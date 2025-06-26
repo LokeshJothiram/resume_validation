@@ -225,6 +225,13 @@
                     audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
                 }
             }
+
+            const backButton = document.getElementById('back-button');
+            if (backButton) {
+                backButton.onclick = () => {
+                    document.getElementById('results-overlay').classList.add('hidden');
+                };
+            }
         });
 
         document.getElementById('reset-button').addEventListener('click', () => {
@@ -232,10 +239,6 @@
             const resultsOverlay = document.getElementById('results-overlay');
             form.reset();
             resultsOverlay.classList.add('hidden');
-        });
-
-        document.getElementById('back-button').addEventListener('click', () => {
-            document.getElementById('results-overlay').classList.add('hidden');
         });
     </script>
 </body>
