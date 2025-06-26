@@ -147,15 +147,30 @@ def calculate_resume_match_with_gemini(job_description, resume_text):
 # Ollama code is commented out below
 def evaluate_technical_proficiency_with_gemini(transcription, technology):
     prompt = f"""
-    You are an expert technical interviewer. Analyze the following transcribed interview response for a {technology} role and evaluate the candidate's technical proficiency. Provide a score out of 10 based on technical accuracy, depth, and relevance to {technology}. Also, provide a brief explanation.
+    You are an expert technical interviewer. Analyze the following transcribed interview answers for a {technology} role and evaluate the candidate on multiple dimensions:
 
-    Transcription: {transcription}
+    1. Technical proficiency (score out of 10, with explanation)
+    2. Communication skills (score out of 10, with explanation)
+    3. Clarity of explanation (score out of 10, with explanation)
+    4. Confidence (score out of 10, with explanation)
+    5. Problem-solving approach (score out of 10, with explanation)
 
-    Output ONLY the following JSON object:
+    Provide your analysis in the following JSON format:
     {{
-      \"score\": <score>,
-      \"explanation\": \"<explanation>\"
+      "technical_score": <score>,
+      "technical_explanation": "<explanation>",
+      "communication_score": <score>,
+      "communication_explanation": "<explanation>",
+      "clarity_score": <score>,
+      "clarity_explanation": "<explanation>",
+      "confidence_score": <score>,
+      "confidence_explanation": "<explanation>",
+      "problem_solving_score": <score>,
+      "problem_solving_explanation": "<explanation>"
     }}
+
+    Answers:
+    {transcription}
     """
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
@@ -170,9 +185,9 @@ def evaluate_technical_proficiency_with_gemini(transcription, technology):
         if match:
             return json.loads(match.group(0))
         else:
-            return {"score": 0, "explanation": "Could not parse Gemini output."}
+            return {"technical_score": 0, "technical_explanation": "Could not parse Gemini output."}
     except Exception as e:
-        return {"score": 0, "explanation": f"Error contacting Gemini API: {e}"}
+        return {"technical_score": 0, "technical_explanation": f"Error contacting Gemini API: {e}"}
 
 def split_audio(audio_path, chunk_duration_ms=29000):
     audio = AudioSegment.from_file(audio_path)
@@ -370,8 +385,16 @@ def process():
                 f"The following are only the candidate's answers from an interview transcript:\n{candidate_text}",
                 technology
             )
-            response['technical_score'] = tech_eval.get('score', 0)
-            response['technical_explanation'] = tech_eval.get('explanation', '')
+            response['technical_score'] = tech_eval.get('technical_score', 0)
+            response['technical_explanation'] = tech_eval.get('technical_explanation', '')
+            response['communication_score'] = tech_eval.get('communication_score', 0)
+            response['communication_explanation'] = tech_eval.get('communication_explanation', '')
+            response['clarity_score'] = tech_eval.get('clarity_score', 0)
+            response['clarity_explanation'] = tech_eval.get('clarity_explanation', '')
+            response['confidence_score'] = tech_eval.get('confidence_score', 0)
+            response['confidence_explanation'] = tech_eval.get('confidence_explanation', '')
+            response['problem_solving_score'] = tech_eval.get('problem_solving_score', 0)
+            response['problem_solving_explanation'] = tech_eval.get('problem_solving_explanation', '')
         else:
             response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
