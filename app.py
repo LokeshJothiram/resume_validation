@@ -13,8 +13,12 @@ import uuid
 from dotenv import load_dotenv
 from pyannote.audio import Pipeline
 import google.generativeai as genai
+from sarvamai import SarvamAI
+import tempfile
 
 load_dotenv()
+SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
+client = SarvamAI(api_subscription_key=SARVAM_API_KEY)
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -170,6 +174,50 @@ def evaluate_technical_proficiency_with_gemini(transcription, technology):
     except Exception as e:
         return {"score": 0, "explanation": f"Error contacting Gemini API: {e}"}
 
+def split_audio(audio_path, chunk_duration_ms=29000):
+    audio = AudioSegment.from_file(audio_path)
+    chunks = []
+    for i in range(0, len(audio), chunk_duration_ms):
+        chunk = audio[i:i + chunk_duration_ms]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
+            chunk.export(temp_file.name, format="wav")
+            chunks.append(temp_file.name)
+    return chunks
+
+# --- Sarvam Speech-to-Text Integration using SDK with chunking ---
+def transcribe_audio_with_sarvam(audio_path, model="saarika:v2.5", language_code="en-IN"):
+    try:
+        audio = AudioSegment.from_file(audio_path)
+        duration_seconds = len(audio) / 1000
+        if duration_seconds <= 30:
+            with open(audio_path, "rb") as audio_file:
+                response = client.speech_to_text.transcribe(
+                    file=audio_file,
+                    model=model,
+                    language_code=language_code
+                )
+                return response.transcript
+        else:
+            chunks = split_audio(audio_path)
+            transcripts = []
+            for chunk_path in chunks:
+                with open(chunk_path, "rb") as audio_file:
+                    response = client.speech_to_text.transcribe(
+                        file=audio_file,
+                        model=model,
+                        language_code=language_code
+                    )
+                    transcripts.append(response.transcript)
+            # Clean up temp files
+            for chunk_path in chunks:
+                try:
+                    os.unlink(chunk_path)
+                except:
+                    pass
+            return ' '.join(transcripts)
+    except Exception as e:
+        return f"Error contacting Sarvam API: {e}"
+
 # --- Commented out Ollama code ---
 # def calculate_resume_match_with_ollama(job_description, resume_text):
 #     prompt = f"""
@@ -244,6 +292,27 @@ def evaluate_technical_proficiency_with_gemini(transcription, technology):
 #     except (KeyError, json.JSONDecodeError):
 #         return {"score": 0, "explanation": "Error parsing model output from Ollama."}
 
+def separate_hr_candidate_with_gemini(transcript):
+    prompt = f"""
+    The following is a transcript of a job interview between an HR interviewer and a candidate.
+    Please separate the transcript into a conversation history, labeling each line as either 'HR:' or 'Candidate:'.
+    Do not use a table or columns. Just alternate lines starting with 'HR:' or 'Candidate:' as appropriate.
+
+    Transcript:
+    {transcript}
+    """
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=2000
+            )
+        )
+        return response.text
+    except Exception as e:
+        return f"Error contacting Gemini API: {e}"
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -278,28 +347,24 @@ def process():
             response['resume_error'] = resume_text
         os.remove(resume_path)
 
-    # Process audio
+    # Process audio (Sarvam API)
     if audio_file and audio_file.filename:
         audio_path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + audio_file.filename)
         audio_file.save(audio_path)
-        answers = transcribe_audio_with_diarization(audio_path)
-        if isinstance(answers, str) and answers.startswith("Error"):
-            response['audio_error'] = answers
-        elif isinstance(answers, list) and answers:
-            scores = []
-            explanations = []
-            for ans in answers:
-                tech_eval = evaluate_technical_proficiency_with_gemini(ans, technology)
-                scores.append(tech_eval.get('score', 0))
-                explanations.append(tech_eval.get('explanation', ''))
-            avg_score = round(sum(scores) / len(scores), 2) if scores else 0
-            response['transcription'] = '\n\n'.join(answers)
-            response['technical_score'] = avg_score
-            response['technical_explanation'] = '\n\n'.join([
-                f"Q{idx+1}: {explanations[idx]}" for idx in range(len(explanations))
-            ])
+        transcript = transcribe_audio_with_sarvam(audio_path)
+        if isinstance(transcript, str) and transcript.startswith("Error"):
+            response['audio_error'] = transcript
+        elif isinstance(transcript, str) and transcript.strip():
+            response['transcription'] = transcript
+            # Optionally, run technical proficiency evaluation on the transcript
+            tech_eval = evaluate_technical_proficiency_with_gemini(transcript, technology)
+            response['technical_score'] = tech_eval.get('score', 0)
+            response['technical_explanation'] = tech_eval.get('explanation', '')
+            # Separate HR and candidate messages using Gemini
+            separated_dialog = separate_hr_candidate_with_gemini(transcript)
+            response['separated_dialog'] = separated_dialog
         else:
-            response['audio_error'] = "No candidate answers detected."
+            response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
 
     return jsonify(response)

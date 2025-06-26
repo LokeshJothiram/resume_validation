@@ -211,6 +211,10 @@
                                 <summary class="cursor-pointer text-sm text-gray-600">Show Transcription</summary>
                                 <p class="mt-2 text-sm text-gray-500 italic">"${result.transcription}"</p>
                             </details>
+                            <details class="mt-2">
+                                <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
+                                <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                            </details>
                         </div>
                     `;
                 } else if (result.audio_error) {
