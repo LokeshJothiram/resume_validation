@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, jsonify
-from llama_cpp import Llama
+# from llama_cpp import Llama
 
 import os
 import pdfplumber
@@ -157,8 +157,9 @@ def evaluate_technical_proficiency(transcription, technology):
     ollama_api_url = "http://localhost:11434/api/generate"
     payload = {
         # "model": "gemma:2b",
-        "model": "llama3.2",
+        # "model": "llama3-gguf",
         # "model": "mistral",
+        "model": "llama3.2",
 
         "prompt": prompt,
         "format": "json",
