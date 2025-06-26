@@ -356,13 +356,22 @@ def process():
             response['audio_error'] = transcript
         elif isinstance(transcript, str) and transcript.strip():
             response['transcription'] = transcript
-            # Optionally, run technical proficiency evaluation on the transcript
-            tech_eval = evaluate_technical_proficiency_with_gemini(transcript, technology)
-            response['technical_score'] = tech_eval.get('score', 0)
-            response['technical_explanation'] = tech_eval.get('explanation', '')
             # Separate HR and candidate messages using Gemini
             separated_dialog = separate_hr_candidate_with_gemini(transcript)
             response['separated_dialog'] = separated_dialog
+            # Extract only candidate's messages
+            candidate_lines = []
+            for line in separated_dialog.splitlines():
+                if line.strip().startswith('Candidate:'):
+                    candidate_lines.append(line.replace('Candidate:', '').strip())
+            candidate_text = '\n'.join(candidate_lines)
+            # Run technical proficiency evaluation on only candidate's answers
+            tech_eval = evaluate_technical_proficiency_with_gemini(
+                f"The following are only the candidate's answers from an interview transcript:\n{candidate_text}",
+                technology
+            )
+            response['technical_score'] = tech_eval.get('score', 0)
+            response['technical_explanation'] = tech_eval.get('explanation', '')
         else:
             response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
