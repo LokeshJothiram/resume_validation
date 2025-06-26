@@ -12,6 +12,7 @@ import json
 import uuid
 from dotenv import load_dotenv
 from pyannote.audio import Pipeline
+import google.generativeai as genai
 
 load_dotenv()
 
@@ -21,6 +22,11 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Load Gemini API key
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 # The LLaMA 3 model will be accessed via the Ollama API, so we no longer load it here.
 
@@ -100,8 +106,9 @@ def transcribe_audio_with_diarization(audio_path):
     answers = [utt["text"] for utt in utterances if utt["speaker"] == candidate_speaker]
     return answers
 
-# Function to evaluate resume match using LLaMA via Ollama
-def calculate_resume_match_with_ollama(job_description, resume_text):
+# Function to evaluate resume match using Gemini 1.5 Flash
+# Ollama code is commented out below
+def calculate_resume_match_with_gemini(job_description, resume_text):
     prompt = f"""
     You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
 
@@ -111,37 +118,30 @@ def calculate_resume_match_with_ollama(job_description, resume_text):
 
     Output ONLY the following JSON object:
     {{
-      "match_percentage": <percentage>,
-      "explanation": "<explanation>"
+      \"match_percentage\": <percentage>,
+      \"explanation\": \"<explanation>\"
     }}
     """
-    
-    ollama_api_url = "http://localhost:11434/api/generate"
-    payload = {
-        # "model": "gemma:2b",
-        # "model": "tinyllama",
-        "model": "llama3.2",
-
-
-        "prompt": prompt,
-        "format": "json",
-        "stream": False
-    }
-
     try:
-        response = requests.post(ollama_api_url, json=payload)
-        response.raise_for_status() # Raise an exception for bad status codes
-        
-        response_data = response.json()
-        result = json.loads(response_data['response'])
-        return result
-    except requests.exceptions.RequestException as e:
-        return {"match_percentage": 0, "explanation": f"Error contacting Ollama API: {e}"}
-    except (KeyError, json.JSONDecodeError):
-        return {"match_percentage": 0, "explanation": "Error parsing model output from Ollama."}
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=2000
+            )
+        )
+        import re, json
+        match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        else:
+            return {"match_percentage": 0, "explanation": "Could not parse Gemini output."}
+    except Exception as e:
+        return {"match_percentage": 0, "explanation": f"Error contacting Gemini API: {e}"}
 
-# Function to evaluate technical proficiency using LLaMA via Ollama
-def evaluate_technical_proficiency(transcription, technology):
+# Function to evaluate technical proficiency using Gemini 1.5 Flash
+# Ollama code is commented out below
+def evaluate_technical_proficiency_with_gemini(transcription, technology):
     prompt = f"""
     You are an expert technical interviewer. Analyze the following transcribed interview response for a {technology} role and evaluate the candidate's technical proficiency. Provide a score out of 10 based on technical accuracy, depth, and relevance to {technology}. Also, provide a brief explanation.
 
@@ -149,35 +149,100 @@ def evaluate_technical_proficiency(transcription, technology):
 
     Output ONLY the following JSON object:
     {{
-      "score": <score>,
-      "explanation": "<explanation>"
+      \"score\": <score>,
+      \"explanation\": \"<explanation>\"
     }}
     """
-    
-    ollama_api_url = "http://localhost:11434/api/generate"
-    payload = {
-        # "model": "gemma:2b",
-        # "model": "llama3-gguf",
-        # "model": "mistral",
-        "model": "llama3.2",
-
-        "prompt": prompt,
-        "format": "json",
-        "stream": False
-    }
-
     try:
-        response = requests.post(ollama_api_url, json=payload)
-        response.raise_for_status() # Raise an exception for bad status codes
-        
-        # The response from Ollama is a JSON string in the 'response' field
-        response_data = response.json()
-        result = json.loads(response_data['response'])
-        return result
-    except requests.exceptions.RequestException as e:
-        return {"score": 0, "explanation": f"Error contacting Ollama API: {e}"}
-    except (KeyError, json.JSONDecodeError):
-        return {"score": 0, "explanation": "Error parsing model output from Ollama."}
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=2000
+            )
+        )
+        import re, json
+        match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        else:
+            return {"score": 0, "explanation": "Could not parse Gemini output."}
+    except Exception as e:
+        return {"score": 0, "explanation": f"Error contacting Gemini API: {e}"}
+
+# --- Commented out Ollama code ---
+# def calculate_resume_match_with_ollama(job_description, resume_text):
+#     prompt = f"""
+#     You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
+# 
+#     Job Description: {job_description}
+# 
+#     Resume: {resume_text}
+# 
+#     Output ONLY the following JSON object:
+#     {{
+#       "match_percentage": <percentage>,
+#       "explanation": "<explanation>"
+#     }}
+#     """
+#     
+#     ollama_api_url = "http://localhost:11434/api/generate"
+#     payload = {
+#         # "model": "gemma:2b",
+#         # "model": "tinyllama",
+#         "model": "llama3-gguf",
+#         "prompt": prompt,
+#         "format": "json",
+#         "stream": False
+#     }
+# 
+#     try:
+#         response = requests.post(ollama_api_url, json=payload)
+#         response.raise_for_status() # Raise an exception for bad status codes
+#         
+#         response_data = response.json()
+#         result = json.loads(response_data['response'])
+#         return result
+#     except requests.exceptions.RequestException as e:
+#         return {"match_percentage": 0, "explanation": f"Error contacting Ollama API: {e}"}
+#     except (KeyError, json.JSONDecodeError):
+#         return {"match_percentage": 0, "explanation": "Error parsing model output from Ollama."}
+#
+# def evaluate_technical_proficiency(transcription, technology):
+#     prompt = f"""
+#     You are an expert technical interviewer. Analyze the following transcribed interview response for a {technology} role and evaluate the candidate's technical proficiency. Provide a score out of 10 based on technical accuracy, depth, and relevance to {technology}. Also, provide a brief explanation.
+# 
+#     Transcription: {transcription}
+# 
+#     Output ONLY the following JSON object:
+#     {{
+#       "score": <score>,
+#       "explanation": "<explanation>"
+#     }}
+#     """
+#     
+#     ollama_api_url = "http://localhost:11434/api/generate"
+#     payload = {
+#         # "model": "gemma:2b",
+#         "model": "llama3-gguf",
+#         # "model": "mistral",
+#         "prompt": prompt,
+#         "format": "json",
+#         "stream": False
+#     }
+# 
+#     try:
+#         response = requests.post(ollama_api_url, json=payload)
+#         response.raise_for_status() # Raise an exception for bad status codes
+#         
+#         # The response from Ollama is a JSON string in the 'response' field
+#         response_data = response.json()
+#         result = json.loads(response_data['response'])
+#         return result
+#     except requests.exceptions.RequestException as e:
+#         return {"score": 0, "explanation": f"Error contacting Ollama API: {e}"}
+#     except (KeyError, json.JSONDecodeError):
+#         return {"score": 0, "explanation": "Error parsing model output from Ollama."}
 
 @app.route('/')
 def index():
@@ -200,37 +265,31 @@ def process():
     if resume_file and resume_file.filename and job_description.strip():
         resume_path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + resume_file.filename)
         resume_file.save(resume_path)
-        
         resume_text = ""
         if resume_file.filename.endswith('.pdf'):
             resume_text = extract_text_from_pdf(resume_path)
         elif resume_file.filename.endswith('.docx'):
             resume_text = extract_text_from_docx(resume_path)
-        
         if "Error" not in resume_text:
-            match_result = calculate_resume_match_with_ollama(job_description, resume_text)
+            match_result = calculate_resume_match_with_gemini(job_description, resume_text)
             response['resume_match'] = match_result.get('match_percentage')
             response['resume_explanation'] = match_result.get('explanation')
         else:
             response['resume_error'] = resume_text
-        
         os.remove(resume_path)
 
     # Process audio
     if audio_file and audio_file.filename:
         audio_path = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()) + "_" + audio_file.filename)
         audio_file.save(audio_path)
-        
-        # Use diarization-based transcription
         answers = transcribe_audio_with_diarization(audio_path)
         if isinstance(answers, str) and answers.startswith("Error"):
             response['audio_error'] = answers
         elif isinstance(answers, list) and answers:
-            # Evaluate each answer
             scores = []
             explanations = []
             for ans in answers:
-                tech_eval = evaluate_technical_proficiency(ans, technology)
+                tech_eval = evaluate_technical_proficiency_with_gemini(ans, technology)
                 scores.append(tech_eval.get('score', 0))
                 explanations.append(tech_eval.get('explanation', ''))
             avg_score = round(sum(scores) / len(scores), 2) if scores else 0
@@ -241,7 +300,6 @@ def process():
             ])
         else:
             response['audio_error'] = "No candidate answers detected."
-        
         os.remove(audio_path)
 
     return jsonify(response)
