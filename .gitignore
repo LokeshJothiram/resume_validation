@@ -1,0 +1,23 @@
+.venv
+.env
+myenv
+/**/__pycache__/
+/**/*.pyc
+**/poetry.lock
+**/*.pyc
+**/*.log
+/**/*.log
+**/__pycache__/
+venv/
+.venv/
+myenv/
+.qodo
+
+# Trained Models
+trained_models/
+trained_models/*
+*.pkl
+model_metadata.json
+# indices/*
+indices/*
+uploads/*
