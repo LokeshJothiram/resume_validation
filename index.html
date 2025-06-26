@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Talent Acquisition Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">AI Talent Acquisition Assistant</h1>
+            <p class="text-gray-600 mt-2">Streamline your hiring process with AI-powered analysis.</p>
+        </header>
+        
+        <div class="max-w-2xl mx-auto">
+            <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300">
+                <form id="talentForm" enctype="multipart/form-data">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="job_description" class="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
+                            <textarea id="job_description" name="job_description" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" rows="6"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="resume" class="block text-sm font-medium text-gray-700 mb-1">Upload Resume</label>
+                                <input type="file" id="resume" name="resume" accept=".pdf,.docx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            
+                            <div>
+                                <label for="audio" class="block text-sm font-medium text-gray-700 mb-1">Upload Interview Audio</label>
+                                <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="technology" class="block text-sm font-medium text-gray-700 mb-1">Primary Technology</label>
+                            <select id="technology" name="technology" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="General">General</option>
+                                <option value="Python">Python</option>
+                                <option value="Java">Java</option>
+                                <option value="JavaScript">JavaScript</option>
+                                <option value="Dotnet">Dotnet</option>
+
+                                <option value="Machine Learning">Machine Learning</option>
+                                <option value="DevOps">DevOps</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 text-center">
+                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">Analyze Candidate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Modal -->
+        <div id="results-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-full overflow-y-auto">
+                <!-- Loader -->
+                <div id="loader" class="text-center p-12">
+                    <div role="status">
+                        <svg aria-hidden="true" class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0492C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5424 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                        </svg>
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-4 text-gray-600">Analyzing... Please wait.</p>
+                </div>
+
+                <!-- Results -->
+                <div id="results" class="p-6 sm:p-8 hidden">
+                    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Analysis Results</h2>
+                    <div id="meta_info" class="mb-6 text-center text-gray-700"></div>
+                    <div class="space-y-6">
+                        <div id="resume_result_card" class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Resume Analysis</h3>
+                            <div id="resume_result"></div>
+                        </div>
+                        <div id="audio_result_card" class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Audio Analysis</h3>
+                            <div id="audio_result"></div>
+                        </div>
+                    </div>
+                     <div class="mt-8 text-center">
+                        <button id="reset-button" class="text-blue-600 hover:underline">Start New Analysis</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('talentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = document.getElementById('talentForm');
+            const formData = new FormData(form);
+            const resultsOverlay = document.getElementById('results-overlay');
+            const loader = document.getElementById('loader');
+            const resultsDiv = document.getElementById('results');
+
+            // Show overlay with loader
+            resultsOverlay.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            resultsDiv.classList.add('hidden');
+
+            const response = await fetch('/process', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+
+            // Hide loader and show results
+            loader.classList.add('hidden');
+            resultsDiv.classList.remove('hidden');
+
+            const resumeResultDiv = document.getElementById('resume_result');
+            const audioResultDiv = document.getElementById('audio_result');
+            const resumeResultCard = document.getElementById('resume_result_card');
+            const audioResultCard = document.getElementById('audio_result_card');
+            const metaInfoDiv = document.getElementById('meta_info');
+            
+            resumeResultDiv.innerHTML = '';
+            audioResultDiv.innerHTML = '';
+            resumeResultCard.classList.add('hidden');
+            audioResultCard.classList.add('hidden');
+            
+            // Show selected technology and audio file name
+            const selectedTech = document.getElementById('technology').value;
+            const audioInput = document.getElementById('audio');
+            let audioFileName = '';
+            if (audioInput.files && audioInput.files.length > 0) {
+                audioFileName = audioInput.files[0].name;
+            }
+            metaInfoDiv.innerHTML = `<p><strong>Selected Technology:</strong> ${selectedTech || 'N/A'}</p>` +
+                (audioFileName ? `<p><strong>Audio File:</strong> ${audioFileName}</p>` : '');
+            
+            if (result.resume_match || result.resume_error) {
+                resumeResultCard.classList.remove('hidden');
+                if (result.resume_match) {
+                    let resumeHTML = `<div class="space-y-2">
+                                        <p><strong>Resume Match:</strong> <span class="font-bold text-blue-600">${result.resume_match}%</span></p>`;
+                    if (result.resume_explanation) {
+                        resumeHTML += `<p><strong>Explanation:</strong> ${result.resume_explanation}</p>`;
+                    }
+                    resumeHTML += `</div>`;
+                    resumeResultDiv.innerHTML = resumeHTML;
+                } else if (result.resume_error) {
+                    resumeResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
+                }
+            }
+            
+            if (result.transcription || result.audio_error) {
+                audioResultCard.classList.remove('hidden');
+                if (result.transcription) {
+                    audioResultDiv.innerHTML = `
+                        <div class="space-y-2">
+                            <p><strong>Technical Score:</strong> <span class="font-bold text-blue-600">${result.technical_score}/10</span></p>
+                            <p><strong>Explanation:</strong> ${result.technical_explanation}</p>
+                            <details class="mt-2">
+                                <summary class="cursor-pointer text-sm text-gray-600">Show Transcription</summary>
+                                <p class="mt-2 text-sm text-gray-500 italic">"${result.transcription}"</p>
+                            </details>
+                        </div>
+                    `;
+                } else if (result.audio_error) {
+                    audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
+                }
+            }
+        });
+
+        document.getElementById('reset-button').addEventListener('click', () => {
+            const form = document.getElementById('talentForm');
+            const resultsOverlay = document.getElementById('results-overlay');
+
+            form.reset();
+            resultsOverlay.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
