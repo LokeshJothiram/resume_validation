@@ -6,20 +6,26 @@
     <title>AI Talent Acquisition Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-50">
+<body class="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700">
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800">AI Talent Acquisition Assistant</h1>
-            <p class="text-gray-600 mt-2">Streamline your hiring process with AI-powered analysis.</p>
+            <h1 class="text-4xl font-bold text-white drop-shadow-lg">AI Talent Acquisition Assistant</h1>
+            <p class="text-blue-100 mt-2">Streamline your hiring process with AI-powered analysis.</p>
         </header>
         
         <div class="max-w-2xl mx-auto">
-            <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300">
+            <div id="form-card" class="glass-card transition-all duration-300">
                 <!-- Tab Header -->
                 <div class="flex border-b mb-6">
-                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 focus:outline-none hover:text-blue-700 hover:border-blue-300">Resume Match</button>
-                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 focus:outline-none hover:text-blue-700 hover:border-blue-300">Technical Proficiency</button>
+                    <button id="tab-resume" type="button" class="tab-btn active px-4 py-2 font-semibold flex items-center gap-2 focus:outline-none">
+                        <i data-lucide="file-text" class="w-5 h-5"></i> Resume Match
+                    </button>
+                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold flex items-center gap-2 focus:outline-none">
+                        <i data-lucide="mic" class="w-5 h-5"></i> Technical Proficiency
+                    </button>
                 </div>
                 <form id="talentForm" enctype="multipart/form-data">
                     <!-- Resume Match Tab -->
@@ -28,10 +34,14 @@
                             <div>
                                 <label for="job_description" class="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
                                 <textarea id="job_description" name="job_description" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" rows="6"></textarea>
+                                <span id="jobdesc-error" class="text-red-400 text-sm hidden"></span>
                             </div>
                             <div>
-                                <label for="resume" class="block text-sm font-medium text-gray-700 mb-1">Upload Resume</label>
+                                <label for="resume" class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                    <i data-lucide="upload" class="w-4 h-4"></i> Upload Resume
+                                </label>
                                 <input type="file" id="resume" name="resume" accept=".pdf,.docx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <span id="resume-error" class="text-red-400 text-sm hidden"></span>
                             </div>
                         </div>
                     </div>
@@ -39,8 +49,11 @@
                     <div id="audio-tab-content" class="hidden">
                         <div class="space-y-6">
                             <div>
-                                <label for="audio" class="block text-sm font-medium text-gray-700 mb-1">Upload Interview Audio</label>
+                                <label for="audio" class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                    <i data-lucide="mic" class="w-4 h-4"></i> Upload Interview Audio
+                                </label>
                                 <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <span id="audio-error" class="text-red-400 text-sm hidden"></span>
                             </div>
                             <div>
                                 <label for="technology" class="block text-sm font-medium text-gray-700 mb-1">Primary Technology</label>
@@ -57,18 +70,22 @@
                         </div>
                     </div>
                     <div class="mt-8 text-center">
-                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">Analyze Candidate</button>
+                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105 flex items-center gap-2 justify-center">
+                            <i data-lucide="search" class="w-5 h-5"></i> Analyze Candidate
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Results Modal -->
-        <div id="results-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto relative">
-                <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">&larr; Back</button>
+        <div id="results-overlay" class="fixed inset-0 bg-blue-900 bg-opacity-60 flex items-center justify-center p-4 hidden">
+            <div class="glass-modal w-full max-w-4xl max-h-full overflow-y-auto relative">
+                <button id="close-results" class="absolute top-4 left-4 bg-transparent text-white p-1 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Close Results">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
                 <!-- Loader -->
-                <div id="loader" class="text-center p-12">
+                <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center w-full h-full text-center p-12">
                     <div role="status" class="flex flex-col items-center justify-center">
                         <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
@@ -76,20 +93,18 @@
                         </svg>
                         <span class="sr-only">Loading...</span>
                     </div>
-                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                    <p class="mt-4 text-blue-600 font-semibold animate-pulse flex items-center justify-center">Analyzing... Please wait.</p>
                 </div>
 
                 <!-- Results -->
                 <div id="results" class="p-6 sm:p-8 hidden">
-                    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Analysis Results</h2>
+                    <h2 class="text-3xl font-bold mb-6 text-center text-white-800">Analysis Results</h2>
                     <div id="meta_info" class="mb-6 text-center text-gray-700"></div>
                     <div class="space-y-6">
                         <div id="resume_result_card" class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Resume Analysis</h3>
-                            <div id="resume_result"></div>
+                            <div id="resume_result" class="text-center font-bold text-2xl text-blue-400"></div>
                         </div>
                         <div id="audio_result_card" class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Audio Analysis</h3>
                             <div id="audio_result"></div>
                         </div>
                     </div>
@@ -107,26 +122,56 @@
         let activeTab = 'resume';
 
         tabResume.addEventListener('click', () => {
-            tabResume.classList.add('text-blue-700', 'border-blue-600');
-            tabResume.classList.remove('text-gray-500');
-            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
-            tabAudio.classList.add('text-gray-500');
+            tabResume.classList.add('active');
+            tabAudio.classList.remove('active');
             resumeTabContent.classList.remove('hidden');
             audioTabContent.classList.add('hidden');
             activeTab = 'resume';
+            lucide.createIcons();
         });
         tabAudio.addEventListener('click', () => {
-            tabAudio.classList.add('text-blue-700', 'border-blue-600');
-            tabAudio.classList.remove('text-gray-500');
-            tabResume.classList.remove('text-blue-700', 'border-blue-600');
-            tabResume.classList.add('text-gray-500');
+            tabAudio.classList.add('active');
+            tabResume.classList.remove('active');
             audioTabContent.classList.remove('hidden');
             resumeTabContent.classList.add('hidden');
             activeTab = 'audio';
+            lucide.createIcons();
         });
+
+        let currentController = null;
 
         document.getElementById('talentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Hide all errors first
+            document.getElementById('jobdesc-error').classList.add('hidden');
+            document.getElementById('resume-error').classList.add('hidden');
+            document.getElementById('audio-error').classList.add('hidden');
+            let hasError = false;
+
+            if (activeTab === 'resume') {
+                const jobDesc = document.getElementById('job_description').value.trim();
+                const resumeFile = document.getElementById('resume').files[0];
+                if (!jobDesc) {
+                    document.getElementById('jobdesc-error').textContent = 'Please enter a job description.';
+                    document.getElementById('jobdesc-error').classList.remove('hidden');
+                    hasError = true;
+                }
+                if (!resumeFile) {
+                    document.getElementById('resume-error').textContent = 'Please upload a resume file.';
+                    document.getElementById('resume-error').classList.remove('hidden');
+                    hasError = true;
+                }
+            } else if (activeTab === 'audio') {
+                const audioFile = document.getElementById('audio').files[0];
+                if (!audioFile) {
+                    document.getElementById('audio-error').textContent = 'Please upload an interview audio file.';
+                    document.getElementById('audio-error').classList.remove('hidden');
+                    hasError = true;
+                }
+            }
+            if (hasError) return;
+
             const form = document.getElementById('talentForm');
             const formData = new FormData(form);
             const resultsOverlay = document.getElementById('results-overlay');
@@ -142,6 +187,10 @@
                 formData.delete('job_description');
             }
 
+            // Abort any previous request
+            if (currentController) currentController.abort();
+            currentController = new AbortController();
+
             // Show overlay with loader
             resultsOverlay.classList.remove('hidden');
             loader.classList.remove('hidden');
@@ -149,7 +198,8 @@
 
             const response = await fetch('/process', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                signal: currentController.signal
             });
             
             const result = await response.json();
@@ -186,12 +236,10 @@
             if (result.resume_match || result.resume_error) {
                 resumeResultCard.classList.remove('hidden');
                 if (result.resume_match) {
-                    let resumeHTML = `<div class="space-y-2">
-                                        <p><strong>Resume Match:</strong> <span class="font-bold text-blue-600">${result.resume_match}%</span></p>`;
+                    let resumeHTML = `<div class='text-center font-bold text-2xl text-blue-400'>Resume Match: <span class="font-bold text-blue-300">${result.resume_match}%</span></div>`;
                     if (result.resume_explanation) {
-                        resumeHTML += `<p><strong>Explanation:</strong> ${result.resume_explanation}</p>`;
+                        resumeHTML += `<p class="mt-2 text-base font-normal text-white text-left">${result.resume_explanation}</p>`;
                     }
-                    resumeHTML += `</div>`;
                     resumeResultDiv.innerHTML = resumeHTML;
                 } else if (result.resume_error) {
                     resumeResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
@@ -202,44 +250,140 @@
                 audioResultCard.classList.remove('hidden');
                 if (result.transcription) {
                     audioResultDiv.innerHTML = `
-                        <div class="flex flex-col sm:flex-row gap-6">
-                            <!-- Left Column -->
-                            <div class="flex-1">
-                                <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
-                                <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                <details class="mt-2">
-                                    <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
-                                    <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
-                                </details>
+                        <div>
+                            <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
+                            <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
+                            <div id="score-charts" class="flex flex-wrap gap-6 mb-4 justify-center items-center">
+                                <div class="flex flex-col items-center">
+                                    <canvas id="chart-communication" width="80" height="80"></canvas>
+                                    <span class="mt-1 text-xs font-bold text-blue-400">Communication</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="chart-clarity" width="80" height="80"></canvas>
+                                    <span class="mt-1 text-xs font-bold text-blue-400">Clarity</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="chart-confidence" width="80" height="80"></canvas>
+                                    <span class="mt-1 text-xs font-bold text-blue-400">Confidence</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="chart-problem" width="80" height="80"></canvas>
+                                    <span class="mt-1 text-xs font-bold text-blue-400">Problem-Solving</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="chart-analytical" width="80" height="80"></canvas>
+                                    <span class="mt-1 text-xs font-bold text-blue-400">Analytical Thinking</span>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="chart-detail" width="80" height="80"></canvas>
+                                    <span class="mt-1 text-xs font-bold text-blue-400">Attention to Detail</span>
+                                </div>
                             </div>
-                            <!-- Right Column -->
-                            <div class="flex-1 border-l border-gray-200 pl-6">
-                                <p class="mb-2"><strong>Communication Score:</strong> <span class="font-bold text-blue-600">${result.communication_score}/10</span></p>
-                                <p class="mb-2"><strong>Clarity Score:</strong> <span class="font-bold text-blue-600">${result.clarity_score}/10</span></p>
-                                <p class="mb-2"><strong>Confidence Score:</strong> <span class="font-bold text-blue-600">${result.confidence_score}/10</span></p>
-                                <p class="mb-2"><strong>Problem-Solving Score:</strong> <span class="font-bold text-blue-600">${result.problem_solving_score}/10</span></p>
-                            </div>
+                            <details class="mt-2">
+                                <summary class="cursor-pointer text-sm text-gray-400">Show Conversation History</summary>
+                                <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                            </details>
                         </div>
                     `;
+                    // Render the pie charts after DOM update
+                    setTimeout(() => renderScoreCharts(result), 0);
                 } else if (result.audio_error) {
                     audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
                 }
             }
 
-            const backButton = document.getElementById('back-button');
-            if (backButton) {
-                backButton.onclick = () => {
+            const closeButton = document.getElementById('close-results');
+            if (closeButton) {
+                closeButton.onclick = () => {
                     document.getElementById('results-overlay').classList.add('hidden');
+                    if (currentController) currentController.abort();
                 };
             }
+
+            // After updating DOM with results:
+            lucide.createIcons();
         });
 
-        document.getElementById('reset-button').addEventListener('click', () => {
-            const form = document.getElementById('talentForm');
-            const resultsOverlay = document.getElementById('results-overlay');
-            form.reset();
-            resultsOverlay.classList.add('hidden');
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => lucide.createIcons(), 100);
         });
+
+        function renderScoreCharts(result) {
+            const chartConfigs = [
+                { id: 'chart-communication', label: 'Communication', value: result.communication_score, color: '#6366f1' },
+                { id: 'chart-clarity', label: 'Clarity', value: result.clarity_score, color: '#0ea5e9' },
+                { id: 'chart-confidence', label: 'Confidence', value: result.confidence_score, color: '#f472b6' },
+                { id: 'chart-problem', label: 'Problem-Solving', value: result.problem_solving_score, color: '#f59e42' },
+                { id: 'chart-analytical', label: 'Analytical Thinking', value: result.analytical_thinking_score, color: '#22d3ee' },
+                { id: 'chart-detail', label: 'Attention to Detail', value: result.attention_to_detail_score, color: '#a3e635' },
+            ];
+            chartConfigs.forEach(cfg => {
+                const ctx = document.getElementById(cfg.id);
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: [cfg.label, ''],
+                            datasets: [{
+                                data: [cfg.value, 10 - cfg.value],
+                                backgroundColor: [
+                                    cfg.color,
+                                    '#e5e7eb'
+                                ],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            cutout: '70%',
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: false },
+                                title: { display: false },
+                                datalabels: { display: false }
+                            },
+                            animation: false,
+                            responsive: false,
+                        },
+                        plugins: [{
+                            id: 'center-text',
+                            afterDraw(chart) {
+                                const { ctx, chartArea: area } = chart;
+                                ctx.save();
+                                ctx.font = 'bold 16px Inter, sans-serif';
+                                ctx.fillStyle = '#fff';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(`${cfg.value * 10}%`, area.left + (area.right - area.left) / 2, area.top + (area.bottom - area.top) / 2);
+                                ctx.restore();
+                            }
+                        }]
+                    });
+                }
+            });
+        }
+
+        // Add event listeners to hide validation errors on input
+        // Job Description
+        const jobDescInput = document.getElementById('job_description');
+        if (jobDescInput) {
+            jobDescInput.addEventListener('input', () => {
+                document.getElementById('jobdesc-error').classList.add('hidden');
+            });
+        }
+        // Resume file
+        const resumeInput = document.getElementById('resume');
+        if (resumeInput) {
+            resumeInput.addEventListener('change', () => {
+                document.getElementById('resume-error').classList.add('hidden');
+            });
+        }
+        // Audio file
+        const audioInput = document.getElementById('audio');
+        if (audioInput) {
+            audioInput.addEventListener('change', () => {
+                document.getElementById('audio-error').classList.add('hidden');
+            });
+        }
     </script>
 </body>
 </html>
