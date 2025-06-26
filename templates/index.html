@@ -18,8 +18,8 @@
             <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300">
                 <!-- Tab Header -->
                 <div class="flex border-b mb-6">
-                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold text-blue-700 border-b-2 border-blue-600 focus:outline-none">Resume Match</button>
-                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold text-gray-500 border-b-2 border-transparent hover:text-blue-700 hover:border-blue-300 focus:outline-none">Technical Proficiency</button>
+                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 focus:outline-none hover:text-blue-700 hover:border-blue-300">Resume Match</button>
+                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 focus:outline-none hover:text-blue-700 hover:border-blue-300">Technical Proficiency</button>
                 </div>
                 <form id="talentForm" enctype="multipart/form-data">
                     <!-- Resume Match Tab -->
@@ -108,18 +108,18 @@
 
         tabResume.addEventListener('click', () => {
             tabResume.classList.add('text-blue-700', 'border-blue-600');
-            tabResume.classList.remove('text-gray-500', 'border-transparent');
+            tabResume.classList.remove('text-gray-500');
             tabAudio.classList.remove('text-blue-700', 'border-blue-600');
-            tabAudio.classList.add('text-gray-500', 'border-transparent');
+            tabAudio.classList.add('text-gray-500');
             resumeTabContent.classList.remove('hidden');
             audioTabContent.classList.add('hidden');
             activeTab = 'resume';
         });
         tabAudio.addEventListener('click', () => {
             tabAudio.classList.add('text-blue-700', 'border-blue-600');
-            tabAudio.classList.remove('text-gray-500', 'border-transparent');
+            tabAudio.classList.remove('text-gray-500');
             tabResume.classList.remove('text-blue-700', 'border-blue-600');
-            tabResume.classList.add('text-gray-500', 'border-transparent');
+            tabResume.classList.add('text-gray-500');
             audioTabContent.classList.remove('hidden');
             resumeTabContent.classList.add('hidden');
             activeTab = 'audio';
