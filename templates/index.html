@@ -93,9 +93,6 @@
                             <div id="audio_result"></div>
                         </div>
                     </div>
-                     <div class="mt-8 text-center">
-                        <button id="reset-button" class="text-blue-600 hover:underline">Start New Analysis</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -233,7 +230,6 @@
         document.getElementById('reset-button').addEventListener('click', () => {
             const form = document.getElementById('talentForm');
             const resultsOverlay = document.getElementById('results-overlay');
-
             form.reset();
             resultsOverlay.classList.add('hidden');
         });
