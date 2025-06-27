@@ -155,7 +155,7 @@
     <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2"></div>
 
     <!-- Custom Delete Confirmation Modal -->
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-60 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
             <div class="text-lg font-semibold mb-4">Delete this saved analysis?</div>
             <div class="flex justify-center gap-4 mt-6">
@@ -216,7 +216,12 @@
             renderSavedAnalyses();
             activeTab = 'saved';
             document.getElementById('analyze-btn-container').classList.add('hidden');
-            document.getElementById('results-overlay').classList.add('hidden');
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
+            // Also hide the delete modal when switching to Saved Analyses tab
+            const deleteModal = document.getElementById('delete-modal');
+            deleteModal.classList.add('hidden');
         });
 
         document.getElementById('talentForm').addEventListener('submit', async (e) => {
@@ -286,6 +291,7 @@
             const resultsDiv = document.getElementById('results');
 
             // Show overlay with loader
+            resultsOverlay.style.display = '';
             resultsOverlay.classList.remove('hidden');
             loader.classList.remove('hidden');
             resultsDiv.classList.add('hidden');
@@ -365,7 +371,7 @@
                             <div class="flex-1">
                                 <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
                                 <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
+                                    <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
                                         <div class="flex flex-col items-center">
                                             <canvas id="donutRelevance" width="120" height="120"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
@@ -670,7 +676,9 @@
         // Render Saved Analyses
         async function renderSavedAnalyses() {
             // Always hide the results modal when viewing saved analyses
-            document.getElementById('results-overlay').classList.add('hidden');
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
             const list = document.getElementById('saved_analyses_list');
             list.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
             let files = [];
@@ -809,12 +817,13 @@
                 div.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="text-xs text-gray-400">Saved: ${file.timestamp}</div>
-                        <button class="text-red-500 text-xs font-semibold" onclick="deleteSavedAnalysis('${file.filename}')">Delete</button>
+                        <button class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.filename}')">Delete</button>
                     </div>
                     ${resumeSummary}
                     ${audioSummary}
                     ${audioDetails}
                 `;
+                // DO NOT add any onclick to the div in Saved Analyses tab
                 list.appendChild(div);
             }
         }
@@ -835,16 +844,18 @@
         document.getElementById('delete-modal-cancel').onclick = function() {
             document.getElementById('delete-modal').classList.add('hidden');
             pendingDeleteFilename = null;
+            // Always hide results modal when closing delete modal
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
             if (activeTab === 'resume' || activeTab === 'audio') {
                 document.getElementById('analyze-btn-container').classList.remove('hidden');
             }
             // Restore results modal if it was open and not on saved tab
             if (activeTab === 'saved') {
-                const resultsOverlay = document.getElementById('results-overlay');
                 resultsOverlay.classList.add('hidden');
                 resultsOverlay.style.display = 'none';
             } else if (wasResultsOverlayOpen) {
-                const resultsOverlay = document.getElementById('results-overlay');
                 resultsOverlay.classList.remove('hidden');
                 resultsOverlay.style.display = '';
             }
@@ -853,16 +864,18 @@
         document.getElementById('delete-modal-confirm').onclick = async function() {
             if (!pendingDeleteFilename) return;
             document.getElementById('delete-modal').classList.add('hidden');
+            // Always hide results modal when closing delete modal
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
             if (activeTab === 'resume' || activeTab === 'audio') {
                 document.getElementById('analyze-btn-container').classList.remove('hidden');
             }
             // Restore results modal if it was open and not on saved tab
             if (activeTab === 'saved') {
-                const resultsOverlay = document.getElementById('results-overlay');
                 resultsOverlay.classList.add('hidden');
                 resultsOverlay.style.display = 'none';
             } else if (wasResultsOverlayOpen) {
-                const resultsOverlay = document.getElementById('results-overlay');
                 resultsOverlay.classList.remove('hidden');
                 resultsOverlay.style.display = '';
             }
@@ -887,7 +900,11 @@
                 icon = '<i data-lucide="check-circle" class="w-5 h-5 mr-1"></i>';
             } else if (type === 'error') {
                 toast.classList.add('bg-red-600', 'text-white');
-                icon = '<i data-lucide="x-circle" class="w-5 h-5 mr-1"></i>';
+                if (message.toLowerCase().includes('deleted')) {
+                    icon = '<i data-lucide="trash-2" class="w-5 h-5 mr-1"></i>';
+                } else {
+                    icon = '<i data-lucide="x-circle" class="w-5 h-5 mr-1"></i>';
+                }
             } else {
                 toast.classList.add('bg-gray-700', 'text-white');
                 icon = '<i data-lucide="info" class="w-5 h-5 mr-1"></i>';
