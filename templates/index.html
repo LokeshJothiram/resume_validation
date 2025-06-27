@@ -292,6 +292,14 @@
             const loader = document.getElementById('loader');
             const resultsDiv = document.getElementById('results');
 
+            // Reset save button to initial state for new analysis
+            const saveBtn = document.getElementById('save-analysis-btn');
+            saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+            saveBtn.classList.remove('bg-green-700', 'cursor-default');
+            saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            saveBtn.disabled = false;
+            lucide.createIcons();
+
             // Show overlay with loader
             resultsOverlay.style.visibility = 'visible';
             resultsOverlay.style.display = '';
@@ -677,6 +685,12 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     showToast('Analysis saved!', 'success');
+                    const saveBtn = document.getElementById('save-analysis-btn');
+                    saveBtn.innerHTML = '<i data-lucide="check-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
+                    saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    saveBtn.classList.add('bg-green-700', 'cursor-default');
+                    saveBtn.disabled = true;
+                    lucide.createIcons();
                 } else {
                     showToast('Failed to save analysis.', 'error');
                 }
