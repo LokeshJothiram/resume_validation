@@ -102,7 +102,7 @@
                             <!-- Saved analyses will be rendered here -->
                         </div>
                     </div>
-                    <div class="mt-8 text-center">
+                    <div id="analyze-btn-container" class="mt-8 text-center">
                         <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
                             <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
                         </button>
@@ -117,7 +117,7 @@
                 <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <i data-lucide="arrow-left" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Back
                 </button>
-                <button id="save-analysis-btn" class="absolute top-4 right-24 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                <button id="save-analysis-btn" class="absolute top-4 right-24 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center hidden">
                     <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
                 </button>
                 <!-- Loader -->
@@ -151,6 +151,20 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2"></div>
+
+    <!-- Custom Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+            <div class="text-lg font-semibold mb-4">Delete this saved analysis?</div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button id="delete-modal-confirm" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 font-semibold">Delete</button>
+                <button id="delete-modal-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -174,6 +188,7 @@
             audioTabContent.classList.add('hidden');
             savedTabContent.classList.add('hidden');
             activeTab = 'resume';
+            document.getElementById('analyze-btn-container').classList.remove('hidden');
         });
         tabAudio.addEventListener('click', () => {
             tabAudio.classList.add('text-blue-700', 'border-blue-600');
@@ -186,6 +201,7 @@
             resumeTabContent.classList.add('hidden');
             savedTabContent.classList.add('hidden');
             activeTab = 'audio';
+            document.getElementById('analyze-btn-container').classList.remove('hidden');
         });
         tabSaved.addEventListener('click', () => {
             tabSaved.classList.add('text-blue-700', 'border-blue-600');
@@ -199,6 +215,8 @@
             audioTabContent.classList.add('hidden');
             renderSavedAnalyses();
             activeTab = 'saved';
+            document.getElementById('analyze-btn-container').classList.add('hidden');
+            document.getElementById('results-overlay').classList.add('hidden');
         });
 
         document.getElementById('talentForm').addEventListener('submit', async (e) => {
@@ -271,6 +289,7 @@
             resultsOverlay.classList.remove('hidden');
             loader.classList.remove('hidden');
             resultsDiv.classList.add('hidden');
+            document.getElementById('save-analysis-btn').classList.add('hidden');
 
             const response = await fetch('/process', {
                 method: 'POST',
@@ -282,6 +301,7 @@
             // Hide loader and show results
             loader.classList.add('hidden');
             resultsDiv.classList.remove('hidden');
+            document.getElementById('save-analysis-btn').classList.remove('hidden');
 
             const resumeResultDiv = document.getElementById('resume_result');
             const audioResultDiv = document.getElementById('audio_result');
@@ -627,17 +647,19 @@
                 });
                 const result = await response.json();
                 if (result.status === 'success') {
-                    alert('Analysis saved to server as ' + result.filename);
+                    showToast('Analysis saved!', 'success');
                 } else {
-                    alert('Failed to save analysis.');
+                    showToast('Failed to save analysis.', 'error');
                 }
             } catch (err) {
-                alert('Error saving analysis.');
+                showToast('Error saving analysis.', 'error');
             }
         });
 
         // Render Saved Analyses
         async function renderSavedAnalyses() {
+            // Always hide the results modal when viewing saved analyses
+            document.getElementById('results-overlay').classList.add('hidden');
             const list = document.getElementById('saved_analyses_list');
             list.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
             let files = [];
@@ -753,13 +775,71 @@
             }
         }
 
-        // Remove saved analysis (global for inline onclick)
-        window.deleteSavedAnalysis = async function(filename) {
-            if (!confirm('Delete this saved analysis?')) return;
+        let pendingDeleteFilename = null;
+        let wasResultsOverlayOpen = false;
+        window.deleteSavedAnalysis = function(filename) {
+            pendingDeleteFilename = filename;
+            document.getElementById('delete-modal').classList.remove('hidden');
+            document.getElementById('analyze-btn-container').classList.add('hidden');
+            // Hide results modal if open
+            const resultsOverlay = document.getElementById('results-overlay');
+            wasResultsOverlayOpen = !resultsOverlay.classList.contains('hidden');
+            resultsOverlay.classList.add('hidden');
+        }
+        document.getElementById('delete-modal-cancel').onclick = function() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            pendingDeleteFilename = null;
+            if (activeTab === 'resume' || activeTab === 'audio') {
+                document.getElementById('analyze-btn-container').classList.remove('hidden');
+            }
+            // Restore results modal if it was open and not on saved tab
+            if (wasResultsOverlayOpen && activeTab !== 'saved') {
+                document.getElementById('results-overlay').classList.remove('hidden');
+            }
+            wasResultsOverlayOpen = false;
+        };
+        document.getElementById('delete-modal-confirm').onclick = async function() {
+            if (!pendingDeleteFilename) return;
+            document.getElementById('delete-modal').classList.add('hidden');
+            if (activeTab === 'resume' || activeTab === 'audio') {
+                document.getElementById('analyze-btn-container').classList.remove('hidden');
+            }
+            // Restore results modal if it was open and not on saved tab
+            if (wasResultsOverlayOpen && activeTab !== 'saved') {
+                document.getElementById('results-overlay').classList.remove('hidden');
+            }
+            wasResultsOverlayOpen = false;
             try {
-                await fetch(`/delete_saved_analysis/${filename}`, { method: 'DELETE' });
-            } catch (e) {}
+                await fetch(`/delete_saved_analysis/${pendingDeleteFilename}`, { method: 'DELETE' });
+                showToast('Deleted successfully.', 'error');
+            } catch (e) {
+                showToast('Error deleting analysis.', 'error');
+            }
+            pendingDeleteFilename = null;
             renderSavedAnalyses();
+        };
+
+        // Toast notification logic
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            let icon = '';
+            toast.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2';
+            if (type === 'success') {
+                toast.classList.add('bg-green-600', 'text-white');
+                icon = '<i data-lucide="check-circle" class="w-5 h-5 mr-1"></i>';
+            } else if (type === 'error') {
+                toast.classList.add('bg-red-600', 'text-white');
+                icon = '<i data-lucide="x-circle" class="w-5 h-5 mr-1"></i>';
+            } else {
+                toast.classList.add('bg-gray-700', 'text-white');
+                icon = '<i data-lucide="info" class="w-5 h-5 mr-1"></i>';
+            }
+            toast.innerHTML = icon + '<span>' + message + '</span>';
+            setTimeout(() => { toast.style.opacity = '1'; lucide.createIcons(); }, 10);
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
         }
     </script>
 </body>
