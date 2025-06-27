@@ -6,6 +6,7 @@
     <title>AI Talent Acquisition Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -18,20 +19,30 @@
             <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300">
                 <!-- Tab Header -->
                 <div class="flex border-b mb-6">
-                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 focus:outline-none hover:text-blue-700 hover:border-blue-300">Resume Match</button>
-                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 focus:outline-none hover:text-blue-700 hover:border-blue-300">Technical Proficiency</button>
+                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300">
+                        <i data-lucide="file-search" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Resume Match
+                    </button>
+                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300">
+                        <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
+                    </button>
                 </div>
                 <form id="talentForm" enctype="multipart/form-data">
                     <!-- Resume Match Tab -->
                     <div id="resume-tab-content">
                         <div class="space-y-6">
                             <div>
-                                <label for="job_description" class="block text-sm font-medium text-gray-700 mb-1">Job Description</label>
+                                <label for="job_description" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="user" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description
+                                </label>
                                 <textarea id="job_description" name="job_description" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" rows="6"></textarea>
+                                <p id="job_description_error" class="text-red-500 text-xs mt-1 hidden">Job Description is required.</p>
                             </div>
                             <div>
-                                <label for="resume" class="block text-sm font-medium text-gray-700 mb-1">Upload Resume</label>
+                                <label for="resume" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="file" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Upload Resume
+                                </label>
                                 <input type="file" id="resume" name="resume" accept=".pdf,.docx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <p id="resume_error" class="text-red-500 text-xs mt-1 hidden">Resume file is required.</p>
                             </div>
                         </div>
                     </div>
@@ -39,12 +50,18 @@
                     <div id="audio-tab-content" class="hidden">
                         <div class="space-y-6">
                             <div>
-                                <label for="audio" class="block text-sm font-medium text-gray-700 mb-1">Upload Interview Audio</label>
+                                <label for="audio" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Upload Interview Audio
+                                </label>
                                 <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <p id="audio_error" class="text-red-500 text-xs mt-1 hidden">Audio file is required.</p>
                             </div>
                             <div>
-                                <label for="technology" class="block text-sm font-medium text-gray-700 mb-1">Primary Technology</label>
+                                <label for="technology" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="cpu" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Primary Technology
+                                </label>
                                 <select id="technology" name="technology" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Technology</option>
                                     <option value="General">General</option>
                                     <option value="Python">Python</option>
                                     <option value="Java">Java</option>
@@ -53,11 +70,14 @@
                                     <option value="Machine Learning">Machine Learning</option>
                                     <option value="DevOps">DevOps</option>
                                 </select>
+                                <p id="technology_error" class="text-red-500 text-xs mt-1 hidden">Technology is required.</p>
                             </div>
                         </div>
                     </div>
                     <div class="mt-8 text-center">
-                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">Analyze Candidate</button>
+                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+                            <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
+                        </button>
                     </div>
                 </form>
             </div>
@@ -66,7 +86,9 @@
         <!-- Results Modal -->
         <div id="results-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto relative">
-                <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">&larr; Back</button>
+                <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i data-lucide="arrow-left" class="inline w-4 h-4 mr-1 align-text-bottom"></i>&larr; Back
+                </button>
                 <!-- Loader -->
                 <div id="loader" class="text-center p-12">
                     <div role="status" class="flex flex-col items-center justify-center">
@@ -127,6 +149,44 @@
 
         document.getElementById('talentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            let valid = true;
+
+            // Resume tab
+            const jobDesc = document.getElementById('job_description').value.trim();
+            const resumeFile = document.getElementById('resume').files[0];
+            // Technical tab
+            const audioFile = document.getElementById('audio').files[0];
+            const technology = document.getElementById('technology').value;
+
+            // Hide/show errors based on validity
+            if (activeTab === 'resume') {
+                if (!jobDesc) {
+                    document.getElementById('job_description_error').classList.remove('hidden');
+                    valid = false;
+                } else {
+                    document.getElementById('job_description_error').classList.add('hidden');
+                }
+                if (!resumeFile) {
+                    document.getElementById('resume_error').classList.remove('hidden');
+                    valid = false;
+                } else {
+                    document.getElementById('resume_error').classList.add('hidden');
+                }
+            } else if (activeTab === 'audio') {
+                if (!audioFile) {
+                    document.getElementById('audio_error').classList.remove('hidden');
+                    valid = false;
+                } else {
+                    document.getElementById('audio_error').classList.add('hidden');
+                }
+                if (!technology) {
+                    document.getElementById('technology_error').classList.remove('hidden');
+                    valid = false;
+                } else {
+                    document.getElementById('technology_error').classList.add('hidden');
+                }
+            }
+            if (!valid) return;
             const form = document.getElementById('talentForm');
             const formData = new FormData(form);
             const resultsOverlay = document.getElementById('results-overlay');
@@ -234,12 +294,36 @@
             }
         });
 
-        document.getElementById('reset-button').addEventListener('click', () => {
-            const form = document.getElementById('talentForm');
-            const resultsOverlay = document.getElementById('results-overlay');
-            form.reset();
-            resultsOverlay.classList.add('hidden');
+        // Hide error when user starts typing or selects a file
+        // Resume tab
+        const jobDescInput = document.getElementById('job_description');
+        const resumeInput = document.getElementById('resume');
+        jobDescInput.addEventListener('input', () => {
+            if (jobDescInput.value.trim()) {
+                document.getElementById('job_description_error').classList.add('hidden');
+            }
         });
+        resumeInput.addEventListener('change', () => {
+            if (resumeInput.files && resumeInput.files.length > 0) {
+                document.getElementById('resume_error').classList.add('hidden');
+            }
+        });
+        // Technical tab
+        const audioInput = document.getElementById('audio');
+        const techInput = document.getElementById('technology');
+        audioInput.addEventListener('change', () => {
+            if (audioInput.files && audioInput.files.length > 0) {
+                document.getElementById('audio_error').classList.add('hidden');
+            }
+        });
+        techInput.addEventListener('change', () => {
+            if (techInput.value) {
+                document.getElementById('technology_error').classList.add('hidden');
+            }
+        });
+
+        console.log('Calling lucide.createIcons()');
+        lucide.createIcons();
     </script>
 </body>
 </html>
