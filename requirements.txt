@@ -11,3 +11,6 @@ torch
 torchvision
 torchaudio
 python-dotenv
+docx
+google-generativeai
+sarvamai
