@@ -18,6 +18,7 @@ from sarvamai import SarvamAI
 import tempfile
 import datetime
 import glob
+from users import USERS
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -41,14 +42,6 @@ if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
 # The LLaMA 3 model will be accessed via the Ollama API, so we no longer load it here.
-
-# Hardcoded users
-USERS = {
-    'admin': 'ta@2025',
-    'bob': 'password2',
-    'charlie': 'password3',
-    'diana': 'password4',
-}
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_path):
