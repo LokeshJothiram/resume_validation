@@ -63,6 +63,13 @@
                                 <p id="audio_error" class="text-red-500 text-xs mt-1 hidden">Audio file is required.</p>
                             </div>
                             <div>
+                                <label for="techQuestionsUpload" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="file" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Upload Technology Questions (.docx)
+                                </label>
+                                <input type="file" id="techQuestionsUpload" accept=".docx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <input type="hidden" id="tech_questions" name="tech_questions">
+                            </div>
+                            <div>
                                 <label for="technology" class="block text-sm font-medium text-gray-700 mb-1">
                                     <i data-lucide="cpu" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Primary Technology
                                 </label>
@@ -127,6 +134,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Tab switching logic
         const tabResume = document.getElementById('tab-resume');
@@ -269,25 +277,120 @@
                 audioResultCard.classList.remove('hidden');
                 if (result.transcription) {
                     audioResultDiv.innerHTML = `
-                        <div class="flex flex-col sm:flex-row gap-6">
-                            <!-- Left Column -->
-                            <div class="flex-1">
-                                <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
-                                <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                <details class="mt-2">
-                                    <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
-                                    <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
-                                </details>
+                        <div class="space-y-4">
+                            <!-- Top row: Technical Score and Explanation -->
+                            <div class="flex flex-col sm:flex-row gap-6">
+                                <div class="flex-1">
+                                    <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
+                                    <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutRelevance" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutConfidence" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutCommunication" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Communication</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutClarity" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutProblemSolving" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <!-- Right Column -->
-                            <div class="flex-1 border-l border-gray-200 pl-6">
-                                <p class="mb-2"><strong>Communication Score:</strong> <span class="font-bold text-blue-600">${result.communication_score}/10</span></p>
-                                <p class="mb-2"><strong>Clarity Score:</strong> <span class="font-bold text-blue-600">${result.clarity_score}/10</span></p>
-                                <p class="mb-2"><strong>Confidence Score:</strong> <span class="font-bold text-blue-600">${result.confidence_score}/10</span></p>
-                                <p class="mb-2"><strong>Problem-Solving Score:</strong> <span class="font-bold text-blue-600">${result.problem_solving_score}/10</span></p>
-                            </div>
+                            <!-- Per-question grading -->
+                            ${Array.isArray(result.question_grades) && result.question_grades.length > 0 ? `
+                            <details class="mt-4">
+                                <summary class="cursor-pointer text-lg font-semibold mb-2">Show Per-Question Grading</summary>
+                                <div class="overflow-x-auto mt-2">
+                                    <table class="min-w-full text-sm border border-gray-200 rounded">
+                                        <thead>
+                                            <tr class="bg-gray-100">
+                                                <th class="px-3 py-2 border-b text-left">Question</th>
+                                                <th class="px-3 py-2 border-b text-left">Candidate Answer</th>
+                                                <th class="px-3 py-2 border-b text-left">Score</th>
+                                                <th class="px-3 py-2 border-b text-left">Explanation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${result.question_grades.map(q => `
+                                            <tr>
+                                                <td class="px-3 py-2 border-b align-top">${q.question}</td>
+                                                <td class="px-3 py-2 border-b align-top">${q.answer}</td>
+                                                <td class="px-3 py-2 border-b align-top font-bold text-blue-600">${q.score}/10</td>
+                                                <td class="px-3 py-2 border-b align-top">${q.explanation}</td>
+                                            </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                            ` : ''}
+                            <!-- Conversation History -->
+                            <details class="mt-2">
+                                <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
+                                <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                            </details>
                         </div>
                     `;
+                    // Render the donut charts
+                    setTimeout(() => {
+                        function renderDonut(canvasId, value, color) {
+                            const ctx = document.getElementById(canvasId).getContext('2d');
+                            new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    datasets: [{
+                                        data: [value, 10 - value],
+                                        backgroundColor: [color, '#e5e7eb'],
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    cutout: '70%',
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { enabled: false },
+                                        beforeDraw: function(chart) {
+                                            // Not used, see below for center text
+                                        }
+                                    }
+                                },
+                                plugins: [{
+                                    id: 'centerText',
+                                    afterDraw: chart => {
+                                        const {ctx, chartArea: {width, height}} = chart;
+                                        ctx.save();
+                                        ctx.font = 'bold 1.2rem Inter, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillStyle = color;
+                                        ctx.fillText(`${value}/10`, width / 2, height / 2);
+                                        ctx.restore();
+                                    }
+                                }]
+                            });
+                        }
+                        renderDonut('donutRelevance', result.relevance_score || 0, '#2563eb');
+                        renderDonut('donutConfidence', result.confidence_score || 0, '#3b82f6');
+                        renderDonut('donutCommunication', result.communication_score || 0, '#60a5fa');
+                        renderDonut('donutClarity', result.clarity_score || 0, '#93c5fd');
+                        renderDonut('donutProblemSolving', result.problem_solving_score || 0, '#38bdf8');
+                        renderDonut('donutTechnicalKnowledge', result.depth_score || 0, '#0ea5e9');
+                    }, 100);
                 } else if (result.audio_error) {
                     audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
                 }
@@ -384,6 +487,26 @@
                                 localStorage.setItem('jobDescriptions', JSON.stringify(saved));
                                 updateSavedDescriptionsDropdown();
                             }
+                        })
+                        .catch(function(err) {
+                            alert('Could not read the Word file.');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file) {
+                alert('Only .docx files are supported.');
+                e.target.value = '';
+            }
+        });
+
+        document.getElementById('techQuestionsUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.docx')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    mammoth.extractRawText({arrayBuffer: event.target.result})
+                        .then(function(result) {
+                            document.getElementById('tech_questions').value = result.value;
                         })
                         .catch(function(err) {
                             alert('Could not read the Word file.');

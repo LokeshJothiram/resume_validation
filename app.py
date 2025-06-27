@@ -9,6 +9,7 @@ from pydub import AudioSegment
 import numpy as np
 import requests
 import json
+import re
 import uuid
 from dotenv import load_dotenv
 from pyannote.audio import Pipeline
@@ -143,7 +144,6 @@ def calculate_resume_match_with_gemini(job_description, resume_text):
                 max_output_tokens=2000
             )
         )
-        import re, json
         match = re.search(r'\{.*\}', response.text, re.DOTALL)
         if match:
             return json.loads(match.group(0))
@@ -154,51 +154,100 @@ def calculate_resume_match_with_gemini(job_description, resume_text):
 
 # Function to evaluate technical proficiency using Gemini 1.5 Flash
 # Ollama code is commented out below
-def evaluate_technical_proficiency_with_gemini(transcription, technology):
-    prompt = f"""
-    You are an expert technical interviewer. Analyze the following transcribed interview answers for a {technology} role and evaluate the candidate on multiple dimensions:
+def evaluate_technical_proficiency_with_gemini(transcription, technology, tech_questions=None):
+    if tech_questions:
+        questions = [q.strip() for q in tech_questions.split('\n') if q.strip()]
+        questions_json = json.dumps(questions)
+        prompt = f"""
+You are an expert technical interviewer. You are given a list of technology interview questions for a {technology} role, and the candidate's transcribed answers from an interview.
 
-    1. Technical proficiency (score out of 10, with explanation)
-    2. Communication skills (score out of 10, with explanation)
-    3. Clarity of explanation (score out of 10, with explanation)
-    4. Confidence (score out of 10, with explanation)
-    5. Problem-solving approach (score out of 10, with explanation)
+For each question in the list below, do the following:
+- Find the candidate's answer (if any) from the transcript.
+- Grade the answer out of 10 (0-10).
+- Provide a brief explanation for the grade.
 
-    Provide your analysis in the following JSON format:
-    {{
-      "technical_score": <score>,
-      "technical_explanation": "<explanation>",
-      "communication_score": <score>,
-      "communication_explanation": "<explanation>",
-      "clarity_score": <score>,
-      "clarity_explanation": "<explanation>",
-      "confidence_score": <score>,
-      "confidence_explanation": "<explanation>",
-      "problem_solving_score": <score>,
-      "problem_solving_explanation": "<explanation>"
-    }}
+Return your response as a single JSON object with:
+- "question_grades": [an array where each element is an object with "question", "answer", "score", "explanation"]
+- "technical_score": <score>
+- "technical_explanation": "<explanation> (must be at least 50 words)"
+- "depth_score": <score>
+- "depth_explanation": "<explanation>"
+- "relevance_score": <score>
+- "relevance_explanation": "<explanation>"
+- "communication_score": <score>
+- "communication_explanation": "<explanation>"
+- "clarity_score": <score>
+- "clarity_explanation": "<explanation>"
+- "confidence_score": <score>
+- "confidence_explanation": "<explanation>"
+- "problem_solving_score": <score>
+- "problem_solving_explanation": "<explanation>"
 
-    Answers:
-    {transcription}
-    """
+The technical explanation must be at least 50 words.
+
+Questions:
+{questions_json}
+
+Transcript:
+{transcription}
+"""
+    else:
+        prompt = f"""
+You are an expert technical interviewer. Analyze the following transcribed interview answers for a {technology} role and evaluate the candidate on multiple dimensions:
+
+1. Technical proficiency (score out of 10, with explanation)
+2. Depth of technical knowledge (score out of 10, with explanation)
+3. Relevance of answers to technology (score out of 10, with explanation)
+4. Communication skills (score out of 10, with explanation)
+5. Clarity of explanation (score out of 10, with explanation)
+6. Confidence (score out of 10, with explanation)
+7. Problem-solving approach (score out of 10, with explanation)
+
+Provide your analysis in the following JSON format:
+{{
+  "technical_score": <score>,
+  "technical_explanation": "<explanation> (must be at least 50 words)",
+  "depth_score": <score>,
+  "depth_explanation": "<explanation>",
+  "relevance_score": <score>,
+  "relevance_explanation": "<explanation>",
+  "communication_score": <score>,
+  "communication_explanation": "<explanation>",
+  "clarity_score": <score>,
+  "clarity_explanation": "<explanation>",
+  "confidence_score": <score>,
+  "confidence_explanation": "<explanation>",
+  "problem_solving_score": <score>,
+  "problem_solving_explanation": "<explanation>"
+}}
+
+The technical explanation must be at least 50 words.
+
+Answers:
+{transcription}
+"""
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(
             prompt,
             generation_config=genai.types.GenerationConfig(
-                max_output_tokens=2000
+                max_output_tokens=4000
             )
         )
-        import re, json
-        match = re.search(r'\{.*\}', response.text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        else:
-            return {"technical_score": 0, "technical_explanation": "Could not parse Gemini output."}
-    except Exception as e:
+        match_obj = re.search(r'\{.*\}', response.text, re.DOTALL)
+        if match_obj:
+            try:
+                result = json.loads(match_obj.group(0))
+                return result
+            except Exception:
+                pass
         return {
             "technical_score": 0,
-            "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
+            "technical_explanation": "Could not parse Gemini output.",
+            "depth_score": 0,
+            "depth_explanation": "",
+            "relevance_score": 0,
+            "relevance_explanation": "",
             "communication_score": 0,
             "communication_explanation": "",
             "clarity_score": 0,
@@ -206,7 +255,26 @@ def evaluate_technical_proficiency_with_gemini(transcription, technology):
             "confidence_score": 0,
             "confidence_explanation": "",
             "problem_solving_score": 0,
-            "problem_solving_explanation": ""
+            "problem_solving_explanation": "",
+            "question_grades": []
+        }
+    except Exception as e:
+        return {
+            "technical_score": 0,
+            "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
+            "depth_score": 0,
+            "depth_explanation": "",
+            "relevance_score": 0,
+            "relevance_explanation": "",
+            "communication_score": 0,
+            "communication_explanation": "",
+            "clarity_score": 0,
+            "clarity_explanation": "",
+            "confidence_score": 0,
+            "confidence_explanation": "",
+            "problem_solving_score": 0,
+            "problem_solving_explanation": "",
+            "question_grades": []
         }
 
 def split_audio(audio_path, chunk_duration_ms=29000):
@@ -377,10 +445,13 @@ def process():
     resume_file = request.files.get('resume')
     audio_file = request.files.get('audio')
     technology = request.form.get('technology', 'General')
+    tech_questions = request.form.get('tech_questions', '').strip()
 
     print(f"Selected technology: {technology}")
     if audio_file and audio_file.filename:
         print(f"Uploaded audio file: {audio_file.filename}")
+    if tech_questions:
+        print(f"Uploaded technology questions: {tech_questions[:60]}...")
 
     response = {}
 
@@ -422,10 +493,15 @@ def process():
             # Run technical proficiency evaluation on only candidate's answers
             tech_eval = evaluate_technical_proficiency_with_gemini(
                 f"The following are only the candidate's answers from an interview transcript:\n{candidate_text}",
-                technology
+                technology,
+                tech_questions=tech_questions
             )
             response['technical_score'] = tech_eval.get('technical_score', 0)
             response['technical_explanation'] = tech_eval.get('technical_explanation', '')
+            response['depth_score'] = tech_eval.get('depth_score', 0)
+            response['depth_explanation'] = tech_eval.get('depth_explanation', '')
+            response['relevance_score'] = tech_eval.get('relevance_score', 0)
+            response['relevance_explanation'] = tech_eval.get('relevance_explanation', '')
             response['communication_score'] = tech_eval.get('communication_score', 0)
             response['communication_explanation'] = tech_eval.get('communication_explanation', '')
             response['clarity_score'] = tech_eval.get('clarity_score', 0)
@@ -434,6 +510,7 @@ def process():
             response['confidence_explanation'] = tech_eval.get('confidence_explanation', '')
             response['problem_solving_score'] = tech_eval.get('problem_solving_score', 0)
             response['problem_solving_explanation'] = tech_eval.get('problem_solving_explanation', '')
+            response['question_grades'] = tech_eval.get('question_grades', [])
         else:
             response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
