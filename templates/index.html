@@ -277,6 +277,14 @@
             
             if (Array.isArray(result.resumes) && result.resumes.length > 0) {
                 resumeResultCard.classList.remove('hidden');
+
+                // Sort resumes by match percentage in descending order
+                result.resumes.sort((a, b) => {
+                    const scoreA = a.match_percentage || -1;
+                    const scoreB = b.match_percentage || -1;
+                    return scoreB - scoreA;
+                });
+                
                 let allResumesHTML = result.resumes.map(r => {
                     if (r.error) {
                         return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
@@ -507,13 +515,6 @@
                             const jdText = result.value;
                             document.getElementById('job_description').value = jdText;
                             document.getElementById('job_description_error').classList.add('hidden');
-                            // Immediately save to localStorage if not already present
-                            let saved = JSON.parse(localStorage.getItem('jobDescriptions') || '[]');
-                            if (jdText && !saved.includes(jdText)) {
-                                saved.push(jdText);
-                                localStorage.setItem('jobDescriptions', JSON.stringify(saved));
-                                updateSavedDescriptionsDropdown();
-                            }
                         })
                         .catch(function(err) {
                             alert('Could not read the Word file.');
