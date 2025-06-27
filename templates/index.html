@@ -779,13 +779,40 @@
                 // Audio summary extraction
                 let audioSummary = '';
                 let audioDetails = '';
-                // Use metaInfo for Selected Technology and Audio File
-                if (data.metaInfo) {
-                    audioSummary = data.metaInfo;
-                }
                 if (data.audioHTML) {
+                    // Extract selected technology, audio file, technical score
+                    let tech = 'N/A';
+                    let audioFile = 'N/A';
+                    let score = 'N/A';
+                    const techMatch = data.audioHTML.match(/Selected Technology:\s*<\/strong>\s*([^<]*)/);
+                    if (techMatch) tech = techMatch[1].trim();
+                    else {
+                        // Try to find after 'Selected Technology:'
+                        const t2 = data.audioHTML.split('Selected Technology:')[1];
+                        if (t2) tech = t2.split('<')[0].trim();
+                    }
+                    const fileMatch = data.audioHTML.match(/Audio File:\s*<\/strong>\s*([^<]*)/);
+                    if (fileMatch) audioFile = fileMatch[1].trim();
+                    else {
+                        const f2 = data.audioHTML.split('Audio File:')[1];
+                        if (f2) audioFile = f2.split('<')[0].trim();
+                    }
+                    const scoreMatch = data.audioHTML.match(/Technical Score:\s*([\d.]+\/10)/);
+                    if (scoreMatch) score = scoreMatch[1];
+                    else {
+                        const s2 = data.audioHTML.match(/Technical Score:\s*<[^>]*>([\d.]+\/10)/);
+                        if (s2) score = s2[1];
+                    }
+                    audioSummary = `<div><span class='font-bold'>Selected Technology:</span> ${tech}</div>` +
+                                   `<div><span class='font-bold'>Audio File:</span> ${audioFile}</div>` +
+                                   `<div class='font-bold text-blue-600 mb-2'>Technical Score: ${score}</div>`;
                     // Everything else in details
-                    audioDetails = `<details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Full Audio Analysis</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${data.audioHTML}</div></details>`;
+                    let rest = data.audioHTML;
+                    // Remove summary lines from rest
+                    rest = rest.replace(/<div><span class='font-bold'>Selected Technology:<\/span>.*?<\/div>/, '')
+                               .replace(/<div><span class='font-bold'>Audio File:<\/span>.*?<\/div>/, '')
+                               .replace(/Technical Score:.*?<\/div>/, '');
+                    audioDetails = `<details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Full Audio Analysis</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${rest}</div></details>`;
                 }
                 div.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
