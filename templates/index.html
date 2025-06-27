@@ -219,6 +219,8 @@
             const resultsOverlay = document.getElementById('results-overlay');
             resultsOverlay.classList.add('hidden');
             resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
+            wasResultsOverlayOpen = false;
             // Also hide the delete modal when switching to Saved Analyses tab
             const deleteModal = document.getElementById('delete-modal');
             deleteModal.classList.add('hidden');
@@ -291,6 +293,7 @@
             const resultsDiv = document.getElementById('results');
 
             // Show overlay with loader
+            resultsOverlay.style.visibility = 'visible';
             resultsOverlay.style.display = '';
             resultsOverlay.classList.remove('hidden');
             loader.classList.remove('hidden');
@@ -679,6 +682,7 @@
             const resultsOverlay = document.getElementById('results-overlay');
             resultsOverlay.classList.add('hidden');
             resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
             const list = document.getElementById('saved_analyses_list');
             list.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
             let files = [];
@@ -834,13 +838,29 @@
             pendingDeleteFilename = filename;
             document.getElementById('delete-modal').classList.remove('hidden');
             document.getElementById('analyze-btn-container').classList.add('hidden');
-            // Always hide results modal when opening delete modal
+
             const resultsOverlay = document.getElementById('results-overlay');
+
+            if (activeTab === 'saved') {
+                wasResultsOverlayOpen = false;
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+                // Extra defensive: force hide overlay parent as well
+                setTimeout(() => {
+                    resultsOverlay.classList.add('hidden');
+                    resultsOverlay.style.display = 'none';
+                    resultsOverlay.style.visibility = 'hidden';
+                }, 10);
+                return;
+            }
+
+            wasResultsOverlayOpen = !resultsOverlay.classList.contains('hidden');
             resultsOverlay.classList.add('hidden');
             resultsOverlay.style.display = 'none';
-            // Hide results modal if open
-            wasResultsOverlayOpen = !resultsOverlay.classList.contains('hidden');
+            resultsOverlay.style.visibility = 'hidden';
         }
+
         document.getElementById('delete-modal-cancel').onclick = function() {
             document.getElementById('delete-modal').classList.add('hidden');
             pendingDeleteFilename = null;
@@ -848,6 +868,7 @@
             const resultsOverlay = document.getElementById('results-overlay');
             resultsOverlay.classList.add('hidden');
             resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
             if (activeTab === 'resume' || activeTab === 'audio') {
                 document.getElementById('analyze-btn-container').classList.remove('hidden');
             }
@@ -855,9 +876,18 @@
             if (activeTab === 'saved') {
                 resultsOverlay.classList.add('hidden');
                 resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+                wasResultsOverlayOpen = false;
+                // Extra defensive: force hide overlay parent as well
+                setTimeout(() => {
+                    resultsOverlay.classList.add('hidden');
+                    resultsOverlay.style.display = 'none';
+                    resultsOverlay.style.visibility = 'hidden';
+                }, 10);
             } else if (wasResultsOverlayOpen) {
                 resultsOverlay.classList.remove('hidden');
                 resultsOverlay.style.display = '';
+                resultsOverlay.style.visibility = 'visible';
             }
             wasResultsOverlayOpen = false;
         };
@@ -868,6 +898,7 @@
             const resultsOverlay = document.getElementById('results-overlay');
             resultsOverlay.classList.add('hidden');
             resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
             if (activeTab === 'resume' || activeTab === 'audio') {
                 document.getElementById('analyze-btn-container').classList.remove('hidden');
             }
@@ -875,9 +906,18 @@
             if (activeTab === 'saved') {
                 resultsOverlay.classList.add('hidden');
                 resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+                wasResultsOverlayOpen = false;
+                // Extra defensive: force hide overlay parent as well
+                setTimeout(() => {
+                    resultsOverlay.classList.add('hidden');
+                    resultsOverlay.style.display = 'none';
+                    resultsOverlay.style.visibility = 'hidden';
+                }, 10);
             } else if (wasResultsOverlayOpen) {
                 resultsOverlay.classList.remove('hidden');
                 resultsOverlay.style.display = '';
+                resultsOverlay.style.visibility = 'visible';
             }
             wasResultsOverlayOpen = false;
             try {
