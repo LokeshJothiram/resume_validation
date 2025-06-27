@@ -10,9 +10,11 @@
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='tringapps_inc_logo.jpeg') }}">
 </head>
 <body class="bg-gray-50">
-    <a href="{{ url_for('logout') }}" class="flex items-center text-blue-600 hover:text-blue-800 font-semibold absolute top-6 right-8 z-50">
-        <i data-lucide="log-out" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Logout
-    </a>
+    <form action="{{ url_for('logout') }}" method="post" style="display:inline;">
+        <button type="submit" id="logout" class="flex items-center text-blue-600 hover:text-blue-800 font-semibold absolute top-6 right-8 z-50 bg-transparent border-none cursor-pointer">
+            <i data-lucide="log-out" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Logout
+        </button>
+    </form>
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
         <header class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-800">AI Talent Acquisition Assistant</h1>

@@ -13,9 +13,10 @@ def login():
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'danger')
+            return redirect(url_for('auth.login'))
     return render_template('login.html')
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
 def logout():
     session.pop('user', None)
     return redirect(url_for('auth.login')) 
