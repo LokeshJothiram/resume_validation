@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify, redirect, url_for, session, flash
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session, flash, send_from_directory
 # from llama_cpp import Llama
 
 import os
@@ -16,6 +16,8 @@ from pyannote.audio import Pipeline
 import google.generativeai as genai
 from sarvamai import SarvamAI
 import tempfile
+import datetime
+import glob
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -28,6 +30,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Ensure saved_files folder exists
+SAVED_FILES_FOLDER = 'saved_files'
+os.makedirs(SAVED_FILES_FOLDER, exist_ok=True)
 
 # Load Gemini API key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
@@ -534,6 +540,49 @@ def process():
         os.remove(audio_path)
 
     return jsonify(response)
+
+# Save analysis endpoint
+@app.route('/save_analysis', methods=['POST'])
+def save_analysis():
+    data = request.get_json()
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"analysis_{timestamp}.json"
+    filepath = os.path.join(SAVED_FILES_FOLDER, filename)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return jsonify({'status': 'success', 'filename': filename})
+
+# List all saved analysis files
+@app.route('/list_saved_analyses', methods=['GET'])
+def list_saved_analyses():
+    files = glob.glob(os.path.join(SAVED_FILES_FOLDER, 'analysis_*.json'))
+    files.sort(reverse=True)
+    result = []
+    for f in files:
+        fname = os.path.basename(f)
+        # Extract timestamp from filename
+        ts = fname.replace('analysis_', '').replace('.json', '')
+        result.append({'filename': fname, 'timestamp': ts})
+    return jsonify(result)
+
+# Get a saved analysis file's contents
+@app.route('/get_saved_analysis/<filename>', methods=['GET'])
+def get_saved_analysis(filename):
+    filepath = os.path.join(SAVED_FILES_FOLDER, filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    with open(filepath, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return jsonify(data)
+
+# Delete a saved analysis file
+@app.route('/delete_saved_analysis/<filename>', methods=['DELETE'])
+def delete_saved_analysis(filename):
+    filepath = os.path.join(SAVED_FILES_FOLDER, filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    os.remove(filepath)
+    return jsonify({'status': 'deleted'})
 
 if __name__ == '__main__':
     app.run(debug=True)

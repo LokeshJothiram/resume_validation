@@ -29,6 +29,9 @@
                     <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300">
                         <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
                     </button>
+                    <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300">
+                        <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
+                    </button>
                 </div>
                 <form id="talentForm" enctype="multipart/form-data">
                     <!-- Resume Match Tab -->
@@ -93,6 +96,12 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Saved Analyses Tab -->
+                    <div id="saved-tab-content" class="hidden">
+                        <div class="space-y-6" id="saved_analyses_list">
+                            <!-- Saved analyses will be rendered here -->
+                        </div>
+                    </div>
                     <div class="mt-8 text-center">
                         <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
                             <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
@@ -107,6 +116,9 @@
             <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto relative">
                 <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <i data-lucide="arrow-left" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Back
+                </button>
+                <button id="save-analysis-btn" class="absolute top-4 right-24 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
                 </button>
                 <!-- Loader -->
                 <div id="loader" class="text-center p-12">
@@ -145,8 +157,10 @@
         // Tab switching logic
         const tabResume = document.getElementById('tab-resume');
         const tabAudio = document.getElementById('tab-audio');
+        const tabSaved = document.getElementById('tab-saved');
         const resumeTabContent = document.getElementById('resume-tab-content');
         const audioTabContent = document.getElementById('audio-tab-content');
+        const savedTabContent = document.getElementById('saved-tab-content');
         let activeTab = 'resume';
 
         tabResume.addEventListener('click', () => {
@@ -154,8 +168,11 @@
             tabResume.classList.remove('text-gray-500');
             tabAudio.classList.remove('text-blue-700', 'border-blue-600');
             tabAudio.classList.add('text-gray-500');
+            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
+            tabSaved.classList.add('text-gray-500');
             resumeTabContent.classList.remove('hidden');
             audioTabContent.classList.add('hidden');
+            savedTabContent.classList.add('hidden');
             activeTab = 'resume';
         });
         tabAudio.addEventListener('click', () => {
@@ -163,9 +180,25 @@
             tabAudio.classList.remove('text-gray-500');
             tabResume.classList.remove('text-blue-700', 'border-blue-600');
             tabResume.classList.add('text-gray-500');
+            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
+            tabSaved.classList.add('text-gray-500');
             audioTabContent.classList.remove('hidden');
             resumeTabContent.classList.add('hidden');
+            savedTabContent.classList.add('hidden');
             activeTab = 'audio';
+        });
+        tabSaved.addEventListener('click', () => {
+            tabSaved.classList.add('text-blue-700', 'border-blue-600');
+            tabSaved.classList.remove('text-gray-500');
+            tabResume.classList.remove('text-blue-700', 'border-blue-600');
+            tabResume.classList.add('text-gray-500');
+            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
+            tabAudio.classList.add('text-gray-500');
+            savedTabContent.classList.remove('hidden');
+            resumeTabContent.classList.add('hidden');
+            audioTabContent.classList.add('hidden');
+            renderSavedAnalyses();
+            activeTab = 'saved';
         });
 
         document.getElementById('talentForm').addEventListener('submit', async (e) => {
@@ -577,6 +610,157 @@
 
         console.log('Calling lucide.createIcons()');
         lucide.createIcons();
+
+        // Save Analysis Button Logic
+        document.getElementById('save-analysis-btn').addEventListener('click', async function() {
+            // Gather the latest analysis result from the modal
+            const resumeHTML = document.getElementById('resume_result').innerHTML;
+            const audioHTML = document.getElementById('audio_result').innerHTML;
+            const metaInfo = document.getElementById('meta_info').innerHTML;
+            const timestamp = new Date().toLocaleString();
+            const data = { resumeHTML, audioHTML, metaInfo, timestamp };
+            try {
+                const response = await fetch('/save_analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Analysis saved to server as ' + result.filename);
+                } else {
+                    alert('Failed to save analysis.');
+                }
+            } catch (err) {
+                alert('Error saving analysis.');
+            }
+        });
+
+        // Render Saved Analyses
+        async function renderSavedAnalyses() {
+            const list = document.getElementById('saved_analyses_list');
+            list.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
+            let files = [];
+            try {
+                const resp = await fetch('/list_saved_analyses');
+                files = await resp.json();
+            } catch (e) {
+                list.innerHTML = '<div class="text-red-500 text-center">Failed to load saved analyses.</div>';
+                return;
+            }
+            if (!files.length) {
+                list.innerHTML = '<div class="text-gray-500 text-center">No saved analyses yet.</div>';
+                return;
+            }
+            list.innerHTML = '';
+            for (const file of files) {
+                // Fetch file content
+                let data = null;
+                try {
+                    const resp = await fetch(`/get_saved_analysis/${file.filename}`);
+                    data = await resp.json();
+                } catch (e) {
+                    data = { metaInfo: '', resumeHTML: '<div class="text-red-500">Failed to load file.</div>', audioHTML: '' };
+                }
+                const div = document.createElement('div');
+                div.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
+                // Resume summary extraction
+                let resumeSummary = '';
+                let resumeDetails = '';
+                if (data.resumeHTML) {
+                    // Try to extract filename and match from multiple patterns
+                    let filename = 'Unknown Resume';
+                    let match = 'N/A';
+                    // Try strong tag, fallback to first line
+                    const nameMatch = data.resumeHTML.match(/<strong>([^<]+)<\/strong>/);
+                    if (nameMatch) filename = nameMatch[1].trim();
+                    else {
+                        // Try to get first line text
+                        const firstLine = data.resumeHTML.replace(/<[^>]+>/g, '\n').split('\n').find(l => l.trim());
+                        if (firstLine) filename = firstLine.trim();
+                    }
+                    // Try to extract match percentage
+                    const matchMatch = data.resumeHTML.match(/Resume Match:\s*<span.*?>(\d+%)/);
+                    if (matchMatch) match = matchMatch[1];
+                    else {
+                        // Try to find a number with %
+                        const percent = data.resumeHTML.match(/(\d+%)/);
+                        if (percent) match = percent[1];
+                    }
+                    resumeSummary = `<div class='font-bold mb-1'>${filename}</div><div class='font-bold text-blue-600 mb-2'>Resume Match: ${match}</div>`;
+                    // Explanation extraction
+                    let explanation = '';
+                    const explanationMatch = data.resumeHTML.match(/Explanation:<\/strong>\s*([^<]*)<\/p>|Explanation:<\/strong>\s*([\s\S]*?)<\/div>/);
+                    if (explanationMatch) {
+                        explanation = explanationMatch[1] || explanationMatch[2] || '';
+                    } else {
+                        // fallback: try to extract after 'Explanation:'
+                        const fallback = data.resumeHTML.split('Explanation:')[1];
+                        if (fallback) explanation = fallback.split('</')[0];
+                    }
+                    if (!explanation.trim()) explanation = 'No explanation available.';
+                    resumeDetails = `<details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Explanation</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${explanation}</div></details>`;
+                }
+                // Audio summary extraction
+                let audioSummary = '';
+                let audioDetails = '';
+                if (data.audioHTML) {
+                    // Extract selected technology, audio file, technical score
+                    let tech = 'N/A';
+                    let audioFile = 'N/A';
+                    let score = 'N/A';
+                    const techMatch = data.audioHTML.match(/Selected Technology:\s*<\/strong>\s*([^<]*)/);
+                    if (techMatch) tech = techMatch[1].trim();
+                    else {
+                        // Try to find after 'Selected Technology:'
+                        const t2 = data.audioHTML.split('Selected Technology:')[1];
+                        if (t2) tech = t2.split('<')[0].trim();
+                    }
+                    const fileMatch = data.audioHTML.match(/Audio File:\s*<\/strong>\s*([^<]*)/);
+                    if (fileMatch) audioFile = fileMatch[1].trim();
+                    else {
+                        const f2 = data.audioHTML.split('Audio File:')[1];
+                        if (f2) audioFile = f2.split('<')[0].trim();
+                    }
+                    const scoreMatch = data.audioHTML.match(/Technical Score:\s*([\d.]+\/10)/);
+                    if (scoreMatch) score = scoreMatch[1];
+                    else {
+                        const s2 = data.audioHTML.match(/Technical Score:\s*<[^>]*>([\d.]+\/10)/);
+                        if (s2) score = s2[1];
+                    }
+                    audioSummary = `<div><span class='font-bold'>Selected Technology:</span> ${tech}</div>` +
+                                   `<div><span class='font-bold'>Audio File:</span> ${audioFile}</div>` +
+                                   `<div class='font-bold text-blue-600 mb-2'>Technical Score: ${score}</div>`;
+                    // Everything else in details
+                    let rest = data.audioHTML;
+                    // Remove summary lines from rest
+                    rest = rest.replace(/<div><span class='font-bold'>Selected Technology:<\/span>.*?<\/div>/, '')
+                               .replace(/<div><span class='font-bold'>Audio File:<\/span>.*?<\/div>/, '')
+                               .replace(/Technical Score:.*?<\/div>/, '');
+                    audioDetails = `<details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Full Audio Analysis</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${rest}</div></details>`;
+                }
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="text-xs text-gray-400">Saved: ${file.timestamp}</div>
+                        <button class="text-red-500 text-xs font-semibold" onclick="deleteSavedAnalysis('${file.filename}')">Delete</button>
+                    </div>
+                    ${resumeSummary}
+                    ${resumeDetails}
+                    ${audioSummary}
+                    ${audioDetails}
+                `;
+                list.appendChild(div);
+            }
+        }
+
+        // Remove saved analysis (global for inline onclick)
+        window.deleteSavedAnalysis = async function(filename) {
+            if (!confirm('Delete this saved analysis?')) return;
+            try {
+                await fetch(`/delete_saved_analysis/${filename}`, { method: 'DELETE' });
+            } catch (e) {}
+            renderSavedAnalyses();
+        }
     </script>
 </body>
 </html>
