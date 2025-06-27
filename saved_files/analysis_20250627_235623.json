@@ -1,0 +1,8 @@
+{
+  "resumeHTML": "<div class=\"mb-4 p-4 border border-blue-100 rounded\">\n                            <p><strong>Aameer A Resume.docx</strong></p>\n                            <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">40%</span></p>\n                            <p><strong>Explanation:</strong> Aameer's resume demonstrates some relevant skills, but falls short of the job description's requirements in several key areas.  While he possesses experience with ASP.NET, MVC, C#, and SQL Server, his experience is only 3 years, significantly less than the required 4-7 years specified. The resume lacks mention of crucial technologies listed as 'need to have' such as RESTful web services, Entity Framework, and experience with Azure.  Furthermore, the job description emphasizes experience across the entire software development lifecycle, which isn't explicitly detailed in the resume. His recent work with Python and React (Admin Console for AI ChatBot) doesn't directly align with the job's focus on Microsoft technologies. The resume shows potential, but the experience level and technology gaps prevent a higher match percentage.</p>\n                        </div>",
+  "audioHTML": "",
+  "metaInfo": "",
+  "timestamp": "6/27/2025, 11:56:23 PM",
+  "technology": "",
+  "audioFileName": ""
+}
