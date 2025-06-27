@@ -634,7 +634,18 @@
         // Save Analysis Button Logic
         document.getElementById('save-analysis-btn').addEventListener('click', async function() {
             // Gather the latest analysis result from the modal
-            const resumeHTML = document.getElementById('resume_result').innerHTML;
+            // For multiple resumes, get all child HTML blocks
+            const resumeResultDiv = document.getElementById('resume_result');
+            let resumeHTML = '';
+            if (resumeResultDiv) {
+                // If multiple resumes, each is in a div.mb-4 (from previous logic)
+                const blocks = resumeResultDiv.querySelectorAll('div.mb-4');
+                if (blocks.length > 0) {
+                    resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
+                } else {
+                    resumeHTML = resumeResultDiv.innerHTML;
+                }
+            }
             const audioHTML = document.getElementById('audio_result').innerHTML;
             const metaInfo = document.getElementById('meta_info').innerHTML;
             const timestamp = new Date().toLocaleString();
@@ -689,39 +700,73 @@
                 // Resume summary extraction
                 let resumeSummary = '';
                 let resumeDetails = '';
+                let resumeBlocks = '';
                 if (data.resumeHTML) {
-                    // Try to extract filename and match from multiple patterns
-                    let filename = 'Unknown Resume';
-                    let match = 'N/A';
-                    // Try strong tag, fallback to first line
-                    const nameMatch = data.resumeHTML.match(/<strong>([^<]+)<\/strong>/);
-                    if (nameMatch) filename = nameMatch[1].trim();
-                    else {
-                        // Try to get first line text
-                        const firstLine = data.resumeHTML.replace(/<[^>]+>/g, '\n').split('\n').find(l => l.trim());
-                        if (firstLine) filename = firstLine.trim();
-                    }
-                    // Try to extract match percentage
-                    const matchMatch = data.resumeHTML.match(/Resume Match:\s*<span.*?>(\d+%)/);
-                    if (matchMatch) match = matchMatch[1];
-                    else {
-                        // Try to find a number with %
-                        const percent = data.resumeHTML.match(/(\d+%)/);
-                        if (percent) match = percent[1];
-                    }
-                    resumeSummary = `<div class='font-bold mb-1'>${filename}</div><div class='font-bold text-blue-600 mb-2'>Resume Match: ${match}</div>`;
-                    // Explanation extraction
-                    let explanation = '';
-                    const explanationMatch = data.resumeHTML.match(/Explanation:<\/strong>\s*([^<]*)<\/p>|Explanation:<\/strong>\s*([\s\S]*?)<\/div>/);
-                    if (explanationMatch) {
-                        explanation = explanationMatch[1] || explanationMatch[2] || '';
+                    // Create a temporary container to parse the HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = data.resumeHTML;
+                    const blocks = tempDiv.querySelectorAll('div.mb-4');
+                    if (blocks.length > 0) {
+                        // Multiple resumes
+                        resumeBlocks = Array.from(blocks).map(block => {
+                            // Extract filename and match
+                            let filename = 'Unknown Resume';
+                            let match = 'N/A';
+                            const nameMatch = block.innerHTML.match(/<strong>([^<]+)<\/strong>/);
+                            if (nameMatch) filename = nameMatch[1].trim();
+                            else {
+                                const firstLine = block.textContent.split('\n').find(l => l.trim());
+                                if (firstLine) filename = firstLine.trim();
+                            }
+                            const matchMatch = block.innerHTML.match(/Resume Match:\s*<span.*?>(\d+%)/);
+                            if (matchMatch) match = matchMatch[1];
+                            else {
+                                const percent = block.innerHTML.match(/(\d+%)/);
+                                if (percent) match = percent[1];
+                            }
+                            // Explanation extraction
+                            let explanation = '';
+                            const explanationMatch = block.innerHTML.match(/Explanation:<\/strong>\s*([^<]*)<\/p>|Explanation:<\/strong>\s*([\s\S]*?)<\/div>/);
+                            if (explanationMatch) {
+                                explanation = explanationMatch[1] || explanationMatch[2] || '';
+                            } else {
+                                const fallback = block.innerHTML.split('Explanation:')[1];
+                                if (fallback) explanation = fallback.split('</')[0];
+                            }
+                            if (!explanation.trim()) explanation = 'No explanation available.';
+                            return `<div class='mb-2'><div class='font-bold mb-1'>${filename}</div><div class='font-bold text-blue-600 mb-2'>Resume Match: ${match}</div><details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Explanation</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${explanation}</div></details></div>`;
+                        }).join('');
+                        resumeSummary = resumeBlocks;
+                        resumeDetails = '';
                     } else {
-                        // fallback: try to extract after 'Explanation:'
-                        const fallback = data.resumeHTML.split('Explanation:')[1];
-                        if (fallback) explanation = fallback.split('</')[0];
+                        // Single resume (fallback)
+                        let filename = 'Unknown Resume';
+                        let match = 'N/A';
+                        const nameMatch = data.resumeHTML.match(/<strong>([^<]+)<\/strong>/);
+                        if (nameMatch) filename = nameMatch[1].trim();
+                        else {
+                            const firstLine = data.resumeHTML.replace(/<[^>]+>/g, '\n').split('\n').find(l => l.trim());
+                            if (firstLine) filename = firstLine.trim();
+                        }
+                        const matchMatch = data.resumeHTML.match(/Resume Match:\s*<span.*?>(\d+%)/);
+                        if (matchMatch) match = matchMatch[1];
+                        else {
+                            const percent = data.resumeHTML.match(/(\d+%)/);
+                            if (percent) match = percent[1];
+                        }
+                        resumeSummary = `<div class='font-bold mb-1'>${filename}</div><div class='font-bold text-blue-600 mb-2'>Resume Match: ${match}</div>`;
+                        // Explanation extraction
+                        let explanation = '';
+                        const explanationMatch = data.resumeHTML.match(/Explanation:<\/strong>\s*([^<]*)<\/p>|Explanation:<\/strong>\s*([\s\S]*?)<\/div>/);
+                        if (explanationMatch) {
+                            explanation = explanationMatch[1] || explanationMatch[2] || '';
+                        } else {
+                            const fallback = data.resumeHTML.split('Explanation:')[1];
+                            if (fallback) explanation = fallback.split('</')[0];
+                        }
+                        if (!explanation.trim()) explanation = 'No explanation available.';
+                        resumeDetails = `<details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Explanation</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${explanation}</div></details>`;
                     }
-                    if (!explanation.trim()) explanation = 'No explanation available.';
-                    resumeDetails = `<details class='mt-2'><summary class='cursor-pointer text-sm text-gray-600'>Show Explanation</summary><div class='mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2'>${explanation}</div></details>`;
                 }
                 // Audio summary extraction
                 let audioSummary = '';
@@ -767,7 +812,6 @@
                         <button class="text-red-500 text-xs font-semibold" onclick="deleteSavedAnalysis('${file.filename}')">Delete</button>
                     </div>
                     ${resumeSummary}
-                    ${resumeDetails}
                     ${audioSummary}
                     ${audioDetails}
                 `;
