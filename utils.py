@@ -33,14 +33,27 @@ def calculate_resume_match_with_gemini(job_description, resume_text):
     prompt = f"""
     You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
 
+    Also, estimate:
+    - The number of required skills from the job description that are present in the resume (skills_matched and total_skills).
+    - How closely the candidate's years of experience match the job description (experience_match as a percentage).
+    - How well the candidate's education matches the job description (education_match as a percentage).
+    - How many required certifications from the job description are present in the resume (certifications_match as a percentage).
+    - How well the candidate's previous roles match the job title/level in the job description (role_match as a percentage).
+
     Job Description: {job_description}
 
     Resume: {resume_text}
 
     Output ONLY the following JSON object:
     {{
-      \"match_percentage\": <percentage>,
-      \"explanation\": \"<explanation>\"
+      "match_percentage": <percentage>,
+      "explanation": "<explanation>",
+      "skills_matched": <number>,
+      "total_skills": <number>,
+      "experience_match": <percentage>,
+      "education_match": <percentage>,
+      "certifications_match": <percentage>,
+      "role_match": <percentage>
     }}
     """
     try:
@@ -55,9 +68,9 @@ def calculate_resume_match_with_gemini(job_description, resume_text):
         if match:
             return json.loads(match.group(0))
         else:
-            return {"match_percentage": 0, "explanation": "Could not parse Gemini output."}
+            return {"match_percentage": 0, "explanation": "Could not parse Gemini output.", "skills_matched": 0, "total_skills": 0, "experience_match": 0, "education_match": 0, "certifications_match": 0, "role_match": 0}
     except Exception as e:
-        return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)"}
+        return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)", "skills_matched": 0, "total_skills": 0, "experience_match": 0, "education_match": 0, "certifications_match": 0, "role_match": 0}
 
 def split_audio(audio_path, chunk_length_ms=30000):
     """

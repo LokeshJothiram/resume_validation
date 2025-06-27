@@ -31,7 +31,17 @@ def process():
                     continue
                 if 'Error' not in resume_text:
                     match_result = calculate_resume_match_with_gemini(job_description, resume_text)
-                    resumes_result.append({'filename': resume_file.filename, 'match_percentage': match_result.get('match_percentage'), 'explanation': match_result.get('explanation')})
+                    resumes_result.append({
+                        'filename': resume_file.filename,
+                        'match_percentage': match_result.get('match_percentage'),
+                        'explanation': match_result.get('explanation'),
+                        'skills_matched': match_result.get('skills_matched', 0),
+                        'total_skills': match_result.get('total_skills', 0),
+                        'experience_match': match_result.get('experience_match', 0),
+                        'education_match': match_result.get('education_match', 0),
+                        'certifications_match': match_result.get('certifications_match', 0),
+                        'role_match': match_result.get('role_match', 0)
+                    })
                 else:
                     resumes_result.append({'filename': resume_file.filename, 'error': resume_text})
                 os.remove(resume_path)

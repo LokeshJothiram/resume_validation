@@ -357,19 +357,58 @@
                     return scoreB - scoreA;
                 });
                 
-                let allResumesHTML = result.resumes.map(r => {
+                let allResumesHTML = result.resumes.map((r, idx) => {
                     if (r.error) {
                         return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
                     } else {
+                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
                         return `<div class='mb-4 p-4 border border-blue-100 rounded'>
                             <p><strong>${r.filename}</strong></p>
-                            <p><strong>Resume Match:</strong> <span class="font-bold text-blue-600">${r.match_percentage}%</span></p>
+                            <div class="flex flex-row gap-6 my-4 items-center justify-center">
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Match %</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutExp${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutCert${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutRole${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
+                                </div>
+                            </div>
+                            <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
                             <p><strong>Explanation:</strong> ${r.explanation}</p>
                         </div>`;
                     }
                 }).join('');
                 resumeResultDiv.innerHTML = allResumesHTML;
-                } else if (result.resume_error) {
+                // Render donuts for each resume
+                result.resumes.forEach((r, idx) => {
+                    if (!r.error) {
+                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                        renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
+                        renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
+                        renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
+                        renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
+                        renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
+                        renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
+                    }
+                });
+            } else if (result.resume_error) {
                 resumeResultCard.classList.remove('hidden');
                     resumeResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
             }
@@ -455,19 +494,16 @@
                                 type: 'doughnut',
                                 data: {
                                     datasets: [{
-                                        data: [value, 10 - value],
+                                        data: [value, 100 - value],
                                         backgroundColor: [color, '#e5e7eb'],
                                         borderWidth: 0
                                     }]
                                 },
                                 options: {
-                                    cutout: '70%',
+                                    cutout: '60%',
                                     plugins: {
                                         legend: { display: false },
-                                        tooltip: { enabled: false },
-                                        beforeDraw: function(chart) {
-                                            // Not used, see below for center text
-                                        }
+                                        tooltip: { enabled: false }
                                     }
                                 },
                                 plugins: [{
@@ -475,11 +511,11 @@
                                     afterDraw: chart => {
                                         const {ctx, chartArea: {width, height}} = chart;
                                         ctx.save();
-                                        ctx.font = 'bold 1.2rem Inter, sans-serif';
+                                        ctx.font = 'bold 1rem Inter, sans-serif';
                                         ctx.textAlign = 'center';
                                         ctx.textBaseline = 'middle';
                                         ctx.fillStyle = color;
-                                        ctx.fillText(`${value}/10`, width / 2, height / 2);
+                                        ctx.fillText(`${value}%`, width / 2, height / 2);
                                         ctx.restore();
                                     }
                                 }]
@@ -1132,6 +1168,49 @@
                 numQuestionsError.classList.add('hidden');
             }
         });
+
+        // Donut chart renderer for resume match
+        function renderDonut(canvasId, value, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [value, 100 - value],
+                        backgroundColor: [color, '#e5e7eb'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '60%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    afterDraw: chart => {
+                        const {ctx, chartArea: {width, height}} = chart;
+                        ctx.save();
+                        ctx.font = 'bold 1rem Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = color;
+                        ctx.fillText(`${value}%`, width / 2, height / 2);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        // Clear localStorage on logout
+        const logoutBtn = document.querySelector('a[href="/logout"], button#logout');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                localStorage.clear();
+            });
+        }
     </script>
 </body>
 </html>
