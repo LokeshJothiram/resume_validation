@@ -658,7 +658,16 @@
             const audioHTML = document.getElementById('audio_result').innerHTML;
             const metaInfo = document.getElementById('meta_info').innerHTML;
             const timestamp = new Date().toLocaleString();
-            const data = { resumeHTML, audioHTML, metaInfo, timestamp };
+            // Save actual technology and audio file name
+            let technology = '';
+            let audioFileName = '';
+            const techInput = document.getElementById('technology');
+            if (techInput) technology = techInput.value;
+            const audioInput = document.getElementById('audio');
+            if (audioInput && audioInput.files && audioInput.files.length > 0) {
+                audioFileName = audioInput.files[0].name;
+            }
+            const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName };
             try {
                 const response = await fetch('/save_analysis', {
                     method: 'POST',
@@ -784,23 +793,11 @@
                 let audioSummary = '';
                 let audioDetails = '';
                 if (data.audioHTML) {
-                    // Extract selected technology, audio file, technical score
-                    let tech = 'N/A';
-                    let audioFile = 'N/A';
+                    // Use saved technology and audioFileName if present, else fallback to extraction
+                    let tech = data.technology || 'N/A';
+                    let audioFile = data.audioFileName || 'N/A';
                     let score = 'N/A';
-                    const techMatch = data.audioHTML.match(/Selected Technology:\s*<\/strong>\s*([^<]*)/);
-                    if (techMatch) tech = techMatch[1].trim();
-                    else {
-                        // Try to find after 'Selected Technology:'
-                        const t2 = data.audioHTML.split('Selected Technology:')[1];
-                        if (t2) tech = t2.split('<')[0].trim();
-                    }
-                    const fileMatch = data.audioHTML.match(/Audio File:\s*<\/strong>\s*([^<]*)/);
-                    if (fileMatch) audioFile = fileMatch[1].trim();
-                    else {
-                        const f2 = data.audioHTML.split('Audio File:')[1];
-                        if (f2) audioFile = f2.split('<')[0].trim();
-                    }
+                    // Try to extract score from HTML as before
                     const scoreMatch = data.audioHTML.match(/Technical Score:\s*([\d.]+\/10)/);
                     if (scoreMatch) score = scoreMatch[1];
                     else {
