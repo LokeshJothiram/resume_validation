@@ -395,9 +395,6 @@ def process():
             response['confidence_explanation'] = tech_eval.get('confidence_explanation', '')
             response['problem_solving_score'] = tech_eval.get('problem_solving_score', 0)
             response['problem_solving_explanation'] = tech_eval.get('problem_solving_explanation', '')
-            # Add two additional technical-related scores (dummy values for now)
-            response['analytical_thinking_score'] = 0
-            response['attention_to_detail_score'] = 0
         else:
             response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
