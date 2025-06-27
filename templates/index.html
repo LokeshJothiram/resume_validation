@@ -155,7 +155,7 @@
     <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2"></div>
 
     <!-- Custom Delete Confirmation Modal -->
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-60 hidden">
         <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
             <div class="text-lg font-semibold mb-4">Delete this saved analysis?</div>
             <div class="flex justify-center gap-4 mt-6">
@@ -350,9 +350,9 @@
                     }
                 }).join('');
                 resumeResultDiv.innerHTML = allResumesHTML;
-            } else if (result.resume_error) {
+                } else if (result.resume_error) {
                 resumeResultCard.classList.remove('hidden');
-                resumeResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
+                    resumeResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
             }
             
             if (result.transcription || result.audio_error) {
@@ -361,10 +361,10 @@
                     audioResultDiv.innerHTML = `
                         <div class="space-y-4">
                             <!-- Top row: Technical Score and Explanation -->
-                            <div class="flex flex-col sm:flex-row gap-6">
-                                <div class="flex-1">
-                                    <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
-                                    <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <div class="flex-1">
+                                <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
+                                <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
                                         <div class="flex flex-col items-center">
                                             <canvas id="donutRelevance" width="120" height="120"></canvas>
@@ -422,10 +422,10 @@
                             </details>
                             ` : ''}
                             <!-- Conversation History -->
-                            <details class="mt-2">
-                                <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
-                                <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
-                            </details>
+                                <details class="mt-2">
+                                    <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
+                                    <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                                </details>
                         </div>
                     `;
                     // Render the donut charts
@@ -781,10 +781,12 @@
             pendingDeleteFilename = filename;
             document.getElementById('delete-modal').classList.remove('hidden');
             document.getElementById('analyze-btn-container').classList.add('hidden');
-            // Hide results modal if open
+            // Always hide results modal when opening delete modal
             const resultsOverlay = document.getElementById('results-overlay');
-            wasResultsOverlayOpen = !resultsOverlay.classList.contains('hidden');
             resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
+            // Hide results modal if open
+            wasResultsOverlayOpen = !resultsOverlay.classList.contains('hidden');
         }
         document.getElementById('delete-modal-cancel').onclick = function() {
             document.getElementById('delete-modal').classList.add('hidden');
@@ -793,8 +795,14 @@
                 document.getElementById('analyze-btn-container').classList.remove('hidden');
             }
             // Restore results modal if it was open and not on saved tab
-            if (wasResultsOverlayOpen && activeTab !== 'saved') {
-                document.getElementById('results-overlay').classList.remove('hidden');
+            if (activeTab === 'saved') {
+                const resultsOverlay = document.getElementById('results-overlay');
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+            } else if (wasResultsOverlayOpen) {
+                const resultsOverlay = document.getElementById('results-overlay');
+                resultsOverlay.classList.remove('hidden');
+                resultsOverlay.style.display = '';
             }
             wasResultsOverlayOpen = false;
         };
@@ -805,8 +813,14 @@
                 document.getElementById('analyze-btn-container').classList.remove('hidden');
             }
             // Restore results modal if it was open and not on saved tab
-            if (wasResultsOverlayOpen && activeTab !== 'saved') {
-                document.getElementById('results-overlay').classList.remove('hidden');
+            if (activeTab === 'saved') {
+                const resultsOverlay = document.getElementById('results-overlay');
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+            } else if (wasResultsOverlayOpen) {
+                const resultsOverlay = document.getElementById('results-overlay');
+                resultsOverlay.classList.remove('hidden');
+                resultsOverlay.style.display = '';
             }
             wasResultsOverlayOpen = false;
             try {
