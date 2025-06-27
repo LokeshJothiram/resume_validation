@@ -308,7 +308,9 @@
                 resultsOverlay.style.visibility = 'hidden';
             }
 
-            const response = await fetch('/process', {
+            // CHANGED: Dynamically select endpoint based on active tab
+            const endpoint = (activeTab === 'audio') ? '/process_audio' : '/process';
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 body: formData
             });
