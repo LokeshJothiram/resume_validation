@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, redirect, url_for, session, flash
 # from llama_cpp import Llama
 
 import os
@@ -21,6 +21,7 @@ SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 client = SarvamAI(api_subscription_key=SARVAM_API_KEY)
 
 app = Flask(__name__)
+app.secret_key = '123'  # Replace with a secure key in production
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -33,6 +34,14 @@ if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
 # The LLaMA 3 model will be accessed via the Ollama API, so we no longer load it here.
+
+# Hardcoded users
+USERS = {
+    'admin': 'Welcome@ta2025',
+    'bob': 'password2',
+    'charlie': 'password3',
+    'diana': 'password4',
+}
 
 # Function to extract text from PDF
 def extract_text_from_pdf(pdf_path):
@@ -141,7 +150,7 @@ def calculate_resume_match_with_gemini(job_description, resume_text):
         else:
             return {"match_percentage": 0, "explanation": "Could not parse Gemini output."}
     except Exception as e:
-        return {"match_percentage": 0, "explanation": f"Error contacting Gemini API: {e}"}
+        return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)"}
 
 # Function to evaluate technical proficiency using Gemini 1.5 Flash
 # Ollama code is commented out below
@@ -187,7 +196,18 @@ def evaluate_technical_proficiency_with_gemini(transcription, technology):
         else:
             return {"technical_score": 0, "technical_explanation": "Could not parse Gemini output."}
     except Exception as e:
-        return {"technical_score": 0, "technical_explanation": f"Error contacting Gemini API: {e}"}
+        return {
+            "technical_score": 0,
+            "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
+            "communication_score": 0,
+            "communication_explanation": "",
+            "clarity_score": 0,
+            "clarity_explanation": "",
+            "confidence_score": 0,
+            "confidence_explanation": "",
+            "problem_solving_score": 0,
+            "problem_solving_explanation": ""
+        }
 
 def split_audio(audio_path, chunk_duration_ms=29000):
     audio = AudioSegment.from_file(audio_path)
@@ -328,8 +348,27 @@ def separate_hr_candidate_with_gemini(transcript):
     except Exception as e:
         return f"Error contacting Gemini API: {e}"
 
-@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username in USERS and USERS[username] == password:
+            session['user'] = username
+            return redirect(url_for('index'))
+        else:
+            flash('Invalid username or password', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     return render_template('index.html')
 
 @app.route('/process', methods=['POST'])
