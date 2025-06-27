@@ -9,8 +9,13 @@ def generate_questions():
     data = request.get_json()
     technology = data.get('technology', '').strip()
     job_description = data.get('job_description', '').strip()
+    num_questions = int(data.get('num_questions', 5))
+    if num_questions > 20:
+        num_questions = 20
+    if num_questions < 1:
+        num_questions = 1
     prompt = f"""
-You are an expert interviewer. Generate a list of 5 relevant, challenging, and up-to-date interview questions for a {technology or 'General'} role.
+You are an expert interviewer. Generate a list of {num_questions} relevant, challenging, and up-to-date interview questions for a {technology or 'General'} role.
 """
     if job_description:
         prompt += f"\nThe job description is as follows:\n{job_description}\n"

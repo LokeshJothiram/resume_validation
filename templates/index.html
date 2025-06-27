@@ -993,8 +993,10 @@
             let valid = true;
             const tech = document.getElementById('question_gen_technology').value;
             const jd = document.getElementById('question_gen_jd').value.trim();
+            const numQuestions = parseInt(document.getElementById('num_questions').value, 10) || 5;
             const techError = document.getElementById('question_gen_technology_error');
             const jdError = document.getElementById('question_gen_jd_error');
+            const numQuestionsError = document.getElementById('num_questions_error');
             if (!tech) {
                 techError.classList.remove('hidden');
                 valid = false;
@@ -1007,6 +1009,13 @@
             } else {
                 jdError.classList.add('hidden');
             }
+            // New: Validate number of questions
+            if (numQuestions < 1 || numQuestions > 20) {
+                numQuestionsError.classList.remove('hidden');
+                valid = false;
+            } else {
+                numQuestionsError.classList.add('hidden');
+            }
             if (!valid) return;
             const loader = document.getElementById('question-gen-loader');
             const resultDiv = document.getElementById('question-gen-result');
@@ -1018,7 +1027,7 @@
                 const resp = await fetch('/generate_questions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ technology: tech, job_description: jd })
+                    body: JSON.stringify({ technology: tech, job_description: jd, num_questions: numQuestions })
                 });
                 const data = await resp.json();
                 loader.classList.add('hidden');
@@ -1102,6 +1111,25 @@
         document.getElementById('question_gen_jd').addEventListener('input', () => {
             if (document.getElementById('question_gen_jd').value.trim()) {
                 document.getElementById('question_gen_jd_error').classList.add('hidden');
+            }
+        });
+
+        // Prevent Enter in num_questions from submitting the form
+        document.getElementById('num_questions').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+
+        // Live validation for number of questions input
+        const numQuestionsInput = document.getElementById('num_questions');
+        const numQuestionsError = document.getElementById('num_questions_error');
+        numQuestionsInput.addEventListener('input', function() {
+            const value = parseInt(numQuestionsInput.value, 10);
+            if (value < 1 || value > 20) {
+                numQuestionsError.classList.remove('hidden');
+            } else {
+                numQuestionsError.classList.add('hidden');
             }
         });
     </script>
