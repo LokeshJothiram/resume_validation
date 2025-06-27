@@ -29,6 +29,9 @@
                     <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300">
                         <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
                     </button>
+                    <button id="tab-question-gen" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300">
+                        <i data-lucide="help-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Interview Question Generator
+                    </button>
                     <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300">
                         <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
                     </button>
@@ -73,9 +76,9 @@
                             </div>
                             <div>
                                 <label for="techQuestionsUpload" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <i data-lucide="file" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Upload Technology Questions (.docx)
+                                    <i data-lucide="file" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Upload Technology Questions (.docx,.txt)
                                 </label>
-                                <input type="file" id="techQuestionsUpload" accept=".docx" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <input type="file" id="techQuestionsUpload" accept=".docx,.txt" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                 <input type="hidden" id="tech_questions" name="tech_questions">
                             </div>
                             <div>
@@ -93,6 +96,58 @@
                                     <option value="DevOps">DevOps</option>
                                 </select>
                                 <p id="technology_error" class="text-red-500 text-xs mt-1 hidden">Technology is required.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Interview Question Generator Tab -->
+                    <div id="question-gen-tab-content" class="hidden">
+                        <div class="space-y-6">
+                            <div>
+                                <label for="question_gen_technology" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="cpu" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Select Technology
+                                </label>
+                                <select id="question_gen_technology" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Select Technology</option>
+                                    <option value="General">General</option>
+                                    <option value="Python">Python</option>
+                                    <option value="Java">Java</option>
+                                    <option value="JavaScript">JavaScript</option>
+                                    <option value="Dotnet">Dotnet</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="DevOps">DevOps</option>
+                                    <option value="HR">HR</option>
+                                </select>
+                                <p id="question_gen_technology_error" class="text-red-500 text-xs mt-1 hidden">Technology is required.</p>
+                            </div>
+                            <div>
+                                <label for="question_gen_jd" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <i data-lucide="file-text" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Upload or Paste Job Description
+                                </label>
+                                <input type="file" id="question_gen_jd_upload" accept=".docx" class="mb-2 block text-sm text-gray-500 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" style="max-width: 220px;">
+                                <textarea id="question_gen_jd" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Paste job description here (optional)"></textarea>
+                                <p id="question_gen_jd_error" class="text-red-500 text-xs mt-1 hidden">Job Description is required.</p>
+                            </div>
+                            <div class="text-center">
+                                <button id="generate-questions-btn" type="button" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+                                    <i data-lucide="wand-2" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Generate Questions
+                                </button>
+                            </div>
+                            <div id="question-gen-loader" class="text-center hidden">
+                                <svg aria-hidden="true" class="inline w-8 h-8 text-blue-400 animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                    <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                </svg>
+                                <span class="ml-2 text-blue-600 font-semibold animate-pulse">Generating questions...</span>
+                            </div>
+                            <div id="question-gen-result" class="mt-6 hidden">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold text-lg text-gray-800">Generated Questions</span>
+                                    <div>
+                                        <button id="copy-questions-btn" class="text-blue-600 hover:text-blue-800 font-semibold text-sm mr-2"><i data-lucide="copy" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Copy</button>
+                                        <button id="download-questions-btn" class="text-green-600 hover:text-green-800 font-semibold text-sm"><i data-lucide="download" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Download</button>
+                                    </div>
+                                </div>
+                                <pre id="question-gen-list" class="bg-gray-50 rounded p-4 text-gray-800 text-sm overflow-x-auto"></pre>
                             </div>
                         </div>
                     </div>
@@ -171,9 +226,11 @@
         // Tab switching logic
         const tabResume = document.getElementById('tab-resume');
         const tabAudio = document.getElementById('tab-audio');
+        const tabQuestionGen = document.getElementById('tab-question-gen');
         const tabSaved = document.getElementById('tab-saved');
         const resumeTabContent = document.getElementById('resume-tab-content');
         const audioTabContent = document.getElementById('audio-tab-content');
+        const questionGenTabContent = document.getElementById('question-gen-tab-content');
         const savedTabContent = document.getElementById('saved-tab-content');
         let activeTab = 'resume';
 
@@ -182,10 +239,13 @@
             tabResume.classList.remove('text-gray-500');
             tabAudio.classList.remove('text-blue-700', 'border-blue-600');
             tabAudio.classList.add('text-gray-500');
+            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
+            tabQuestionGen.classList.add('text-gray-500');
             tabSaved.classList.remove('text-blue-700', 'border-blue-600');
             tabSaved.classList.add('text-gray-500');
             resumeTabContent.classList.remove('hidden');
             audioTabContent.classList.add('hidden');
+            questionGenTabContent.classList.add('hidden');
             savedTabContent.classList.add('hidden');
             activeTab = 'resume';
             document.getElementById('analyze-btn-container').classList.remove('hidden');
@@ -195,13 +255,46 @@
             tabAudio.classList.remove('text-gray-500');
             tabResume.classList.remove('text-blue-700', 'border-blue-600');
             tabResume.classList.add('text-gray-500');
+            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
+            tabQuestionGen.classList.add('text-gray-500');
             tabSaved.classList.remove('text-blue-700', 'border-blue-600');
             tabSaved.classList.add('text-gray-500');
             audioTabContent.classList.remove('hidden');
             resumeTabContent.classList.add('hidden');
+            questionGenTabContent.classList.add('hidden');
             savedTabContent.classList.add('hidden');
             activeTab = 'audio';
             document.getElementById('analyze-btn-container').classList.remove('hidden');
+        });
+        tabQuestionGen.addEventListener('click', () => {
+            tabQuestionGen.classList.add('text-blue-700', 'border-blue-600');
+            tabQuestionGen.classList.remove('text-gray-500');
+            tabResume.classList.remove('text-blue-700', 'border-blue-600');
+            tabResume.classList.add('text-gray-500');
+            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
+            tabAudio.classList.add('text-gray-500');
+            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
+            tabSaved.classList.add('text-gray-500');
+            questionGenTabContent.classList.remove('hidden');
+            resumeTabContent.classList.add('hidden');
+            audioTabContent.classList.add('hidden');
+            savedTabContent.classList.add('hidden');
+            renderSavedAnalyses();
+            activeTab = 'question-gen';
+            document.getElementById('analyze-btn-container').classList.add('hidden');
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
+            setTimeout(() => {
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+            }, 100);
+            wasResultsOverlayOpen = false;
+            // Also hide the delete modal when switching to Saved Analyses tab
+            const deleteModal = document.getElementById('delete-modal');
+            deleteModal.classList.add('hidden');
         });
         tabSaved.addEventListener('click', () => {
             tabSaved.classList.add('text-blue-700', 'border-blue-600');
@@ -210,9 +303,12 @@
             tabResume.classList.add('text-gray-500');
             tabAudio.classList.remove('text-blue-700', 'border-blue-600');
             tabAudio.classList.add('text-gray-500');
+            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
+            tabQuestionGen.classList.add('text-gray-500');
             savedTabContent.classList.remove('hidden');
             resumeTabContent.classList.add('hidden');
             audioTabContent.classList.add('hidden');
+            questionGenTabContent.classList.add('hidden');
             renderSavedAnalyses();
             activeTab = 'saved';
             document.getElementById('analyze-btn-container').classList.add('hidden');
@@ -300,13 +396,21 @@
             saveBtn.disabled = false;
             lucide.createIcons();
 
-            // Show overlay with loader
-            resultsOverlay.style.visibility = 'visible';
-            resultsOverlay.style.display = '';
-            resultsOverlay.classList.remove('hidden');
-            loader.classList.remove('hidden');
-            resultsDiv.classList.add('hidden');
-            document.getElementById('save-analysis-btn').classList.add('hidden');
+            // Only show overlay for Resume Match or Technical Proficiency
+            if (activeTab === 'resume' || activeTab === 'audio') {
+                // Show overlay with loader
+                resultsOverlay.style.visibility = 'visible';
+                resultsOverlay.style.display = '';
+                resultsOverlay.classList.remove('hidden');
+                loader.classList.remove('hidden');
+                resultsDiv.classList.add('hidden');
+                document.getElementById('save-analysis-btn').classList.add('hidden');
+            } else {
+                // Always hide overlay for other tabs
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+            }
 
             const response = await fetch('/process', {
                 method: 'POST',
@@ -611,8 +715,14 @@
                         });
                 };
                 reader.readAsArrayBuffer(file);
+            } else if (file && file.name.endsWith('.txt')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('tech_questions').value = event.target.result;
+                };
+                reader.readAsText(file);
             } else if (file) {
-                alert('Only .docx files are supported.');
+                alert('Only .docx or .txt files are supported.');
                 e.target.value = '';
             }
         });
@@ -967,6 +1077,135 @@
                 toast.style.opacity = '0';
             }, 2000);
         }
+
+        // --- Interview Question Generator Tab Logic ---
+        document.getElementById('generate-questions-btn').addEventListener('click', async function() {
+            // Force hide results overlay if visible
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
+            setTimeout(() => {
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+            }, 100);
+
+            // Validation for Interview Question Generator
+            let valid = true;
+            const tech = document.getElementById('question_gen_technology').value;
+            const jd = document.getElementById('question_gen_jd').value.trim();
+            const techError = document.getElementById('question_gen_technology_error');
+            const jdError = document.getElementById('question_gen_jd_error');
+            if (!tech) {
+                techError.classList.remove('hidden');
+                valid = false;
+            } else {
+                techError.classList.add('hidden');
+            }
+            if (!jd) {
+                jdError.classList.remove('hidden');
+                valid = false;
+            } else {
+                jdError.classList.add('hidden');
+            }
+            if (!valid) return;
+            const loader = document.getElementById('question-gen-loader');
+            const resultDiv = document.getElementById('question-gen-result');
+            const listPre = document.getElementById('question-gen-list');
+            loader.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            listPre.textContent = '';
+            try {
+                const resp = await fetch('/generate_questions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ technology: tech, job_description: jd })
+                });
+                const data = await resp.json();
+                loader.classList.add('hidden');
+                if (data.questions && Array.isArray(data.questions)) {
+                    listPre.textContent = data.questions.map((q, i) => `${i+1}. ${q}`).join('\n');
+                    resultDiv.classList.remove('hidden');
+                } else {
+                    showToast(data.error || 'Failed to generate questions.', 'error');
+                }
+            } catch (e) {
+                loader.classList.add('hidden');
+                showToast('Error generating questions.', 'error');
+            }
+        });
+        document.getElementById('copy-questions-btn').addEventListener('click', function() {
+            // Force hide results overlay if visible
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
+            setTimeout(() => {
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+            }, 100);
+            const listPre = document.getElementById('question-gen-list');
+            navigator.clipboard.writeText(listPre.textContent).then(() => {
+                showToast('Questions copied!', 'success');
+            });
+        });
+        document.getElementById('download-questions-btn').addEventListener('click', function() {
+            // Force hide results overlay if visible
+            const resultsOverlay = document.getElementById('results-overlay');
+            resultsOverlay.classList.add('hidden');
+            resultsOverlay.style.display = 'none';
+            resultsOverlay.style.visibility = 'hidden';
+            setTimeout(() => {
+                resultsOverlay.classList.add('hidden');
+                resultsOverlay.style.display = 'none';
+                resultsOverlay.style.visibility = 'hidden';
+            }, 100);
+            const listPre = document.getElementById('question-gen-list');
+            const blob = new Blob([listPre.textContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'interview_questions.txt';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        });
+
+        // Interview Question Generator JD .docx upload logic
+        document.getElementById('question_gen_jd_upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.docx')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    mammoth.extractRawText({arrayBuffer: event.target.result})
+                        .then(function(result) {
+                            document.getElementById('question_gen_jd').value = result.value;
+                            document.getElementById('question_gen_jd_error').classList.add('hidden');
+                        })
+                        .catch(function(err) {
+                            alert('Could not read the Word file.');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file) {
+                alert('Only .docx files are supported.');
+                e.target.value = '';
+            }
+        });
+
+        // Hide error when user starts typing or selects a file in Interview Question Generator
+        document.getElementById('question_gen_technology').addEventListener('change', () => {
+            if (document.getElementById('question_gen_technology').value) {
+                document.getElementById('question_gen_technology_error').classList.add('hidden');
+            }
+        });
+        document.getElementById('question_gen_jd').addEventListener('input', () => {
+            if (document.getElementById('question_gen_jd').value.trim()) {
+                document.getElementById('question_gen_jd_error').classList.add('hidden');
+            }
+        });
     </script>
 </body>
 </html>
