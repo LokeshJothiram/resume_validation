@@ -44,7 +44,7 @@
                     <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
                         <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
                     </button>
-                    <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-yellow-600 hover:border-yellow-400 whitespace-nowrap">
+                    <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
                         <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Shortlisted Resumes
                     </button>
                     {% endif %}
@@ -253,7 +253,7 @@
             if (techResumeInput) techResumeInput.required = false;
         });
         tabShortlisted.addEventListener('click', () => {
-            tabShortlisted.classList.add('text-yellow-600', 'border-yellow-400');
+            tabShortlisted.classList.add('text-blue-700', 'border-blue-600');
             tabShortlisted.classList.remove('text-gray-500');
             tabResume.classList.remove('text-blue-700', 'border-blue-600');
             tabResume.classList.add('text-gray-500');
@@ -474,7 +474,7 @@
                     let tries = 0;
                     function tryRender() {
                         let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
-                        if (allReady || tries > 10) {
+                        if (allReady || tries > 20) {
                             resumes.forEach((r, idx) => {
                                 if (!r.error) {
                                     const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
@@ -488,7 +488,7 @@
                             });
                         } else {
                             tries++;
-                            setTimeout(tryRender, 50);
+                            setTimeout(tryRender, 100);
                         }
                     }
                     tryRender();
