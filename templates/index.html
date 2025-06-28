@@ -979,12 +979,27 @@
             wasResultsOverlayOpen = false;
             try {
                 await fetch(`/delete_saved_analysis/${pendingDeleteFilename}`, { method: 'DELETE' });
-                showToast('Deleted successfully.', 'error');
+                showToast('Deleted successfully.', 'success');
+                
+                // Remove the deleted item from the DOM instead of re-rendering everything
+                const list = document.getElementById('saved_analyses_list');
+                const items = list.querySelectorAll('div.bg-white');
+                for (let item of items) {
+                    const deleteBtn = item.querySelector('button[onclick*="deleteSavedAnalysis"]');
+                    if (deleteBtn && deleteBtn.getAttribute('onclick').includes(pendingDeleteFilename)) {
+                        item.remove();
+                        break;
+                    }
+                }
+                
+                // If no items left, show "No saved analyses yet" message
+                if (list.children.length === 0) {
+                    list.innerHTML = '<div class="text-gray-500 text-center">No saved analyses yet.</div>';
+                }
             } catch (e) {
                 showToast('Error deleting analysis.', 'error');
             }
             pendingDeleteFilename = null;
-            renderSavedAnalyses();
         };
 
         // Toast notification logic
