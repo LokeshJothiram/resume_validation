@@ -37,6 +37,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 SAVED_FILES_FOLDER = 'saved_files'
 os.makedirs(SAVED_FILES_FOLDER, exist_ok=True)
 
+# Ensure shortlist folder exists
+SHORTLIST_FOLDER = 'shortlist'
+os.makedirs(SHORTLIST_FOLDER, exist_ok=True)
+
 # Load Gemini API key
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 if GEMINI_API_KEY:
@@ -580,6 +584,63 @@ def delete_saved_analysis(filename):
         return jsonify({'error': 'File not found'}), 404
     os.remove(filepath)
     return jsonify({'status': 'deleted'})
+
+# Shortlist a resume (save analysis data as JSON in shortlist folder)
+@app.route('/shortlist_resume', methods=['POST'])
+def shortlist_resume():
+    resume_file = request.files.get('shortlist_resume')
+    timestamp = request.form.get('timestamp', '')
+    saved_resume_filename = ''
+    original_filename = ''
+    if resume_file and resume_file.filename:
+        ext = os.path.splitext(resume_file.filename)[1]
+        saved_resume_filename = f"resume_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        original_filename = resume_file.filename
+        resume_file.save(os.path.join(SHORTLIST_FOLDER, saved_resume_filename))
+    data = {
+        'timestamp': timestamp,
+        'shortlisted_resume_file': saved_resume_filename,
+        'original_filename': original_filename
+    }
+    filename = f"shortlist_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    filepath = os.path.join(SHORTLIST_FOLDER, filename)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return jsonify({'status': 'success', 'filename': filename})
+
+# List all shortlisted resumes
+@app.route('/list_shortlisted', methods=['GET'])
+def list_shortlisted():
+    files = glob.glob(os.path.join(SHORTLIST_FOLDER, 'shortlist_*.json'))
+    files.sort(reverse=True)
+    result = []
+    for f in files:
+        fname = os.path.basename(f)
+        ts = fname.replace('shortlist_', '').replace('.json', '')
+        result.append({'filename': fname, 'timestamp': ts})
+    return jsonify(result)
+
+# Get a specific shortlisted resume
+@app.route('/get_shortlisted/<filename>', methods=['GET'])
+def get_shortlisted(filename):
+    filepath = os.path.join(SHORTLIST_FOLDER, filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    with open(filepath, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return jsonify(data)
+
+@app.route('/delete_shortlisted/<filename>', methods=['DELETE'])
+def delete_shortlisted(filename):
+    filepath = os.path.join(SHORTLIST_FOLDER, filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+    os.remove(filepath)
+    return jsonify({'status': 'deleted'})
+
+@app.route('/shortlist/<filename>')
+def download_shortlisted_resume(filename):
+    return send_from_directory(SHORTLIST_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
