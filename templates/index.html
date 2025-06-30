@@ -153,6 +153,7 @@
         let activeTab = 'resume';
 
         const techResumeInput = document.getElementById('tech_resume');
+        let latestAnalysisResult = null;
 
         tabResume.addEventListener('click', () => {
             tabResume.classList.add('text-blue-700', 'border-blue-600');
@@ -388,6 +389,7 @@
             });
             
             const result = await response.json();
+            latestAnalysisResult = result; // Store the latest result
 
             // Hide loader and show results
             loader.classList.add('hidden');
@@ -727,13 +729,15 @@
                     const timestamp = new Date().toLocaleString();
                     let technology = '';
                     let audioFileName = '';
-                    const techInput = document.getElementById('technology');
-                    if (techInput) technology = techInput.value;
-                    const audioInput = document.getElementById('audio');
-                    if (audioInput && audioInput.files && audioInput.files.length > 0) {
-                        audioFileName = audioInput.files[0].name;
+                    if (activeTab === 'audio') {
+                        const techInput = document.getElementById('technology');
+                        if (techInput) technology = techInput.value;
+                        const audioInput = document.getElementById('audio');
+                        if (audioInput && audioInput.files && audioInput.files.length > 0) {
+                            audioFileName = audioInput.files[0].name;
+                        }
                     }
-                    const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName };
+                    const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName, rawData: latestAnalysisResult };
                     try {
                         saveBtn.disabled = true;
                         saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
@@ -973,6 +977,10 @@
                 `;
                 // DO NOT add any onclick to the div in Saved Analyses tab
                 list.appendChild(div);
+                // After appending, find the canvases and re-render the donuts
+                if (data.rawData) {
+                    reRenderDonuts(div, data.rawData);
+                }
             }
         }
 
@@ -1101,6 +1109,57 @@
             }
             pendingDeleteFilename = null;
         };
+
+        // --- Re-render donuts for saved analyses ---
+        function reRenderDonuts(containerElement, rawData) {
+            // For Technical Proficiency charts
+            if (rawData.technical_score) {
+                const techCanvasIds = ['donutRelevance', 'donutConfidence', 'donutCommunication', 'donutClarity', 'donutProblemSolving', 'donutTechnicalKnowledge'];
+                const techScores = [
+                    (rawData.relevance_score || 0) * 10,
+                    (rawData.confidence_score || 0) * 10,
+                    (rawData.communication_score || 0) * 10,
+                    (rawData.clarity_score || 0) * 10,
+                    (rawData.problem_solving_score || 0) * 10,
+                    (rawData.depth_score || 0) * 10
+                ];
+                const techColors = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#38bdf8', '#0ea5e9'];
+                
+                techCanvasIds.forEach((id, i) => {
+                    const canvas = containerElement.querySelector(`#${id}`);
+                    if (canvas) {
+                        // We need to pass the actual canvas element to renderDonut
+                        renderDonut(id, techScores[i], techColors[i]);
+                    }
+                });
+            }
+
+            // For Resume Match charts
+            if (Array.isArray(rawData.resumes)) {
+                rawData.resumes.forEach((r, idx) => {
+                    if (r.error) return;
+                    
+                    const resumeCanvasIds = [`donutMatch${idx}`, `donutSkills${idx}`, `donutExp${idx}`, `donutEdu${idx}`, `donutCert${idx}`, `donutRole${idx}`];
+                    const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                    const resumeScores = [
+                        r.match_percentage || 0,
+                        skillCoverage,
+                        r.experience_match || 0,
+                        r.education_match || 0,
+                        r.certifications_match || 0,
+                        r.role_match || 0
+                    ];
+                    const resumeColors = ['#2563eb', '#22c55e', '#f59e42', '#a855f7', '#0ea5e9', '#f43f5e'];
+
+                    resumeCanvasIds.forEach((id, i) => {
+                         const canvas = containerElement.querySelector(`#${id}`);
+                         if(canvas) {
+                            renderDonut(id, resumeScores[i], resumeColors[i]);
+                         }
+                    });
+                });
+            }
+        }
 
         // Toast notification logic
         function showToast(message, type) {
