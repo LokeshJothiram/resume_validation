@@ -613,12 +613,12 @@
                                 }]
                             });
                         }
-                        renderDonut('donutRelevance', result.relevance_score || 0, '#2563eb');
-                        renderDonut('donutConfidence', result.confidence_score || 0, '#3b82f6');
-                        renderDonut('donutCommunication', result.communication_score || 0, '#60a5fa');
-                        renderDonut('donutClarity', result.clarity_score || 0, '#93c5fd');
-                        renderDonut('donutProblemSolving', result.problem_solving_score || 0, '#38bdf8');
-                        renderDonut('donutTechnicalKnowledge', result.depth_score || 0, '#0ea5e9');
+                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
+                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
+                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
+                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
+                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
+                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
                     }, 100);
                 } else if (result.audio_error) {
                     audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
