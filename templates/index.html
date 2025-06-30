@@ -946,11 +946,28 @@
                 // Resume summary extraction for saved analyses
                 let resumeSummary = data.resumeHTML || '';
                 let audioSummary = data.audioHTML || '';
+                // Wrap every Explanation block in a <details><summary>Explanation:</summary>...</details>
+                resumeSummary = resumeSummary.replace(/(<strong>Explanation:<\/strong>)([^<]*)/g, function(match, p1, p2) {
+                    return `<details class=\"mt-2\"><summary class=\"cursor-pointer text-base font-normal mb-2\">Explanation:</summary><div class=\"mt-2\">${p2}</div></details>`;
+                });
+                // Add technology and audio filename if present
+                let metaInfoBlock = '';
+                if ((data.technology && data.technology !== '') || (data.audioFileName && data.audioFileName !== '')) {
+                    metaInfoBlock += '<div class="mb-4 text-sm text-gray-700">';
+                    if (data.technology && data.technology !== '') {
+                        metaInfoBlock += `<span class="block"><strong>Selected Technology:</strong> ${data.technology}</span>`;
+                    }
+                    if (data.audioFileName && data.audioFileName !== '') {
+                        metaInfoBlock += `<span class="block"><strong>Audio File:</strong> ${data.audioFileName}</span>`;
+                    }
+                    metaInfoBlock += '</div>';
+                }
                 div.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="text-xs text-gray-400">Saved: ${file.timestamp}</div>
-                        <button class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.filename}')">Delete</button>
+                    <div class=\"flex justify-between items-center mb-2\">
+                        <div class=\"text-xs text-gray-400\">Saved: ${file.timestamp}</div>
+                        <button class=\"text-red-500 text-xs font-semibold\" onclick=\"event.stopPropagation(); deleteSavedAnalysis('${file.filename}')\">Delete</button>
                     </div>
+                    ${metaInfoBlock}
                     ${resumeSummary}
                     ${audioSummary}
                 `;
