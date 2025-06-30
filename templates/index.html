@@ -696,6 +696,7 @@
                             shortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
                             shortlistBtn.disabled = true;
                             lucide.createIcons();
+                            showToast('Resume shortlisted!', 'shortlist');
                         } else {
                             shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
                             shortlistBtn.disabled = false;
@@ -1099,6 +1100,9 @@
                 } else {
                     icon = '<i data-lucide="x-circle" class="w-5 h-5 mr-1"></i>';
                 }
+            } else if (type === 'shortlist' || type === 'warning') {
+                toast.classList.add('bg-yellow-500', 'text-white');
+                icon = '<i data-lucide="star" class="w-5 h-5 mr-1"></i>';
             } else {
                 toast.classList.add('bg-gray-700', 'text-white');
                 icon = '<i data-lucide="info" class="w-5 h-5 mr-1"></i>';
