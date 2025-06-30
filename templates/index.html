@@ -1206,18 +1206,18 @@
 
             // Validation for Interview Question Generator
             let valid = true;
-            const tech = document.getElementById('question_gen_technology').value;
+            // const tech = document.getElementById('question_gen_technology').value;
             const jd = document.getElementById('question_gen_jd').value.trim();
             const numQuestions = parseInt(document.getElementById('num_questions').value, 10) || 5;
-            const techError = document.getElementById('question_gen_technology_error');
+            // const techError = document.getElementById('question_gen_technology_error');
             const jdError = document.getElementById('question_gen_jd_error');
             const numQuestionsError = document.getElementById('num_questions_error');
-            if (!tech) {
+            /* if (!tech) {
                 techError.classList.remove('hidden');
                 valid = false;
             } else {
                 techError.classList.add('hidden');
-            }
+            } */
             if (!jd) {
                 jdError.classList.remove('hidden');
                 valid = false;
@@ -1242,7 +1242,7 @@
                 const resp = await fetch('/generate_questions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ technology: tech, job_description: jd, num_questions: numQuestions })
+                    body: JSON.stringify({ technology: '', job_description: jd, num_questions: numQuestions })
                 });
                 const data = await resp.json();
                 loader.classList.add('hidden');
@@ -1318,11 +1318,11 @@
         });
 
         // Hide error when user starts typing or selects a file in Interview Question Generator
-        document.getElementById('question_gen_technology').addEventListener('change', () => {
+        /* document.getElementById('question_gen_technology').addEventListener('change', () => {
             if (document.getElementById('question_gen_technology').value) {
                 document.getElementById('question_gen_technology_error').classList.add('hidden');
             }
-        });
+        }); */
         document.getElementById('question_gen_jd').addEventListener('input', () => {
             if (document.getElementById('question_gen_jd').value.trim()) {
                 document.getElementById('question_gen_jd_error').classList.add('hidden');
