@@ -68,7 +68,7 @@
                     </div>
                     <!-- Shortlisted Resumes Tab -->
                     <div id="shortlisted-tab-content" class="hidden">
-                        <div id="shortlisted-list" class="space-y-4"></div>
+                        {% include 'tabs/shortlisted_resumes_tab.html' %}
                     </div>
                     <div id="analyze-btn-container" class="mt-2 text-center">
                         <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
@@ -268,7 +268,7 @@
             audioTabContent.classList.add('hidden');
             questionGenTabContent.classList.add('hidden');
             savedTabContent.classList.add('hidden');
-            renderSavedAnalyses();
+            renderShortlistedResumes();
             activeTab = 'shortlisted';
             document.getElementById('analyze-btn-container').classList.add('hidden');
             const resultsOverlay = document.getElementById('results-overlay');
