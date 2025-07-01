@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from database import User
+from users import USERS
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -8,8 +8,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter_by(username=username, password=password).first()
-        if user:
+        if username in USERS and USERS[username] == password:
             session['user'] = username
             return redirect(url_for('index'))
         else:
