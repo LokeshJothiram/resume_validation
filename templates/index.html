@@ -654,7 +654,6 @@
                 shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
                 shortlistBtn.disabled = false;
                 lucide.createIcons();
-
                 // Remove any previous click handlers before adding a new one
                 shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
                 const newShortlistBtn = document.getElementById('shortlist-btn');
@@ -686,7 +685,6 @@
                         }
                     }
                     formData.append('timestamp', timestamp);
-
                     try {
                         newShortlistBtn.disabled = true;
                         newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
