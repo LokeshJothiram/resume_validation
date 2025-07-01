@@ -655,7 +655,10 @@
                 shortlistBtn.disabled = false;
                 lucide.createIcons();
 
-                shortlistBtn.addEventListener('click', async function() {
+                // Remove any previous click handlers before adding a new one
+                shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
+                const newShortlistBtn = document.getElementById('shortlist-btn');
+                newShortlistBtn.addEventListener('click', async function() {
                     let formData = new FormData();
                     let timestamp = new Date().toLocaleString();
                     let found = false;
@@ -663,7 +666,7 @@
                         const techResumeInput = document.getElementById('tech_resume');
                         if (!techResumeInput.files || techResumeInput.files.length === 0) {
                             document.getElementById('tech_resume_error').classList.remove('hidden');
-                            shortlistBtn.disabled = false;
+                            newShortlistBtn.disabled = false;
                             return;
                         }
                         formData.append('shortlist_resume', techResumeInput.files[0]);
@@ -678,34 +681,34 @@
                         });
                         if (!found) {
                             document.getElementById('resume_error').classList.remove('hidden');
-                            shortlistBtn.disabled = false;
+                            newShortlistBtn.disabled = false;
                             return;
                         }
                     }
                     formData.append('timestamp', timestamp);
 
                     try {
-                        shortlistBtn.disabled = true;
-                        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
+                        newShortlistBtn.disabled = true;
+                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
                         const response = await fetch('/shortlist_resume', {
                             method: 'POST',
                             body: formData
                         });
                         const result = await response.json();
                         if (result.status === 'success') {
-                            shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
-                            shortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                            shortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
-                            shortlistBtn.disabled = true;
+                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
+                            newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                            newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+                            newShortlistBtn.disabled = true;
                             lucide.createIcons();
                             showToast('Resume shortlisted!', 'shortlist');
                         } else {
-                            shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                            shortlistBtn.disabled = false;
+                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                            newShortlistBtn.disabled = false;
                         }
                     } catch (err) {
-                        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                        shortlistBtn.disabled = false;
+                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                        newShortlistBtn.disabled = false;
                     }
                 });
             }
@@ -1453,10 +1456,6 @@
                 `;
                 list.appendChild(div);
             }
-        }
-        // Call renderShortlistedResumes when the tab is clicked
-        if (tabShortlisted) {
-            tabShortlisted.addEventListener('click', renderShortlistedResumes);
         }
 
         // Clear localStorage on logout
