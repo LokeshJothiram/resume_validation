@@ -72,12 +72,12 @@
     <div class="w-full border-b border-gray-200"></div>
     <!-- Main Content: full width, no centering, no top margin -->
     <div class="w-full p-0">
-        <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300 w-full">
+        <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
                 <form id="talentForm" enctype="multipart/form-data" novalidate>
                     <!-- Resume Match Tab -->
                     <div id="resume-tab-content">
                     <div class="flex flex-col md:flex-row items-start w-full">
-                        <div class="w-full md:w-1/2 pr-0 md:pr-8">
+                        <div class="w-full md:w-1/2 pr-0 md:pr-8 self-start">
                         {% include 'tabs/resume_match_tab.html' %}
                         </div>
                         <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
@@ -104,21 +104,21 @@
                                 </button>
                             </div>
                             <div id="results-resume" class="p-0">
-                                <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
-                                <div class="space-y-6">
+                                 <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
+                                 <div class="space-y-6">
                                     <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
+                                        <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
                                         <div id="resume_result_resume"></div>
                                     </div>
-                                </div>
-                            </div>
+                                 </div>
+                             </div>
                         </div>
                     </div>
                     </div>
                     <!-- Technical Proficiency Tab -->
                     <div id="audio-tab-content" class="hidden">
                     <div class="flex flex-col md:flex-row items-start w-full">
-                        <div class="w-full md:w-1/2 pr-0 md:pr-8">
+                        <div class="w-full md:w-1/2 pr-0 md:pr-8 self-start">
                         {% include 'tabs/technical_proficiency_tab.html' %}
                         </div>
                         <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
@@ -145,14 +145,14 @@
                                 </button>
                             </div>
                             <div id="results-audio" class="p-0">
-                                <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                                <div class="space-y-6">
+                                 <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+                                 <div class="space-y-6">
                                     <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
+                                        <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
                                         <div id="audio_result_audio"></div>
                                     </div>
-                                </div>
-                            </div>
+                                 </div>
+                             </div>
                         </div>
                     </div>
                     </div>
