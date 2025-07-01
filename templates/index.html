@@ -21,25 +21,17 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header: Logo (far left), Title (center), Logout (far right) -->
+    <!-- Header: Gradient Title (left), Logout (right) -->
     <div class="w-full bg-white shadow-sm">
-      <div class="flex items-center justify-between w-full py-4 px-0">
-        <!-- Logo far left -->
-        <div class="flex items-center pl-4">
-          <img src="{{ url_for('static', filename='tringapps_inc_logo.jpeg') }}" alt="Logo" class="h-10 w-auto"/>
-        </div>
-        <!-- Title Center -->
-        <div class="flex-1 flex justify-center">
-          <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 text-center">AI Talent Acquisition Assistant</h1>
-        </div>
-        <!-- Logout far right -->
-        <div class="flex items-center pr-4">
-          <form action="{{ url_for('logout') }}" method="post">
-            <button type="submit" id="logout" class="flex items-center text-blue-600 hover:text-blue-800 font-semibold bg-transparent border-none cursor-pointer">
-            <i data-lucide="log-out" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Logout
-        </button>
-    </form>
-        </div>
+      <div class="flex items-center justify-between w-full py-2 px-6">
+        <!-- Gradient Title Left -->
+        <span class="header-gradient font-bold text-2xl sm:text-2xl">AI Talent Assistant</span>
+        <!-- Logout Right -->
+        <form action="{{ url_for('logout') }}" method="post">
+          <button type="submit" id="logout" class="logout-btn flex items-center px-4 py-2 border border-gray-300 rounded-lg font-mono font-semibold bg-white hover:bg-gray-100 transition">
+            <i data-lucide="log-out" class="inline w-4 h-4 mr-2 align-text-bottom"></i> Logout
+          </button>
+        </form>
       </div>
     </div>
     <!-- Tabs Bar: left-aligned, below header, visually distinct -->
