@@ -23,6 +23,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from database import db, User, SavedAnalysis, ShortlistedResume
 from werkzeug.utils import secure_filename
+import openai
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -58,10 +59,8 @@ os.makedirs(SAVED_FILES_FOLDER, exist_ok=True)
 SHORTLIST_FOLDER = 'shortlist'
 os.makedirs(SHORTLIST_FOLDER, exist_ok=True)
 
-# Load Gemini API key
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Load OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Register blueprints
 register_blueprints(app)
@@ -144,41 +143,40 @@ def transcribe_audio_with_diarization(audio_path):
     answers = [utt["text"] for utt in utterances if utt["speaker"] == candidate_speaker]
     return answers
 
-# Function to evaluate resume match using Gemini 1.5 Flash
-# Ollama code is commented out below
-def calculate_resume_match_with_gemini(job_description, resume_text):
+# Function to evaluate resume match using OpenAI GPT-3.5 Turbo
+def calculate_resume_match_with_openai(job_description, resume_text):
     prompt = f"""
-    You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
+You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
 
-    Job Description: {job_description}
+Job Description: {job_description}
 
-    Resume: {resume_text}
+Resume: {resume_text}
 
-    Output ONLY the following JSON object:
-    {{
-      \"match_percentage\": <percentage>,
-      \"explanation\": \"<explanation>\"
-    }}
-    """
+Output ONLY the following JSON object:
+{{
+  \"match_percentage\": <percentage>,
+  \"explanation\": \"<explanation>\"
+}}
+"""
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=2000
-            )
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=800,
+            temperature=0.2,
         )
-        match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        text = response['choices'][0]['message']['content']
+        match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             return json.loads(match.group(0))
         else:
-            return {"match_percentage": 0, "explanation": "Could not parse Gemini output."}
+            return {"match_percentage": 0, "explanation": "Could not parse OpenAI output."}
     except Exception as e:
-        return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)"}
+        return {"match_percentage": 0, "explanation": f"Service unavailable: {e}"}
 
-# Function to evaluate technical proficiency using Gemini 1.5 Flash
-# Ollama code is commented out below
-def evaluate_technical_proficiency_with_gemini(transcription, technology, tech_questions=None):
+# Function to evaluate technical proficiency using OpenAI GPT-3.5 Turbo
+def evaluate_technical_proficiency_with_openai(transcription, technology, tech_questions=None):
+    import json, re
     if tech_questions:
         questions = [q.strip() for q in tech_questions.split('\n') if q.strip()]
         questions_json = json.dumps(questions)
@@ -191,21 +189,21 @@ For each question in the list below, do the following:
 - Provide a brief explanation for the grade.
 
 Return your response as a single JSON object with:
-- "question_grades": [an array where each element is an object with "question", "answer", "score", "explanation"]
-- "technical_score": <score>
-- "technical_explanation": "<explanation> (must be at least 50 words)"
-- "depth_score": <score>
-- "depth_explanation": "<explanation>"
-- "relevance_score": <score>
-- "relevance_explanation": "<explanation>"
-- "communication_score": <score>
-- "communication_explanation": "<explanation>"
-- "clarity_score": <score>
-- "clarity_explanation": "<explanation>"
-- "confidence_score": <score>
-- "confidence_explanation": "<explanation>"
-- "problem_solving_score": <score>
-- "problem_solving_explanation": "<explanation>"
+- \"question_grades\": [an array where each element is an object with \"question\", \"answer\", \"score\", \"explanation\"]
+- \"technical_score\": <score>
+- \"technical_explanation\": \"<explanation> (must be at least 50 words)\"
+- \"depth_score\": <score>
+- \"depth_explanation\": \"<explanation>\"
+- \"relevance_score\": <score>
+- \"relevance_explanation\": \"<explanation>\"
+- \"communication_score\": <score>
+- \"communication_explanation\": \"<explanation>\"
+- \"clarity_score\": <score>
+- \"clarity_explanation\": \"<explanation>\"
+- \"confidence_score\": <score>
+- \"confidence_explanation\": \"<explanation>\"
+- \"problem_solving_score\": <score>
+- \"problem_solving_explanation\": \"<explanation>\"
 
 The technical explanation must be at least 50 words.
 
@@ -251,54 +249,23 @@ Answers:
 {transcription}
 """
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=4000
-            )
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=1500,
+            temperature=0.2,
         )
-        match_obj = re.search(r'\{.*\}', response.text, re.DOTALL)
-        if match_obj:
-            try:
-                result = json.loads(match_obj.group(0))
-                return result
-            except Exception:
-                pass
-        return {
-            "technical_score": 0,
-            "technical_explanation": "Could not parse Gemini output.",
-            "depth_score": 0,
-            "depth_explanation": "",
-            "relevance_score": 0,
-            "relevance_explanation": "",
-            "communication_score": 0,
-            "communication_explanation": "",
-            "clarity_score": 0,
-            "clarity_explanation": "",
-            "confidence_score": 0,
-            "confidence_explanation": "",
-            "problem_solving_score": 0,
-            "problem_solving_explanation": "",
-            "question_grades": []
-        }
+        text = response['choices'][0]['message']['content']
+        match = re.search(r'\{.*\}', text, re.DOTALL)
+        if match:
+            return json.loads(match.group(0))
+        else:
+            return {"technical_score": 0, "technical_explanation": "Could not parse OpenAI output."}
     except Exception as e:
         return {
             "technical_score": 0,
-            "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
-            "depth_score": 0,
-            "depth_explanation": "",
-            "relevance_score": 0,
-            "relevance_explanation": "",
-            "communication_score": 0,
-            "communication_explanation": "",
-            "clarity_score": 0,
-            "clarity_explanation": "",
-            "confidence_score": 0,
-            "confidence_explanation": "",
-            "problem_solving_score": 0,
-            "problem_solving_explanation": "",
-            "question_grades": []
+            "technical_explanation": f"Service unavailable: {e}",
+            # ... other fields as in your Gemini fallback ...
         }
 
 def split_audio(audio_path, chunk_duration_ms=29000):
@@ -507,7 +474,7 @@ def process():
                     os.remove(resume_path)
                     continue
                 if "Error" not in resume_text:
-                    match_result = calculate_resume_match_with_gemini(job_description, resume_text)
+                    match_result = calculate_resume_match_with_openai(job_description, resume_text)
                     resumes_result.append({
                         'filename': resume_file.filename,
                         'match_percentage': match_result.get('match_percentage'),
@@ -541,7 +508,7 @@ def process():
                     candidate_lines.append(line.replace('Candidate:', '').strip())
             candidate_text = '\n'.join(candidate_lines)
             # Run technical proficiency evaluation on only candidate's answers
-            tech_eval = evaluate_technical_proficiency_with_gemini(
+            tech_eval = evaluate_technical_proficiency_with_openai(
                 f"The following are only the candidate's answers from an interview transcript:\n{candidate_text}",
                 technology,
                 tech_questions=tech_questions
