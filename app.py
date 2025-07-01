@@ -18,17 +18,34 @@ from sarvamai import SarvamAI
 import tempfile
 import datetime
 import glob
-from users import USERS
 from routes import register_blueprints
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from database import db, User, SavedAnalysis, ShortlistedResume
+from werkzeug.utils import secure_filename
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 client = SarvamAI(api_subscription_key=SARVAM_API_KEY)
 
+# Load environment variables
+MYSQL_USER = os.getenv('MYSQL_USER')
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD')
+MYSQL_HOST = os.getenv('MYSQL_HOST')
+MYSQL_PORT = os.getenv('MYSQL_PORT')
+MYSQL_DB = os.getenv('MYSQL_DB')
+
 app = Flask(__name__)
 app.secret_key = '123'  # Replace with a secure key in production
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# SQLAlchemy configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+migrate = Migrate(app, db)
 
 # Ensure upload folder exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -423,12 +440,20 @@ def separate_hr_candidate_with_gemini(transcript):
     except Exception as e:
         return f"Error contacting Gemini API: {e}"
 
+def get_current_user():
+    username = session.get('user')
+    if not username:
+        return None
+    from database import User
+    return User.query.filter_by(username=username).first()
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        if username in USERS and USERS[username] == password:
+        user = User.query.filter_by(username=username, password=password).first()
+        if user:
             session['user'] = username
             return redirect(url_for('index'))
         else:
@@ -585,57 +610,74 @@ def delete_saved_analysis(filename):
     os.remove(filepath)
     return jsonify({'status': 'deleted'})
 
-# Shortlist a resume (save analysis data as JSON in shortlist folder)
 @app.route('/shortlist_resume', methods=['POST'])
 def shortlist_resume():
     resume_file = request.files.get('shortlist_resume')
     timestamp = request.form.get('timestamp', '')
+    user = get_current_user()
+    user_id = user.id if user else None
     saved_resume_filename = ''
     original_filename = ''
     if resume_file and resume_file.filename:
         ext = os.path.splitext(resume_file.filename)[1]
+        original_filename = secure_filename(resume_file.filename)
         saved_resume_filename = f"resume_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
-        original_filename = resume_file.filename
         resume_file.save(os.path.join(SHORTLIST_FOLDER, saved_resume_filename))
-    data = {
-        'timestamp': timestamp,
-        'shortlisted_resume_file': saved_resume_filename,
-        'original_filename': original_filename
-    }
-    filename = f"shortlist_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    filepath = os.path.join(SHORTLIST_FOLDER, filename)
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    return jsonify({'status': 'success', 'filename': filename})
+        # Save metadata to DB
+        from database import ShortlistedResume, db
+        shortlist = ShortlistedResume(
+            user_id=user_id,
+            original_filename=original_filename,
+            stored_filename=saved_resume_filename,
+            timestamp=datetime.datetime.now()
+        )
+        db.session.add(shortlist)
+        db.session.commit()
+        return jsonify({'status': 'success', 'id': shortlist.id})
+    return jsonify({'status': 'error', 'message': 'No file uploaded'})
 
-# List all shortlisted resumes
 @app.route('/list_shortlisted', methods=['GET'])
 def list_shortlisted():
-    files = glob.glob(os.path.join(SHORTLIST_FOLDER, 'shortlist_*.json'))
-    files.sort(reverse=True)
-    result = []
-    for f in files:
-        fname = os.path.basename(f)
-        ts = fname.replace('shortlist_', '').replace('.json', '')
-        result.append({'filename': fname, 'timestamp': ts})
+    user = get_current_user()
+    if not user:
+        return jsonify([])
+    from database import ShortlistedResume
+    resumes = ShortlistedResume.query.filter_by(user_id=user.id).order_by(ShortlistedResume.timestamp.desc()).all()
+    result = [
+        {
+            'id': r.id,
+            'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'original_filename': r.original_filename,
+            'stored_filename': r.stored_filename,
+            'user_id': r.user_id
+        } for r in resumes
+    ]
     return jsonify(result)
 
-# Get a specific shortlisted resume
-@app.route('/get_shortlisted/<filename>', methods=['GET'])
-def get_shortlisted(filename):
-    filepath = os.path.join(SHORTLIST_FOLDER, filename)
-    if not os.path.exists(filepath):
-        return jsonify({'error': 'File not found'}), 404
-    with open(filepath, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    return jsonify(data)
+@app.route('/get_shortlisted/<int:resume_id>', methods=['GET'])
+def get_shortlisted(resume_id):
+    user = get_current_user()
+    from database import ShortlistedResume
+    r = ShortlistedResume.query.filter_by(id=resume_id, user_id=user.id).first_or_404()
+    return jsonify({
+        'id': r.id,
+        'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+        'original_filename': r.original_filename,
+        'stored_filename': r.stored_filename,
+        'user_id': r.user_id
+    })
 
-@app.route('/delete_shortlisted/<filename>', methods=['DELETE'])
-def delete_shortlisted(filename):
-    filepath = os.path.join(SHORTLIST_FOLDER, filename)
-    if not os.path.exists(filepath):
-        return jsonify({'error': 'File not found'}), 404
-    os.remove(filepath)
+@app.route('/delete_shortlisted/<int:resume_id>', methods=['DELETE'])
+def delete_shortlisted(resume_id):
+    user = get_current_user()
+    from database import ShortlistedResume, db
+    r = ShortlistedResume.query.filter_by(id=resume_id, user_id=user.id).first_or_404()
+    # Optionally, delete the file from disk as well
+    file_path = os.path.join(SHORTLIST_FOLDER, r.stored_filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    db.session.delete(r)
+    db.session.commit()
     return jsonify({'status': 'deleted'})
 
 @app.route('/shortlist/<filename>')
@@ -643,4 +685,6 @@ def download_shortlisted_resume(filename):
     return send_from_directory(SHORTLIST_FOLDER, filename, as_attachment=True)
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

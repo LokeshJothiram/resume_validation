@@ -712,7 +712,10 @@
 
             // Save button event listener
             if (saveBtn) {
-                saveBtn.addEventListener('click', async function() {
+                // Remove any previous click handlers before adding a new one
+                saveBtn.replaceWith(saveBtn.cloneNode(true));
+                const newSaveBtn = document.getElementById('save-analysis-btn');
+                newSaveBtn.addEventListener('click', async function() {
                     // Gather the latest analysis result from the modal
                     const resumeResultDiv = document.getElementById('resume_result');
                     let resumeHTML = '';
@@ -739,8 +742,8 @@
                     }
                     const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName, rawData: latestAnalysisResult };
                     try {
-                        saveBtn.disabled = true;
-                        saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
+                        newSaveBtn.disabled = true;
+                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
                         const response = await fetch('/save_analysis', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -748,20 +751,20 @@
                         });
                         const result = await response.json();
                         if (result.status === 'success') {
-                            saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
-                            saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                            saveBtn.classList.add('bg-green-700', 'cursor-default');
-                            saveBtn.disabled = true;
+                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
+                            newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            newSaveBtn.classList.add('bg-green-700', 'cursor-default');
+                            newSaveBtn.disabled = true;
                             lucide.createIcons();
                             showToast('Analysis saved successfully!', 'success');
                         } else {
-                            saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                            saveBtn.disabled = false;
+                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                            newSaveBtn.disabled = false;
                             showToast('Failed to save analysis.', 'error');
                         }
                     } catch (err) {
-                        saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                        saveBtn.disabled = false;
+                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                        newSaveBtn.disabled = false;
                         showToast('Error saving analysis.', 'error');
                     }
                 });
@@ -940,7 +943,7 @@
                 // Fetch file content
                 let data = null;
                 try {
-                    const resp = await fetch(`/get_saved_analysis/${file.filename}`);
+                    const resp = await fetch(`/get_saved_analysis/${file.id}`);
                     data = await resp.json();
                 } catch (e) {
                     data = { metaInfo: '', resumeHTML: '<div class="text-red-500">Failed to load file.</div>', audioHTML: '' };
@@ -948,38 +951,53 @@
                 const div = document.createElement('div');
                 div.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
                 // Resume summary extraction for saved analyses
-                let resumeSummary = data.resumeHTML || '';
-                let audioSummary = data.audioHTML || '';
-                // Wrap every Explanation block in a <details><summary>Explanation:</summary>...</details>
-                resumeSummary = resumeSummary.replace(/(<strong>Explanation:<\/strong>)([^<]*)/g, function(match, p1, p2) {
-                    return `<details class=\"mt-2\"><summary class=\"cursor-pointer text-base font-normal mb-2\">Explanation:</summary><div class=\"mt-2\">${p2}</div></details>`;
-                });
+                let resumeSummary = (data.resumeHTML || (file.data && file.data.resumeHTML)) || '';
+                let audioSummary = (data.audioHTML || (file.data && file.data.audioHTML)) || '';
+                // Make donut chart canvas IDs unique by including file.id
+                resumeSummary = resumeSummary.replace(/id="donutMatch(\d+)"/g, `id="donutMatch_${file.id}_$1"`)
+                                           .replace(/id="donutSkills(\d+)"/g, `id="donutSkills_${file.id}_$1"`)
+                                           .replace(/id="donutExp(\d+)"/g, `id="donutExp_${file.id}_$1"`)
+                                           .replace(/id="donutEdu(\d+)"/g, `id="donutEdu_${file.id}_$1"`)
+                                           .replace(/id="donutCert(\d+)"/g, `id="donutCert_${file.id}_$1"`)
+                                           .replace(/id="donutRole(\d+)"/g, `id="donutRole_${file.id}_$1"`);
+                // Also for technical tab
+                resumeSummary = resumeSummary.replace(/id="donutRelevance"/g, `id="donutRelevance_${file.id}"`)
+                                           .replace(/id="donutConfidence"/g, `id="donutConfidence_${file.id}"`)
+                                           .replace(/id="donutCommunication"/g, `id="donutCommunication_${file.id}"`)
+                                           .replace(/id="donutClarity"/g, `id="donutClarity_${file.id}"`)
+                                           .replace(/id="donutProblemSolving"/g, `id="donutProblemSolving_${file.id}"`)
+                                           .replace(/id="donutTechnicalKnowledge"/g, `id="donutTechnicalKnowledge_${file.id}"`);
+                audioSummary = audioSummary.replace(/id="donutRelevance"/g, `id="donutRelevance_${file.id}"`)
+                                         .replace(/id="donutConfidence"/g, `id="donutConfidence_${file.id}"`)
+                                         .replace(/id="donutCommunication"/g, `id="donutCommunication_${file.id}"`)
+                                         .replace(/id="donutClarity"/g, `id="donutClarity_${file.id}"`)
+                                         .replace(/id="donutProblemSolving"/g, `id="donutProblemSolving_${file.id}"`)
+                                         .replace(/id="donutTechnicalKnowledge"/g, `id="donutTechnicalKnowledge_${file.id}"`);
                 // Add technology and audio filename if present
                 let metaInfoBlock = '';
-                if ((data.technology && data.technology !== '') || (data.audioFileName && data.audioFileName !== '')) {
+                const meta = file.data || {};
+                if ((meta.technology && meta.technology !== '') || (meta.audioFileName && meta.audioFileName !== '')) {
                     metaInfoBlock += '<div class="mb-4 text-sm text-gray-700">';
-                    if (data.technology && data.technology !== '') {
-                        metaInfoBlock += `<span class="block"><strong>Selected Technology:</strong> ${data.technology}</span>`;
+                    if (meta.technology && meta.technology !== '') {
+                        metaInfoBlock += `<span class="block"><strong>Selected Technology:</strong> ${meta.technology}</span>`;
                     }
-                    if (data.audioFileName && data.audioFileName !== '') {
-                        metaInfoBlock += `<span class="block"><strong>Audio File:</strong> ${data.audioFileName}</span>`;
+                    if (meta.audioFileName && meta.audioFileName !== '') {
+                        metaInfoBlock += `<span class="block"><strong>Audio File:</strong> ${meta.audioFileName}</span>`;
                     }
                     metaInfoBlock += '</div>';
                 }
                 div.innerHTML = `
                     <div class=\"flex justify-between items-center mb-2\">
                         <div class=\"text-xs text-gray-400\">Saved: ${file.timestamp}</div>
-                        <button class=\"text-red-500 text-xs font-semibold\" onclick=\"event.stopPropagation(); deleteSavedAnalysis('${file.filename}')\">Delete</button>
+                        <button class=\"text-red-500 text-xs font-semibold\" onclick=\"event.stopPropagation(); deleteSavedAnalysis('${file.id}')\">Delete</button>
                     </div>
                     ${metaInfoBlock}
                     ${resumeSummary}
                     ${audioSummary}
                 `;
-                // DO NOT add any onclick to the div in Saved Analyses tab
                 list.appendChild(div);
-                // After appending, find the canvases and re-render the donuts
-                if (data.rawData) {
-                    reRenderDonuts(div, data.rawData);
+                if (meta.rawData) {
+                    reRenderDonuts(div, meta.rawData, file.id);
                 }
             }
         }
@@ -1111,7 +1129,7 @@
         };
 
         // --- Re-render donuts for saved analyses ---
-        function reRenderDonuts(containerElement, rawData) {
+        function reRenderDonuts(containerElement, rawData, fileId) {
             // For Technical Proficiency charts
             if (rawData.technical_score) {
                 const techCanvasIds = ['donutRelevance', 'donutConfidence', 'donutCommunication', 'donutClarity', 'donutProblemSolving', 'donutTechnicalKnowledge'];
@@ -1126,10 +1144,9 @@
                 const techColors = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#38bdf8', '#0ea5e9'];
                 
                 techCanvasIds.forEach((id, i) => {
-                    const canvas = containerElement.querySelector(`#${id}`);
+                    const canvas = containerElement.querySelector(`#${id}_${fileId}`);
                     if (canvas) {
-                        // We need to pass the actual canvas element to renderDonut
-                        renderDonut(id, techScores[i], techColors[i]);
+                        renderDonut(`${id}_${fileId}`, techScores[i], techColors[i]);
                     }
                 });
             }
@@ -1139,7 +1156,7 @@
                 rawData.resumes.forEach((r, idx) => {
                     if (r.error) return;
                     
-                    const resumeCanvasIds = [`donutMatch${idx}`, `donutSkills${idx}`, `donutExp${idx}`, `donutEdu${idx}`, `donutCert${idx}`, `donutRole${idx}`];
+                    const resumeCanvasIds = [`donutMatch_${fileId}_${idx}`, `donutSkills_${fileId}_${idx}`, `donutExp_${fileId}_${idx}`, `donutEdu_${fileId}_${idx}`, `donutCert_${fileId}_${idx}`, `donutRole_${fileId}_${idx}`];
                     const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
                     const resumeScores = [
                         r.match_percentage || 0,
@@ -1409,7 +1426,7 @@
             for (const file of files) {
                 let data = null;
                 try {
-                    const resp = await fetch(`/get_shortlisted/${file.filename}`);
+                    const resp = await fetch(`/get_shortlisted/${file.id}`);
                     data = await resp.json();
                 } catch (e) {
                     data = { metaInfo: '', resumeHTML: '<div class="text-red-500">Failed to load file.</div>', audioHTML: '' };
@@ -1417,11 +1434,11 @@
                 const div = document.createElement('div');
                 div.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
                 let resumeBlock = '';
-                if (data.original_filename && data.shortlisted_resume_file) {
+                if (data.original_filename && data.stored_filename) {
                     resumeBlock = `
                         <div class="mb-2">
                             <div class="font-bold mb-1">${data.original_filename}</div>
-                            <a href="/shortlist/${data.shortlisted_resume_file}" download class="text-blue-600 underline text-sm">Download Resume</a>
+                            <a href="/shortlist/${data.stored_filename}" download class="text-blue-600 underline text-sm">Download Resume</a>
                         </div>
                     `;
                 } else {
@@ -1430,7 +1447,7 @@
                 div.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="text-xs text-gray-400">Shortlisted: ${file.timestamp}</div>
-                        <button class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.filename}')">Delete</button>
+                        <button class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.id}')">Delete</button>
                     </div>
                     ${resumeBlock}
                 `;
