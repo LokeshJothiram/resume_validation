@@ -1,16 +1,13 @@
 import os
 import pdfplumber
 from docx import Document
-# import google.generativeai as genai
+import google.generativeai as genai
 import re
 import json
 from pydub import AudioSegment
 import tempfile
-import openai
 
 SAVED_FILES_FOLDER = 'saved_files'
-
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def extract_text_from_pdf(pdf_path):
     try:
@@ -32,68 +29,48 @@ def extract_text_from_docx(docx_path):
     except Exception as e:
         return f"Error reading DOCX: {str(e)}"
 
-# def calculate_resume_match_with_gemini(job_description, resume_text):
-#     prompt = f"""
-#     You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
-#
-#     Also, estimate:
-#     - The number of required skills from the job description that are present in the resume (skills_matched and total_skills).
-#     - How closely the candidate's years of experience match the job description (experience_match as a percentage).
-#     - How well the candidate's education matches the job description (education_match as a percentage).
-#     - How many required certifications from the job description are present in the resume (certifications_match as a percentage).
-#     - How well the candidate's previous roles match the job title/level in the job description (role_match as a percentage).
-#
-#     Job Description: {job_description}
-#
-#     Resume: {resume_text}
-#
-#     Output ONLY the following JSON object:
-#     {{
-#       "match_percentage": <percentage>,
-#       "explanation": "<explanation>",
-#       "skills_matched": <number>,
-#       "total_skills": <number>,
-#       "experience_match": <percentage>,
-#       "education_match": <percentage>,
-#       "certifications_match": <percentage>,
-#       "role_match": <percentage>
-#     }}
-#     """
-#     try:
-#         model = genai.GenerativeModel('gemini-1.5-flash')
-#         response = model.generate_content(
-#             prompt,
-#             generation_config=genai.types.GenerationConfig(
-#                 max_output_tokens=2000
-#             )
-#         )
-#         match = re.search(r'\{.*\}', response.text, re.DOTALL)
-#         if match:
-#             return json.loads(match.group(0))
-#         else:
-#             return {"match_percentage": 0, "explanation": "Could not parse Gemini output.", "skills_matched": 0, "total_skills": 0, "experience_match": 0, "education_match": 0, "certifications_match": 0, "role_match": 0}
-#     except Exception as e:
-#         return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)", "skills_matched": 0, "total_skills": 0, "experience_match": 0, "education_match": 0, "certifications_match": 0, "role_match": 0}
-
-def calculate_resume_match_with_openai(job_description, resume_text):
+def calculate_resume_match_with_gemini(job_description, resume_text):
     prompt = f"""
-You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.\n\nJob Description: {job_description}\n\nResume: {resume_text}\n\nOutput ONLY the following JSON object:\n{{\n  \"match_percentage\": <percentage>,\n  \"explanation\": \"<explanation>\"\n}}\n"""
+    You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
+
+    Also, estimate:
+    - The number of required skills from the job description that are present in the resume (skills_matched and total_skills).
+    - How closely the candidate's years of experience match the job description (experience_match as a percentage).
+    - How well the candidate's education matches the job description (education_match as a percentage).
+    - How many required certifications from the job description are present in the resume (certifications_match as a percentage).
+    - How well the candidate's previous roles match the job title/level in the job description (role_match as a percentage).
+
+    Job Description: {job_description}
+
+    Resume: {resume_text}
+
+    Output ONLY the following JSON object:
+    {{
+      "match_percentage": <percentage>,
+      "explanation": "<explanation>",
+      "skills_matched": <number>,
+      "total_skills": <number>,
+      "experience_match": <percentage>,
+      "education_match": <percentage>,
+      "certifications_match": <percentage>,
+      "role_match": <percentage>
+    }}
+    """
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=800,
-            temperature=0.2,
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=2000
+            )
         )
-        import re, json
-        text = response['choices'][0]['message']['content']
-        match = re.search(r'\{.*\}', text, re.DOTALL)
+        match = re.search(r'\{.*\}', response.text, re.DOTALL)
         if match:
             return json.loads(match.group(0))
         else:
-            return {"match_percentage": 0, "explanation": "Could not parse OpenAI output."}
+            return {"match_percentage": 0, "explanation": "Could not parse Gemini output.", "skills_matched": 0, "total_skills": 0, "experience_match": 0, "education_match": 0, "certifications_match": 0, "role_match": 0}
     except Exception as e:
-        return {"match_percentage": 0, "explanation": f"Service unavailable: {e}"}
+        return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)", "skills_matched": 0, "total_skills": 0, "experience_match": 0, "education_match": 0, "certifications_match": 0, "role_match": 0}
 
 def split_audio(audio_path, chunk_length_ms=30000):
     """
@@ -154,173 +131,136 @@ def separate_hr_candidate_with_gemini(transcript):
     {transcript}
     """
     try:
-        # model = genai.GenerativeModel('gemini-1.5-flash')
-        # response = model.generate_content(
-        #     prompt,
-        #     generation_config=genai.types.GenerationConfig(
-        #         max_output_tokens=2000
-        #     )
-        # )
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1500,
-            temperature=0.2,
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=2000
+            )
         )
-        text = response['choices'][0]['message']['content']
-        return text
+        return response.text
     except Exception as e:
-        return f"Error contacting OpenAI API: {e}"
+        return f"Error contacting Gemini API: {e}"
 
-# def evaluate_technical_proficiency_with_gemini(transcription, technology, tech_questions=None):
-#     if tech_questions:
-#         questions = [q.strip() for q in tech_questions.split('\n') if q.strip()]
-#         questions_json = json.dumps(questions)
-#         prompt = f"""
-# You are an expert technical interviewer. You are given a list of technology interview questions for a {technology} role, and the candidate's transcribed answers from an interview.
-#
-# For each question in the list below, do the following:
-# - Find the candidate's answer (if any) from the transcript.
-# - Grade the answer out of 10 (0-10).
-# - Provide a brief explanation for the grade.
-#
-# Return your response as a single JSON object with:
-# - "question_grades": [an array where each element is an object with "question", "answer", "score", "explanation"]
-# - "technical_score": <score>
-# - "technical_explanation": "<explanation> (must be at least 50 words)"
-# - "depth_score": <score>
-# - "depth_explanation": "<explanation>"
-# - "relevance_score": <score>
-# - "relevance_explanation": "<explanation>"
-# - "communication_score": <score>
-# - "communication_explanation": "<explanation>"
-# - "clarity_score": <score>
-# - "clarity_explanation": "<explanation>"
-# - "confidence_score": <score>
-# - "confidence_explanation": "<explanation>"
-# - "problem_solving_score": <score>
-# - "problem_solving_explanation": "<explanation>"
-#
-# The technical explanation must be at least 50 words.
-#
-# Questions:
-# {questions_json}
-#
-# Transcript:
-# {transcription}
-# """
-#     else:
-#         prompt = f"""
-# You are an expert technical interviewer. Analyze the following transcribed interview answers for a {technology} role and evaluate the candidate on multiple dimensions:
-#
-# 1. Technical proficiency (score out of 10, with explanation)
-# 2. Depth of technical knowledge (score out of 10, with explanation)
-# 3. Relevance of answers to technology (score out of 10, with explanation)
-# 4. Communication skills (score out of 10, with explanation)
-# 5. Clarity of explanation (score out of 10, with explanation)
-# 6. Confidence (score out of 10, with explanation)
-# 7. Problem-solving approach (score out of 10, with explanation)
-#
-# Provide your analysis in the following JSON format:
-# {{
-#   "technical_score": <score>,
-#   "technical_explanation": "<explanation> (must be at least 50 words)",
-#   "depth_score": <score>,
-#   "depth_explanation": "<explanation>",
-#   "relevance_score": <score>,
-#   "relevance_explanation": "<explanation>",
-#   "communication_score": <score>,
-#   "communication_explanation": "<explanation>",
-#   "clarity_score": <score>,
-#   "clarity_explanation": "<explanation>",
-#   "confidence_score": <score>,
-#   "confidence_explanation": "<explanation>",
-#   "problem_solving_score": <score>,
-#   "problem_solving_explanation": "<explanation>"
-# }}
-#
-# The technical explanation must be at least 50 words.
-#
-# Answers:
-# {transcription}
-# """
-#     try:
-#         model = genai.GenerativeModel('gemini-1.5-flash')
-#         response = model.generate_content(
-#             prompt,
-#             generation_config=genai.types.GenerationConfig(
-#                 max_output_tokens=4000
-#             )
-#         )
-#         match_obj = re.search(r'\{.*\}', response.text, re.DOTALL)
-#         if match_obj:
-#             try:
-#                 result = json.loads(match_obj.group(0))
-#                 return result
-#             except Exception:
-#                 pass
-#         return {
-#             "technical_score": 0,
-#             "technical_explanation": "Could not parse Gemini output.",
-#             "depth_score": 0,
-#             "depth_explanation": "",
-#             "relevance_score": 0,
-#             "relevance_explanation": "",
-#             "communication_score": 0,
-#             "communication_explanation": "",
-#             "clarity_score": 0,
-#             "clarity_explanation": "",
-#             "confidence_score": 0,
-#             "confidence_explanation": "",
-#             "problem_solving_score": 0,
-#             "problem_solving_explanation": "",
-#             "question_grades": []
-#         }
-#     except Exception as e:
-#         return {
-#             "technical_score": 0,
-#             "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
-#             "depth_score": 0,
-#             "depth_explanation": "",
-#             "relevance_score": 0,
-#             "relevance_explanation": "",
-#             "communication_score": 0,
-#             "communication_explanation": "",
-#             "clarity_score": 0,
-#             "clarity_explanation": "",
-#             "confidence_score": 0,
-#             "confidence_explanation": "",
-#             "problem_solving_score": 0,
-#             "problem_solving_explanation": "",
-#             "question_grades": []
-#         }
-
-def evaluate_technical_proficiency_with_openai(transcription, technology, tech_questions=None):
-    import json, re
+def evaluate_technical_proficiency_with_gemini(transcription, technology, tech_questions=None):
     if tech_questions:
         questions = [q.strip() for q in tech_questions.split('\n') if q.strip()]
         questions_json = json.dumps(questions)
         prompt = f"""
-You are an expert technical interviewer. You are given a list of technology interview questions for a {technology} role, and the candidate's transcribed answers from an interview.\n\nFor each question in the list below, do the following:\n- Find the candidate's answer (if any) from the transcript.\n- Grade the answer out of 10 (0-10).\n- Provide a brief explanation for the grade.\n\nReturn your response as a single JSON object with:\n- \"question_grades\": [an array where each element is an object with \"question\", \"answer\", \"score\", \"explanation\"]\n- \"technical_score\": <score>\n- \"technical_explanation\": \"<explanation> (must be at least 50 words)\"\n- \"depth_score\": <score>\n- \"depth_explanation\": \"<explanation>\"\n- \"relevance_score\": <score>\n- \"relevance_explanation\": \"<explanation>\"\n- \"communication_score\": <score>\n- \"communication_explanation\": \"<explanation>\"\n- \"clarity_score\": <score>\n- \"clarity_explanation\": \"<explanation>\"\n- \"confidence_score\": <score>\n- \"confidence_explanation\": \"<explanation>\"\n- \"problem_solving_score\": <score>\n- \"problem_solving_explanation\": \"<explanation>\"\n\nThe technical explanation must be at least 50 words.\n\nQuestions:\n{questions_json}\n\nTranscript:\n{transcription}\n"""
+You are an expert technical interviewer. You are given a list of technology interview questions for a {technology} role, and the candidate's transcribed answers from an interview.
+
+For each question in the list below, do the following:
+- Find the candidate's answer (if any) from the transcript.
+- Grade the answer out of 10 (0-10).
+- Provide a brief explanation for the grade.
+
+Return your response as a single JSON object with:
+- "question_grades": [an array where each element is an object with "question", "answer", "score", "explanation"]
+- "technical_score": <score>
+- "technical_explanation": "<explanation> (must be at least 50 words)"
+- "depth_score": <score>
+- "depth_explanation": "<explanation>"
+- "relevance_score": <score>
+- "relevance_explanation": "<explanation>"
+- "communication_score": <score>
+- "communication_explanation": "<explanation>"
+- "clarity_score": <score>
+- "clarity_explanation": "<explanation>"
+- "confidence_score": <score>
+- "confidence_explanation": "<explanation>"
+- "problem_solving_score": <score>
+- "problem_solving_explanation": "<explanation>"
+
+The technical explanation must be at least 50 words.
+
+Questions:
+{questions_json}
+
+Transcript:
+{transcription}
+"""
     else:
         prompt = f"""
-You are an expert technical interviewer. Analyze the following transcribed interview answers for a {technology} role and evaluate the candidate on multiple dimensions:\n\n1. Technical proficiency (score out of 10, with explanation)\n2. Depth of technical knowledge (score out of 10, with explanation)\n3. Relevance of answers to technology (score out of 10, with explanation)\n4. Communication skills (score out of 10, with explanation)\n5. Clarity of explanation (score out of 10, with explanation)\n6. Confidence (score out of 10, with explanation)\n7. Problem-solving approach (score out of 10, with explanation)\n\nProvide your analysis in the following JSON format:\n{{\n  \"technical_score\": <score>,\n  \"technical_explanation\": \"<explanation> (must be at least 50 words)\",\n  \"depth_score\": <score>,\n  \"depth_explanation\": \"<explanation>\",\n  \"relevance_score\": <score>,\n  \"relevance_explanation\": \"<explanation>\",\n  \"communication_score\": <score>,\n  \"communication_explanation\": \"<explanation>\",\n  \"clarity_score\": <score>,\n  \"clarity_explanation\": \"<explanation>\",\n  \"confidence_score\": <score>,\n  \"confidence_explanation\": \"<explanation>\",\n  \"problem_solving_score\": <score>,\n  \"problem_solving_explanation\": \"<explanation>\"\n}}\n\nThe technical explanation must be at least 50 words.\n\nAnswers:\n{transcription}\n"""
+You are an expert technical interviewer. Analyze the following transcribed interview answers for a {technology} role and evaluate the candidate on multiple dimensions:
+
+1. Technical proficiency (score out of 10, with explanation)
+2. Depth of technical knowledge (score out of 10, with explanation)
+3. Relevance of answers to technology (score out of 10, with explanation)
+4. Communication skills (score out of 10, with explanation)
+5. Clarity of explanation (score out of 10, with explanation)
+6. Confidence (score out of 10, with explanation)
+7. Problem-solving approach (score out of 10, with explanation)
+
+Provide your analysis in the following JSON format:
+{{
+  "technical_score": <score>,
+  "technical_explanation": "<explanation> (must be at least 50 words)",
+  "depth_score": <score>,
+  "depth_explanation": "<explanation>",
+  "relevance_score": <score>,
+  "relevance_explanation": "<explanation>",
+  "communication_score": <score>,
+  "communication_explanation": "<explanation>",
+  "clarity_score": <score>,
+  "clarity_explanation": "<explanation>",
+  "confidence_score": <score>,
+  "confidence_explanation": "<explanation>",
+  "problem_solving_score": <score>,
+  "problem_solving_explanation": "<explanation>"
+}}
+
+The technical explanation must be at least 50 words.
+
+Answers:
+{transcription}
+"""
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1500,
-            temperature=0.2,
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=4000
+            )
         )
-        text = response['choices'][0]['message']['content']
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        else:
-            return {"technical_score": 0, "technical_explanation": "Could not parse OpenAI output."}
+        match_obj = re.search(r'\{.*\}', response.text, re.DOTALL)
+        if match_obj:
+            try:
+                result = json.loads(match_obj.group(0))
+                return result
+            except Exception:
+                pass
+        return {
+            "technical_score": 0,
+            "technical_explanation": "Could not parse Gemini output.",
+            "depth_score": 0,
+            "depth_explanation": "",
+            "relevance_score": 0,
+            "relevance_explanation": "",
+            "communication_score": 0,
+            "communication_explanation": "",
+            "clarity_score": 0,
+            "clarity_explanation": "",
+            "confidence_score": 0,
+            "confidence_explanation": "",
+            "problem_solving_score": 0,
+            "problem_solving_explanation": "",
+            "question_grades": []
+        }
     except Exception as e:
         return {
             "technical_score": 0,
-            "technical_explanation": f"Service unavailable: {e}",
-            # ... other fields as in your Gemini fallback ...
+            "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
+            "depth_score": 0,
+            "depth_explanation": "",
+            "relevance_score": 0,
+            "relevance_explanation": "",
+            "communication_score": 0,
+            "communication_explanation": "",
+            "clarity_score": 0,
+            "clarity_explanation": "",
+            "confidence_score": 0,
+            "confidence_explanation": "",
+            "problem_solving_score": 0,
+            "problem_solving_explanation": "",
+            "question_grades": []
         } 

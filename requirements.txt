@@ -17,4 +17,3 @@ sarvamai
 Flask-SQLAlchemy
 Flask-Migrate
 mysqlclient
-openai
