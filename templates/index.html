@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='tringapps_inc_logo.jpeg') }}">
+    <style>
+      /* Style for disabled tab buttons */
+      button.tab-btn:disabled {
+        color: #9ca3af !important; /* Tailwind gray-400 */
+        border-color: transparent !important;
+        background: none !important;
+        opacity: 0.5;
+        cursor: not-allowed !important;
+        pointer-events: auto;
+      }
+    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Header: Logo (far left), Title (center), Logout (far right) -->
@@ -32,7 +43,7 @@
       </div>
     </div>
     <!-- Tabs Bar: left-aligned, below header, visually distinct -->
-    <div class="w-full bg-transparent border-b mb-8">
+    <div class="w-full bg-transparent border-b mb-0">
       <div class="flex border-b-0 pl-4">
         {% if session.role == 'admin' %}
         <button id="tab-job-upload" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
@@ -57,38 +68,112 @@
         {% endif %}
       </div>
     </div>
-    <!-- Main Content -->
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div class="w-full flex justify-center">
-            <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300 max-w-6xl mx-auto">
-                <form id="talentForm" enctype="multipart/form-data" novalidate>
-                    <!-- Resume Match Tab -->
-                    <div id="resume-tab-content">
-                        {% include 'tabs/resume_match_tab.html' %}
+    <!-- Horizontal separator below tabs -->
+    <div class="w-full border-b border-gray-200"></div>
+    <!-- Main Content: full width, no centering, no top margin -->
+    <div class="w-full p-0">
+        <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300 w-full">
+            <form id="talentForm" enctype="multipart/form-data" novalidate>
+                <!-- Resume Match Tab -->
+                <div id="resume-tab-content">
+                    <div class="flex flex-col md:flex-row items-start w-full">
+                        <div class="w-full md:w-1/2 pr-0 md:pr-8">
+                            {% include 'tabs/resume_match_tab.html' %}
+                        </div>
+                        <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
+                        <div class="w-full md:w-1/2 pl-0 md:pl-8">
+                            <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                            <!-- Loader under Analysis Results -->
+                            <div id="loader-resume" class="text-center p-8 hidden">
+                                <div role="status" class="flex flex-col items-center justify-center">
+                                    <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                        <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                    </svg>
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                            </div>
+                            <!-- Save and Shortlist buttons -->
+                            <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
+                                <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                                </button>
+                                <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                                </button>
+                            </div>
+                            <div id="results-resume" class="p-0">
+                                <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
+                                <div class="space-y-6">
+                                    <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
+                                        <div id="resume_result_resume"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Technical Proficiency Tab -->
-                    <div id="audio-tab-content" class="hidden">
-                        {% include 'tabs/technical_proficiency_tab.html' %}
+                </div>
+                <!-- Technical Proficiency Tab -->
+                <div id="audio-tab-content" class="hidden">
+                    <div class="flex flex-col md:flex-row items-start w-full">
+                        <div class="w-full md:w-1/2 pr-0 md:pr-8">
+                            {% include 'tabs/technical_proficiency_tab.html' %}
+                        </div>
+                        <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
+                        <div class="w-full md:w-1/2 pl-0 md:pl-8">
+                            <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                            <!-- Loader under Analysis Results -->
+                            <div id="loader-audio" class="text-center p-8 hidden">
+                                <div role="status" class="flex flex-col items-center justify-center">
+                                    <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                        <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                    </svg>
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                            </div>
+                            <!-- Save and Shortlist buttons -->
+                            <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
+                                <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                                </button>
+                                <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                                </button>
+                            </div>
+                            <div id="results-audio" class="p-0">
+                                <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+                                <div class="space-y-6">
+                                    <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
+                                        <div id="audio_result_audio"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Interview Question Generator Tab -->
-                    <div id="question-gen-tab-content" class="hidden">
-                        {% include 'tabs/interview_question_generator_tab.html' %}
-                    </div>
-                    <!-- Saved Analyses Tab -->
-                    <div id="saved-tab-content" class="hidden">
-                        {% include 'tabs/saved_analyses_tab.html' %}
-                    </div>
-                    <!-- Shortlisted Resumes Tab -->
-                    <div id="shortlisted-tab-content" class="hidden">
-                        {% include 'tabs/shortlisted_resumes_tab.html' %}
-                    </div>
-                    <div id="analyze-btn-container" class="mt-2 text-center">
-                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
-                            <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <!-- Interview Question Generator Tab -->
+                <div id="question-gen-tab-content" class="hidden w-full text-left">
+                    {% include 'tabs/interview_question_generator_tab.html' %}
+                </div>
+                <!-- Saved Analyses Tab -->
+                <div id="saved-tab-content" class="hidden w-full text-left">
+                    {% include 'tabs/saved_analyses_tab.html' %}
+                </div>
+                <!-- Shortlisted Resumes Tab -->
+                <div id="shortlisted-tab-content" class="hidden w-full text-left">
+                    {% include 'tabs/shortlisted_resumes_tab.html' %}
+                </div>
+                <div id="analyze-btn-container" class="mt-2 text-left">
+                    <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+                        <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
+                    </button>
+                </div>
+            </form>
         </div>
 
         <!-- Results Modal -->
@@ -151,6 +236,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Tab navigation button IDs (define once, globally)
+        const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
+
         // Tab switching logic
         const tabResume = document.getElementById('tab-resume');
         const tabAudio = document.getElementById('tab-audio');
@@ -364,34 +452,58 @@
             } else if (activeTab === 'audio') {
                 if (audioFile) formData.append('audio', audioFile);
             }
-            const resultsOverlay = document.getElementById('results-overlay');
-            const loader = document.getElementById('loader');
-            const resultsDiv = document.getElementById('results');
 
-            // Reset save button to initial state for new analysis
-            const saveBtn = document.getElementById('save-analysis-btn');
+            // Use unique IDs for each tab
+            let loaderId, resultsId, actionBtnsId, saveBtnId, shortlistBtnId, metaInfoId, resultCardId, resultDivId;
+            if (activeTab === 'resume') {
+                loaderId = 'loader-resume';
+                resultsId = 'results-resume';
+                actionBtnsId = 'action-btns-resume';
+                saveBtnId = 'save-analysis-btn-resume';
+                shortlistBtnId = 'shortlist-btn-resume';
+                metaInfoId = 'meta_info_resume';
+                resultCardId = 'resume_result_card_resume';
+                resultDivId = 'resume_result_resume';
+            } else if (activeTab === 'audio') {
+                loaderId = 'loader-audio';
+                resultsId = 'results-audio';
+                actionBtnsId = 'action-btns-audio';
+                saveBtnId = 'save-analysis-btn-audio';
+                shortlistBtnId = 'shortlist-btn-audio';
+                metaInfoId = 'meta_info_audio';
+                resultCardId = 'audio_result_card_audio';
+                resultDivId = 'audio_result_audio';
+            }
+
+            // Disable all tab buttons while loading, except the active tab
+            tabIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn && id !== `tab-${activeTab}`) btn.disabled = true;
+            });
+
+            // Show loader, hide results and buttons in right column
+            document.getElementById(loaderId).classList.remove('hidden');
+            document.getElementById(resultsId).classList.add('hidden');
+            document.getElementById(actionBtnsId).classList.add('hidden');
+            // Hide placeholder when analyzing
+            if (activeTab === 'resume') {
+                document.getElementById('placeholder-resume').classList.add('hidden');
+            } else if (activeTab === 'audio') {
+                document.getElementById('placeholder-audio').classList.add('hidden');
+            }
+
+            // Reset Save/Shortlist button state
+            const saveBtn = document.getElementById(saveBtnId);
+            const shortlistBtn = document.getElementById(shortlistBtnId);
             saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
             saveBtn.classList.remove('bg-green-700', 'cursor-default');
             saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
             saveBtn.disabled = false;
+            shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+            shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
+            shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+            shortlistBtn.disabled = false;
             lucide.createIcons();
-
-            // Only show overlay for Resume Match or Technical Proficiency
-            if (activeTab === 'resume' || activeTab === 'audio') {
-                // Show overlay with loader
-                resultsOverlay.style.visibility = 'visible';
-                resultsOverlay.style.display = '';
-                resultsOverlay.classList.remove('hidden');
-                loader.classList.remove('hidden');
-                resultsDiv.classList.add('hidden');
-                document.getElementById('save-analysis-btn').classList.add('hidden');
-                document.getElementById('shortlist-btn').classList.add('hidden');
-            } else {
-                // Always hide overlay for other tabs
-                resultsOverlay.classList.add('hidden');
-                resultsOverlay.style.display = 'none';
-                resultsOverlay.style.visibility = 'hidden';
-            }
 
             // CHANGED: Dynamically select endpoint based on active tab
             const endpoint = (activeTab === 'audio') ? '/process_audio' : '/process';
@@ -403,23 +515,26 @@
             const result = await response.json();
             latestAnalysisResult = result; // Store the latest result
 
-            // Hide loader and show results
-            loader.classList.add('hidden');
-            resultsDiv.classList.remove('hidden');
-            document.getElementById('save-analysis-btn').classList.remove('hidden');
-            document.getElementById('shortlist-btn').classList.remove('hidden');
+            // Hide loader, show results and buttons in right column
+            document.getElementById(loaderId).classList.add('hidden');
+            document.getElementById(resultsId).classList.remove('hidden');
+            document.getElementById(actionBtnsId).classList.remove('hidden');
 
-            const resumeResultDiv = document.getElementById('resume_result');
-            const audioResultDiv = document.getElementById('audio_result');
-            const resumeResultCard = document.getElementById('resume_result_card');
-            const audioResultCard = document.getElementById('audio_result_card');
-            const metaInfoDiv = document.getElementById('meta_info');
-            
-            resumeResultDiv.innerHTML = '';
-            audioResultDiv.innerHTML = '';
-            resumeResultCard.classList.add('hidden');
-            audioResultCard.classList.add('hidden');
-            
+            // Render results in the correct tab's containers
+            const metaInfoDiv = document.getElementById(metaInfoId);
+            const resultCardDiv = document.getElementById(resultCardId);
+            const resultDiv = document.getElementById(resultDivId);
+            // Clear previous results
+            if (metaInfoDiv) metaInfoDiv.innerHTML = '';
+            if (resultDiv) resultDiv.innerHTML = '';
+            if (resultCardDiv) resultCardDiv.classList.add('hidden');
+            // If no results, show placeholder again
+            if (activeTab === 'resume' && (!result || (!result.resumes && !result.resume_error))) {
+                document.getElementById('placeholder-resume').classList.remove('hidden');
+            } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
+                document.getElementById('placeholder-audio').classList.remove('hidden');
+            }
+
             // Show selected technology and audio file name only for audio tab
             if (activeTab === 'audio') {
                 const selectedTech = document.getElementById('technology').value;
@@ -433,355 +548,338 @@
             } else {
                 metaInfoDiv.innerHTML = '';
             }
-            
-            if (Array.isArray(result.resumes) && result.resumes.length > 0) {
-                resumeResultCard.classList.remove('hidden');
 
-                // Sort resumes by match percentage in descending order
-                result.resumes.sort((a, b) => {
-                    const scoreA = a.match_percentage || -1;
-                    const scoreB = b.match_percentage || -1;
-                    return scoreB - scoreA;
-                });
-                
-                let allResumesHTML = result.resumes.map((r, idx) => {
-                    if (r.error) {
-                        return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
-                    } else {
-                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                        return `<div class='mb-4 p-4 border border-blue-100 rounded'>
-                            <p><strong>${r.filename}</strong></p>
-                            <div class="flex flex-row gap-6 my-4 items-center justify-center">
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Match %</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutExp${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutCert${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutRole${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
-                                </div>
-                            </div>
-                            <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
-                            <p><strong>Explanation:</strong> ${r.explanation}</p>
-                        </div>`;
-                    }
-                }).join('');
-                resumeResultDiv.innerHTML = allResumesHTML;
-                // Robust donut rendering: wait for all canvases to exist
-                function renderAllDonutsWhenReady(resumes) {
-                    let tries = 0;
-                    function tryRender() {
-                        let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
-                        if (allReady || tries > 20) {
-                            resumes.forEach((r, idx) => {
-                                if (!r.error) {
-                                    const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                                    renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
-                                    renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
-                                    renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
-                                    renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
-                                    renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
-                                    renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
-                                }
-                            });
+            if (activeTab === 'resume') {
+                if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+                    resultCardDiv.classList.remove('hidden');
+                    // Sort resumes by match percentage in descending order
+                    result.resumes.sort((a, b) => {
+                        const scoreA = a.match_percentage || -1;
+                        const scoreB = b.match_percentage || -1;
+                        return scoreB - scoreA;
+                    });
+                    let allResumesHTML = result.resumes.map((r, idx) => {
+                        if (r.error) {
+                            return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
                         } else {
-                            tries++;
-                            setTimeout(tryRender, 100);
+                            const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                            return `<div class='mb-4 p-4 border border-blue-100 rounded'>
+                                <p><strong>${r.filename}</strong></p>
+                                <div class="flex flex-row gap-6 my-4 items-center justify-center">
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Match %</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutExp${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutCert${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutRole${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
+                                    </div>
+                                </div>
+                                <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
+                                <p><strong>Explanation:</strong> ${r.explanation}</p>
+                            </div>`;
                         }
+                    }).join('');
+                    resultDiv.innerHTML = allResumesHTML;
+                    // Robust donut rendering: wait for all canvases to exist
+                    function renderAllDonutsWhenReady(resumes) {
+                        let tries = 0;
+                        function tryRender() {
+                            let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
+                            if (allReady || tries > 20) {
+                                resumes.forEach((r, idx) => {
+                                    if (!r.error) {
+                                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                                        renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
+                                        renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
+                                        renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
+                                        renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
+                                        renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
+                                        renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
+                                    }
+                                });
+                            } else {
+                                tries++;
+                                setTimeout(tryRender, 100);
+                            }
+                        }
+                        tryRender();
                     }
-                    tryRender();
+                    renderAllDonutsWhenReady(result.resumes);
+                } else if (result.resume_error) {
+                    resultCardDiv.classList.remove('hidden');
+                    resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
                 }
-                renderAllDonutsWhenReady(result.resumes);
-            } else if (result.resume_error) {
-                resumeResultCard.classList.remove('hidden');
-                    resumeResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
-            }
-            
-            if (result.transcription || result.audio_error) {
-                audioResultCard.classList.remove('hidden');
-                if (result.transcription) {
-                    audioResultDiv.innerHTML = `
-                        <div class="space-y-4">
-                            <!-- Top row: Technical Score and Explanation -->
-                        <div class="flex flex-col sm:flex-row gap-6">
-                            <div class="flex-1">
-                                <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
-                                <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                    <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutRelevance" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutConfidence" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutCommunication" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Communication</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutClarity" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutProblemSolving" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
+            } else if (activeTab === 'audio') {
+                if (result.transcription || result.audio_error) {
+                    resultCardDiv.classList.remove('hidden');
+                    if (result.transcription) {
+                        resultDiv.innerHTML = `
+                            <div class="space-y-4">
+                                <!-- Top row: Technical Score and Explanation -->
+                            <div class="flex flex-col sm:flex-row gap-6">
+                                <div class="flex-1">
+                                    <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
+                                    <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutRelevance" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutConfidence" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutCommunication" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Communication</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutClarity" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutProblemSolving" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Per-question grading -->
-                            ${Array.isArray(result.question_grades) && result.question_grades.length > 0 ? `
-                            <details class="mt-4">
-                                <summary class="cursor-pointer text-lg font-semibold mb-2">Show Per-Question Grading</summary>
-                                <div class="overflow-x-auto mt-2">
-                                    <table class="min-w-full text-sm border border-gray-200 rounded">
-                                        <thead>
-                                            <tr class="bg-gray-100">
-                                                <th class="px-3 py-2 border-b text-left">Question</th>
-                                                <th class="px-3 py-2 border-b text-left">Candidate Answer</th>
-                                                <th class="px-3 py-2 border-b text-left">Score</th>
-                                                <th class="px-3 py-2 border-b text-left">Explanation</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${result.question_grades.map(q => `
-                                            <tr>
-                                                <td class="px-3 py-2 border-b align-top">${q.question}</td>
-                                                <td class="px-3 py-2 border-b align-top">${q.answer}</td>
-                                                <td class="px-3 py-2 border-b align-top font-bold text-blue-600">${q.score}/10</td>
-                                                <td class="px-3 py-2 border-b align-top">${q.explanation}</td>
-                                            </tr>
-                                            `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </details>
-                            ` : ''}
-                            <!-- Conversation History -->
-                                <details class="mt-2">
-                                    <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
-                                    <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                                <!-- Per-question grading -->
+                                ${Array.isArray(result.question_grades) && result.question_grades.length > 0 ? `
+                                <details class="mt-4">
+                                    <summary class="cursor-pointer text-lg font-semibold mb-2">Show Per-Question Grading</summary>
+                                    <div class="overflow-x-auto mt-2">
+                                        <table class="min-w-full text-sm border border-gray-200 rounded">
+                                            <thead>
+                                                <tr class="bg-gray-100">
+                                                    <th class="px-3 py-2 border-b text-left">Question</th>
+                                                    <th class="px-3 py-2 border-b text-left">Candidate Answer</th>
+                                                    <th class="px-3 py-2 border-b text-left">Score</th>
+                                                    <th class="px-3 py-2 border-b text-left">Explanation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${result.question_grades.map(q => `
+                                                <tr>
+                                                    <td class="px-3 py-2 border-b align-top">${q.question}</td>
+                                                    <td class="px-3 py-2 border-b align-top">${q.answer}</td>
+                                                    <td class="px-3 py-2 border-b align-top font-bold text-blue-600">${q.score}/10</td>
+                                                    <td class="px-3 py-2 border-b align-top">${q.explanation}</td>
+                                                </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </details>
-                        </div>
-                    `;
-                    // Render the donut charts
-                    setTimeout(() => {
-                        function renderDonut(canvasId, value, color) {
-                            window.donutCharts = window.donutCharts || {};
-                            const canvas = document.getElementById(canvasId);
-                            if (!canvas) return;
-                            // Destroy previous chart if exists
-                            if (window.donutCharts[canvasId]) {
-                                window.donutCharts[canvasId].destroy();
-                            }
-                            window.donutCharts[canvasId] = new Chart(canvas.getContext('2d'), {
-                                type: 'doughnut',
-                                data: {
-                                    datasets: [{
-                                        data: [value, 100 - value],
-                                        backgroundColor: [color, '#e5e7eb'],
-                                        borderWidth: 0
+                                ` : ''}
+                                <!-- Conversation History -->
+                                    <details class="mt-2">
+                                        <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
+                                        <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                                    </details>
+                            </div>
+                        `;
+                        // Render the donut charts
+                        setTimeout(() => {
+                            function renderDonut(canvasId, value, color) {
+                                window.donutCharts = window.donutCharts || {};
+                                const canvas = document.getElementById(canvasId);
+                                if (!canvas) return;
+                                // Destroy previous chart if exists
+                                if (window.donutCharts[canvasId]) {
+                                    window.donutCharts[canvasId].destroy();
+                                }
+                                window.donutCharts[canvasId] = new Chart(canvas.getContext('2d'), {
+                                    type: 'doughnut',
+                                    data: {
+                                        datasets: [{
+                                            data: [value, 100 - value],
+                                            backgroundColor: [color, '#e5e7eb'],
+                                            borderWidth: 0
+                                        }]
+                                    },
+                                    options: {
+                                        cutout: '60%',
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: { enabled: false }
+                                        }
+                                    },
+                                    plugins: [{
+                                        id: 'centerText',
+                                        afterDraw: chart => {
+                                            const {ctx, chartArea: {width, height}} = chart;
+                                            ctx.save();
+                                            ctx.font = 'bold 1rem Inter, sans-serif';
+                                            ctx.textAlign = 'center';
+                                            ctx.textBaseline = 'middle';
+                                            ctx.fillStyle = color;
+                                            ctx.fillText(`${value}%`, width / 2, height / 2);
+                                            ctx.restore();
+                                        }
                                     }]
-                                },
-                                options: {
-                                    cutout: '60%',
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: { enabled: false }
-                                    }
-                                },
-                                plugins: [{
-                                    id: 'centerText',
-                                    afterDraw: chart => {
-                                        const {ctx, chartArea: {width, height}} = chart;
-                                        ctx.save();
-                                        ctx.font = 'bold 1rem Inter, sans-serif';
-                                        ctx.textAlign = 'center';
-                                        ctx.textBaseline = 'middle';
-                                        ctx.fillStyle = color;
-                                        ctx.fillText(`${value}%`, width / 2, height / 2);
-                                        ctx.restore();
-                                    }
-                                }]
-                            });
-                        }
-                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
-                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
-                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
-                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
-                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
-                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
-                    }, 100);
-                } else if (result.audio_error) {
-                    audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
-                }
-            }
-
-            const backButton = document.getElementById('back-button');
-            if (backButton) {
-                backButton.onclick = () => {
-                    document.getElementById('results-overlay').classList.add('hidden');
-                };
-            }
-
-            // Job Description Save/Load Logic
-            if (activeTab === 'resume') {
-                if (jobDesc) {
-                    let saved = JSON.parse(localStorage.getItem('jobDescriptions') || '[]');
-                    if (!saved.includes(jobDesc)) {
-                        saved.push(jobDesc);
-                        localStorage.setItem('jobDescriptions', JSON.stringify(saved));
-                        updateSavedDescriptionsDropdown();
-                    }
-                }
-            }
-
-            // Reset shortlist button to initial state for new analysis
-            const shortlistBtn = document.getElementById('shortlist-btn');
-            if (shortlistBtn) {
-                shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-                shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-                shortlistBtn.disabled = false;
-                lucide.createIcons();
-                // Remove any previous click handlers before adding a new one
-                shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
-                const newShortlistBtn = document.getElementById('shortlist-btn');
-                newShortlistBtn.addEventListener('click', async function() {
-                    let formData = new FormData();
-                    let timestamp = new Date().toLocaleString();
-                    let found = false;
-                    if (activeTab === 'audio') {
-                        const techResumeInput = document.getElementById('tech_resume');
-                        if (!techResumeInput.files || techResumeInput.files.length === 0) {
-                            document.getElementById('tech_resume_error').classList.remove('hidden');
-                            newShortlistBtn.disabled = false;
-                            return;
-                        }
-                        formData.append('shortlist_resume', techResumeInput.files[0]);
-                        found = true;
-                    } else if (activeTab === 'resume') {
-                        const resumeInputs = document.querySelectorAll('.resume-file');
-                        resumeInputs.forEach(input => {
-                            if (input.files && input.files.length > 0 && !found) {
-                                formData.append('shortlist_resume', input.files[0]);
-                                found = true;
+                                });
                             }
-                        });
-                        if (!found) {
-                            document.getElementById('resume_error').classList.remove('hidden');
-                            newShortlistBtn.disabled = false;
-                            return;
-                        }
+                            renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
+                            renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
+                            renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
+                            renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
+                            renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
+                            renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
+                        }, 100);
+                    } else if (result.audio_error) {
+                        resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
                     }
-                    formData.append('timestamp', timestamp);
-                    try {
-                        newShortlistBtn.disabled = true;
-                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
-                        const response = await fetch('/shortlist_resume', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const result = await response.json();
-                        if (result.status === 'success') {
-                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
-                            newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                            newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
-                            newShortlistBtn.disabled = true;
-                            lucide.createIcons();
-                            showToast('Resume shortlisted!', 'shortlist');
-                        } else {
-                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                            newShortlistBtn.disabled = false;
+                }
+            }
+
+            // Save button event listener (remove previous, add new)
+            saveBtn.replaceWith(saveBtn.cloneNode(true));
+            const newSaveBtn = document.getElementById(saveBtnId);
+            newSaveBtn.addEventListener('click', async function() {
+                // Gather the latest analysis result from the correct resultDiv
+                let resumeHTML = '';
+                if (activeTab === 'resume') {
+                    const blocks = resultDiv.querySelectorAll('div.mb-4');
+                    if (blocks.length > 0) {
+                        resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
+                    } else {
+                        resumeHTML = resultDiv.innerHTML;
+                    }
+                }
+                let audioHTML = '';
+                if (activeTab === 'audio') {
+                    audioHTML = resultDiv.innerHTML;
+                }
+                const metaInfo = metaInfoDiv.innerHTML;
+                const timestamp = new Date().toLocaleString();
+                let technology = '';
+                let audioFileName = '';
+                if (activeTab === 'audio') {
+                    const techInput = document.getElementById('technology');
+                    if (techInput) technology = techInput.value;
+                    const audioInput = document.getElementById('audio');
+                    if (audioInput && audioInput.files && audioInput.files.length > 0) {
+                        audioFileName = audioInput.files[0].name;
+                    }
+                }
+                const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName, rawData: latestAnalysisResult };
+                try {
+                    newSaveBtn.disabled = true;
+                    newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
+                    const response = await fetch('/save_analysis', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
+                        newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        newSaveBtn.classList.add('bg-green-700', 'cursor-default');
+                        newSaveBtn.disabled = true;
+                        lucide.createIcons();
+                        showToast('Analysis saved successfully!', 'success');
+                    } else {
+                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                        newSaveBtn.disabled = false;
+                        showToast('Failed to save analysis.', 'error');
+                    }
+                } catch (err) {
+                    newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                    newSaveBtn.disabled = false;
+                    showToast('Error saving analysis.', 'error');
+                }
+            });
+
+            // Shortlist button event listener (remove previous, add new)
+            shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
+            const newShortlistBtn = document.getElementById(shortlistBtnId);
+            newShortlistBtn.addEventListener('click', async function() {
+                let formData = new FormData();
+                let timestamp = new Date().toLocaleString();
+                let found = false;
+                if (activeTab === 'audio') {
+                    const techResumeInput = document.getElementById('tech_resume');
+                    if (!techResumeInput.files || techResumeInput.files.length === 0) {
+                        document.getElementById('tech_resume_error').classList.remove('hidden');
+                        newShortlistBtn.disabled = false;
+                        return;
+                    }
+                    formData.append('shortlist_resume', techResumeInput.files[0]);
+                    found = true;
+                } else if (activeTab === 'resume') {
+                    const resumeInputs = document.querySelectorAll('.resume-file');
+                    resumeInputs.forEach(input => {
+                        if (input.files && input.files.length > 0 && !found) {
+                            formData.append('shortlist_resume', input.files[0]);
+                            found = true;
                         }
-                    } catch (err) {
+                    });
+                    if (!found) {
+                        document.getElementById('resume_error').classList.remove('hidden');
+                        newShortlistBtn.disabled = false;
+                        return;
+                    }
+                }
+                formData.append('timestamp', timestamp);
+                try {
+                    newShortlistBtn.disabled = true;
+                    newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
+                    const response = await fetch('/shortlist_resume', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
+                        newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                        newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+                        newShortlistBtn.disabled = true;
+                        lucide.createIcons();
+                        showToast('Resume shortlisted!', 'shortlist');
+                    } else {
                         newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
                         newShortlistBtn.disabled = false;
                     }
-                });
-            }
+                } catch (err) {
+                    newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                    newShortlistBtn.disabled = false;
+                }
+            });
 
-            // Save button event listener
-            if (saveBtn) {
-                // Remove any previous click handlers before adding a new one
-                saveBtn.replaceWith(saveBtn.cloneNode(true));
-                const newSaveBtn = document.getElementById('save-analysis-btn');
-                newSaveBtn.addEventListener('click', async function() {
-                    // Gather the latest analysis result from the modal
-                    const resumeResultDiv = document.getElementById('resume_result');
-                    let resumeHTML = '';
-                    if (resumeResultDiv) {
-                        const blocks = resumeResultDiv.querySelectorAll('div.mb-4');
-                        if (blocks.length > 0) {
-                            resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
-                        } else {
-                            resumeHTML = resumeResultDiv.innerHTML;
-                        }
-                    }
-                    const audioHTML = document.getElementById('audio_result').innerHTML;
-                    const metaInfo = document.getElementById('meta_info').innerHTML;
-                    const timestamp = new Date().toLocaleString();
-                    let technology = '';
-                    let audioFileName = '';
-                    if (activeTab === 'audio') {
-                        const techInput = document.getElementById('technology');
-                        if (techInput) technology = techInput.value;
-                        const audioInput = document.getElementById('audio');
-                        if (audioInput && audioInput.files && audioInput.files.length > 0) {
-                            audioFileName = audioInput.files[0].name;
-                        }
-                    }
-                    const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName, rawData: latestAnalysisResult };
-                    try {
-                        newSaveBtn.disabled = true;
-                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
-                        const response = await fetch('/save_analysis', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(data)
-                        });
-                        const result = await response.json();
-                        if (result.status === 'success') {
-                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
-                            newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                            newSaveBtn.classList.add('bg-green-700', 'cursor-default');
-                            newSaveBtn.disabled = true;
-                            lucide.createIcons();
-                            showToast('Analysis saved successfully!', 'success');
-                        } else {
-                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                            newSaveBtn.disabled = false;
-                            showToast('Failed to save analysis.', 'error');
-                        }
-                    } catch (err) {
-                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                        newSaveBtn.disabled = false;
-                        showToast('Error saving analysis.', 'error');
-                    }
-                });
-            }
+            // After results are rendered (after fetch and DOM update):
+            // Hide loader, show results and buttons in right column
+            document.getElementById(loaderId).classList.add('hidden');
+            document.getElementById(resultsId).classList.remove('hidden');
+            document.getElementById(actionBtnsId).classList.remove('hidden');
+
+            // Re-enable all tab buttons after loading
+            tabIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = false;
+            });
         });
 
         // Hide error when user starts typing or selects a file
