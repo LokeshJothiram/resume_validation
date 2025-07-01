@@ -33,30 +33,28 @@
     </div>
     <!-- Tabs Bar: left-aligned, below header, visually distinct -->
     <div class="w-full bg-transparent border-b mb-8">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex border-b-0">
-          {% if session.role == 'admin' %}
-          <button id="tab-job-upload" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-            <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
-          </button>
-          {% else %}
-          <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-            <i data-lucide="file-search" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Resume Match
-          </button>
-          <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-            <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
-          </button>
-          <button id="tab-question-gen" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-            <i data-lucide="help-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Interview Question Generator
-          </button>
-          <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-            <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
-          </button>
-          <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-            <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Shortlisted Resumes
-          </button>
-          {% endif %}
-        </div>
+      <div class="flex border-b-0 pl-4">
+        {% if session.role == 'admin' %}
+        <button id="tab-job-upload" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+          <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
+        </button>
+        {% else %}
+        <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+          <i data-lucide="file-search" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Resume Match
+        </button>
+        <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+          <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
+        </button>
+        <button id="tab-question-gen" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+          <i data-lucide="help-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Interview Question Generator
+        </button>
+        <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+          <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
+        </button>
+        <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+          <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Shortlisted Resumes
+        </button>
+        {% endif %}
       </div>
     </div>
     <!-- Main Content -->
