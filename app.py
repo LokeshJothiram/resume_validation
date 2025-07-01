@@ -23,6 +23,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from database import db, User, SavedAnalysis, ShortlistedResume
 from werkzeug.utils import secure_filename
+import openai
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -58,10 +59,9 @@ os.makedirs(SAVED_FILES_FOLDER, exist_ok=True)
 SHORTLIST_FOLDER = 'shortlist'
 os.makedirs(SHORTLIST_FOLDER, exist_ok=True)
 
-# Load Gemini API key
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+# Load OpenAI API key
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+openai.api_key = OPENAI_API_KEY
 
 # Register blueprints
 register_blueprints(app)
@@ -144,41 +144,27 @@ def transcribe_audio_with_diarization(audio_path):
     answers = [utt["text"] for utt in utterances if utt["speaker"] == candidate_speaker]
     return answers
 
-# Function to evaluate resume match using Gemini 1.5 Flash
-# Ollama code is commented out below
-def calculate_resume_match_with_gemini(job_description, resume_text):
+# Function to evaluate resume match using OpenAI
+def calculate_resume_match_with_openai(job_description, resume_text):
     prompt = f"""
-    You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.
-
-    Job Description: {job_description}
-
-    Resume: {resume_text}
-
-    Output ONLY the following JSON object:
-    {{
-      \"match_percentage\": <percentage>,
-      \"explanation\": \"<explanation>\"
-    }}
-    """
+    You are an expert technical recruiter. Analyze the following job description and resume, and determine how well the resume matches the job description. Provide a match percentage and a brief explanation for your reasoning.\n\nJob Description: {job_description}\n\nResume: {resume_text}\n\nOutput ONLY the following JSON object:\n{{\n  \"match_percentage\": <percentage>,\n  \"explanation\": \"<explanation>\"\n}}\n"""
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=2000
-            )
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000
         )
-        match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        text = response.choices[0].message.content
+        match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             return json.loads(match.group(0))
         else:
-            return {"match_percentage": 0, "explanation": "Could not parse Gemini output."}
+            return {"match_percentage": 0, "explanation": "Could not parse OpenAI output."}
     except Exception as e:
-        return {"match_percentage": 0, "explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-001)"}
+        return {"match_percentage": 0, "explanation": f"Service temporarily unavailable. Please try again later or contact support. (Error code: OPENAI-001) {e}"}
 
-# Function to evaluate technical proficiency using Gemini 1.5 Flash
-# Ollama code is commented out below
-def evaluate_technical_proficiency_with_gemini(transcription, technology, tech_questions=None):
+# Function to evaluate technical proficiency using OpenAI
+def evaluate_technical_proficiency_with_openai(transcription, technology, tech_questions=None):
     if tech_questions:
         questions = [q.strip() for q in tech_questions.split('\n') if q.strip()]
         questions_json = json.dumps(questions)
@@ -251,14 +237,13 @@ Answers:
 {transcription}
 """
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=4000
-            )
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=4000
         )
-        match_obj = re.search(r'\{.*\}', response.text, re.DOTALL)
+        text = response.choices[0].message.content
+        match_obj = re.search(r'\{.*\}', text, re.DOTALL)
         if match_obj:
             try:
                 result = json.loads(match_obj.group(0))
@@ -267,7 +252,7 @@ Answers:
                 pass
         return {
             "technical_score": 0,
-            "technical_explanation": "Could not parse Gemini output.",
+            "technical_explanation": "Could not parse OpenAI output.",
             "depth_score": 0,
             "depth_explanation": "",
             "relevance_score": 0,
@@ -285,7 +270,7 @@ Answers:
     except Exception as e:
         return {
             "technical_score": 0,
-            "technical_explanation": "Service temporarily unavailable. Please try again later or contact support. (Error code: GEMINI-002)",
+            "technical_explanation": f"Service temporarily unavailable. Please try again later or contact support. (Error code: OPENAI-002) {e}",
             "depth_score": 0,
             "depth_explanation": "",
             "relevance_score": 0,
@@ -419,7 +404,7 @@ def transcribe_audio_with_sarvam(audio_path, model="saarika:v2.5", language_code
 #     except (KeyError, json.JSONDecodeError):
 #         return {"score": 0, "explanation": "Error parsing model output from Ollama."}
 
-def separate_hr_candidate_with_gemini(transcript):
+def separate_hr_candidate_with_openai(transcript):
     prompt = f"""
     The following is a transcript of a job interview between an HR interviewer and a candidate.
     Please separate the transcript into a conversation history, labeling each line as either 'HR:' or 'Candidate:'.
@@ -429,16 +414,15 @@ def separate_hr_candidate_with_gemini(transcript):
     {transcript}
     """
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=2000
-            )
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000
         )
-        return response.text
+        text = response.choices[0].message.content
+        return text
     except Exception as e:
-        return f"Error contacting Gemini API: {e}"
+        return f"Error contacting OpenAI API: {e}"
 
 def get_current_user():
     username = session.get('user')
@@ -507,7 +491,7 @@ def process():
                     os.remove(resume_path)
                     continue
                 if "Error" not in resume_text:
-                    match_result = calculate_resume_match_with_gemini(job_description, resume_text)
+                    match_result = calculate_resume_match_with_openai(job_description, resume_text)
                     resumes_result.append({
                         'filename': resume_file.filename,
                         'match_percentage': match_result.get('match_percentage'),
@@ -531,8 +515,8 @@ def process():
             response['audio_error'] = transcript
         elif isinstance(transcript, str) and transcript.strip():
             response['transcription'] = transcript
-            # Separate HR and candidate messages using Gemini
-            separated_dialog = separate_hr_candidate_with_gemini(transcript)
+            # Separate HR and candidate messages using OpenAI
+            separated_dialog = separate_hr_candidate_with_openai(transcript)
             response['separated_dialog'] = separated_dialog
             # Extract only candidate's messages
             candidate_lines = []
@@ -541,7 +525,7 @@ def process():
                     candidate_lines.append(line.replace('Candidate:', '').strip())
             candidate_text = '\n'.join(candidate_lines)
             # Run technical proficiency evaluation on only candidate's answers
-            tech_eval = evaluate_technical_proficiency_with_gemini(
+            tech_eval = evaluate_technical_proficiency_with_openai(
                 f"The following are only the candidate's answers from an interview transcript:\n{candidate_text}",
                 technology,
                 tech_questions=tech_questions

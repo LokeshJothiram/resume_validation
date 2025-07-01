@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 import os, uuid
-from utils import extract_text_from_pdf, extract_text_from_docx, calculate_resume_match_with_gemini, SAVED_FILES_FOLDER
+from utils import extract_text_from_pdf, extract_text_from_docx, calculate_resume_match_with_openai, SAVED_FILES_FOLDER
 
 resume_bp = Blueprint('resume', __name__)
 
@@ -30,7 +30,7 @@ def process():
                     os.remove(resume_path)
                     continue
                 if 'Error' not in resume_text:
-                    match_result = calculate_resume_match_with_gemini(job_description, resume_text)
+                    match_result = calculate_resume_match_with_openai(job_description, resume_text)
                     resumes_result.append({
                         'filename': resume_file.filename,
                         'match_percentage': match_result.get('match_percentage'),

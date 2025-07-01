@@ -1,6 +1,10 @@
 from flask import Blueprint, request, jsonify
 import re
-import google.generativeai as genai
+import openai
+import os
+from dotenv import load_dotenv
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 questions_bp = Blueprint('questions', __name__)
 
@@ -21,16 +25,13 @@ You are an expert interviewer. Generate a list of {num_questions} relevant, chal
         prompt += f"\nThe job description is as follows:\n{job_description}\n"
     prompt += "\nReturn ONLY a numbered list of questions, no explanations."
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                max_output_tokens=800
-            )
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000
         )
-        # Extract only the list of questions
         questions = []
-        for line in response.text.splitlines():
+        for line in response.choices[0].message.content.splitlines():
             line = line.strip()
             if re.match(r'^[0-9]+[).]', line):
                 q = re.sub(r'^[0-9]+[).]\s*', '', line)
@@ -39,7 +40,7 @@ You are an expert interviewer. Generate a list of {num_questions} relevant, chal
             elif line:
                 questions.append(line)
         if not questions:
-            questions = [response.text.strip()]
+            questions = [response.choices[0].message.content.strip()]
         return jsonify({'questions': questions})
     except Exception as e:
         return jsonify({'error': f'Failed to generate questions: {e}'}), 500 

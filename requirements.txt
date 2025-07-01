@@ -12,7 +12,7 @@ torchvision
 torchaudio
 python-dotenv
 docx
-google-generativeai
+openai
 sarvamai
 Flask-SQLAlchemy
 Flask-Migrate

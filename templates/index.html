@@ -513,27 +513,27 @@
                                 <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
                                     <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
                                         <div class="flex flex-col items-center">
-                                            <canvas id="donutRelevance" width="120" height="120"></canvas>
+                                            <canvas id="donutRelevance" width="80" height="80"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <canvas id="donutConfidence" width="120" height="120"></canvas>
+                                            <canvas id="donutConfidence" width="80" height="80"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <canvas id="donutCommunication" width="120" height="120"></canvas>
+                                            <canvas id="donutCommunication" width="80" height="80"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Communication</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <canvas id="donutClarity" width="120" height="120"></canvas>
+                                            <canvas id="donutClarity" width="80" height="80"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <canvas id="donutProblemSolving" width="120" height="120"></canvas>
+                                            <canvas id="donutProblemSolving" width="80" height="80"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
                                         </div>
                                         <div class="flex flex-col items-center">
-                                            <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
+                                            <canvas id="donutTechnicalKnowledge" width="80" height="80"></canvas>
                                             <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
                                         </div>
                                     </div>
@@ -615,12 +615,20 @@
                                 }]
                             });
                         }
-                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
-                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
-                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
-                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
-                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
-                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
+                        const techColors = [
+                          '#4e79a7', // Relevance of Tech - blue
+                          '#f28e2b', // Confidence - orange
+                          '#e15759', // Communication - red
+                          '#76b7b2', // Clarity - teal
+                          '#59a14f', // Problem-Solving - green
+                          '#edc949'  // Technical Knowledge - yellow
+                        ];
+                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, techColors[0]);
+                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, techColors[1]);
+                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, techColors[2]);
+                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, techColors[3]);
+                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, techColors[4]);
+                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, techColors[5]);
                     }, 100);
                 } else if (result.audio_error) {
                     audioResultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
@@ -1142,7 +1150,14 @@
                     (rawData.problem_solving_score || 0) * 10,
                     (rawData.depth_score || 0) * 10
                 ];
-                const techColors = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#38bdf8', '#0ea5e9'];
+                const techColors = [
+                  '#4e79a7', // Relevance of Tech - blue
+                  '#f28e2b', // Confidence - orange
+                  '#e15759', // Communication - red
+                  '#76b7b2', // Clarity - teal
+                  '#59a14f', // Problem-Solving - green
+                  '#edc949'  // Technical Knowledge - yellow
+                ];
                 
                 techCanvasIds.forEach((id, i) => {
                     const canvas = containerElement.querySelector(`#${id}_${fileId}`);

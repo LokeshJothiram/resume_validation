@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import os, uuid
-from utils import transcribe_audio_with_sarvam, separate_hr_candidate_with_gemini, evaluate_technical_proficiency_with_gemini
+from utils import transcribe_audio_with_sarvam, separate_hr_candidate_with_openai, evaluate_technical_proficiency_with_openai
 
 audio_bp = Blueprint('audio', __name__)
 
@@ -18,14 +18,14 @@ def process_audio():
             response['audio_error'] = transcript
         elif isinstance(transcript, str) and transcript.strip():
             response['transcription'] = transcript
-            separated_dialog = separate_hr_candidate_with_gemini(transcript)
+            separated_dialog = separate_hr_candidate_with_openai(transcript)
             response['separated_dialog'] = separated_dialog
             candidate_lines = []
             for line in separated_dialog.splitlines():
                 if line.strip().startswith('Candidate:'):
                     candidate_lines.append(line.replace('Candidate:', '').strip())
             candidate_text = '\n'.join(candidate_lines)
-            tech_eval = evaluate_technical_proficiency_with_gemini(
+            tech_eval = evaluate_technical_proficiency_with_openai(
                 f"The following are only the candidate's answers from an interview transcript:\n{candidate_text}",
                 technology,
                 tech_questions=tech_questions
