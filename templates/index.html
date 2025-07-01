@@ -36,49 +36,49 @@
         <div class="flex items-center pr-4">
           <form action="{{ url_for('logout') }}" method="post">
             <button type="submit" id="logout" class="flex items-center text-blue-600 hover:text-blue-800 font-semibold bg-transparent border-none cursor-pointer">
-              <i data-lucide="log-out" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Logout
-            </button>
-          </form>
+            <i data-lucide="log-out" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Logout
+        </button>
+    </form>
         </div>
       </div>
     </div>
     <!-- Tabs Bar: left-aligned, below header, visually distinct -->
     <div class="w-full bg-transparent border-b mb-0">
       <div class="flex border-b-0 pl-4">
-        {% if session.role == 'admin' %}
-        <button id="tab-job-upload" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-          <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
-        </button>
-        {% else %}
-        <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-          <i data-lucide="file-search" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Resume Match
-        </button>
-        <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-          <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
-        </button>
-        <button id="tab-question-gen" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-          <i data-lucide="help-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Interview Question Generator
-        </button>
-        <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-          <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
-        </button>
-        <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-          <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Shortlisted Resumes
-        </button>
-        {% endif %}
-      </div>
+                    {% if session.role == 'admin' %}
+                    <button id="tab-job-upload" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+                        <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
+                    </button>
+                    {% else %}
+                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+                        <i data-lucide="file-search" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Resume Match
+                    </button>
+                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+                        <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
+                    </button>
+                    <button id="tab-question-gen" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+                        <i data-lucide="help-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Interview Question Generator
+                    </button>
+                    <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+                        <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
+                    </button>
+                    <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
+                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Shortlisted Resumes
+                    </button>
+                    {% endif %}
+                </div>
     </div>
     <!-- Horizontal separator below tabs -->
     <div class="w-full border-b border-gray-200"></div>
     <!-- Main Content: full width, no centering, no top margin -->
     <div class="w-full p-0">
         <div id="form-card" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg transition-all duration-300 w-full">
-            <form id="talentForm" enctype="multipart/form-data" novalidate>
-                <!-- Resume Match Tab -->
-                <div id="resume-tab-content">
+                <form id="talentForm" enctype="multipart/form-data" novalidate>
+                    <!-- Resume Match Tab -->
+                    <div id="resume-tab-content">
                     <div class="flex flex-col md:flex-row items-start w-full">
                         <div class="w-full md:w-1/2 pr-0 md:pr-8">
-                            {% include 'tabs/resume_match_tab.html' %}
+                        {% include 'tabs/resume_match_tab.html' %}
                         </div>
                         <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
                         <div class="w-full md:w-1/2 pl-0 md:pl-8">
@@ -114,12 +114,12 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Technical Proficiency Tab -->
-                <div id="audio-tab-content" class="hidden">
+                    </div>
+                    <!-- Technical Proficiency Tab -->
+                    <div id="audio-tab-content" class="hidden">
                     <div class="flex flex-col md:flex-row items-start w-full">
                         <div class="w-full md:w-1/2 pr-0 md:pr-8">
-                            {% include 'tabs/technical_proficiency_tab.html' %}
+                        {% include 'tabs/technical_proficiency_tab.html' %}
                         </div>
                         <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
                         <div class="w-full md:w-1/2 pl-0 md:pl-8">
@@ -155,25 +155,25 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- Interview Question Generator Tab -->
+                    </div>
+                    <!-- Interview Question Generator Tab -->
                 <div id="question-gen-tab-content" class="hidden w-full text-left">
-                    {% include 'tabs/interview_question_generator_tab.html' %}
-                </div>
-                <!-- Saved Analyses Tab -->
+                        {% include 'tabs/interview_question_generator_tab.html' %}
+                    </div>
+                    <!-- Saved Analyses Tab -->
                 <div id="saved-tab-content" class="hidden w-full text-left">
-                    {% include 'tabs/saved_analyses_tab.html' %}
-                </div>
-                <!-- Shortlisted Resumes Tab -->
+                        {% include 'tabs/saved_analyses_tab.html' %}
+                    </div>
+                    <!-- Shortlisted Resumes Tab -->
                 <div id="shortlisted-tab-content" class="hidden w-full text-left">
-                    {% include 'tabs/shortlisted_resumes_tab.html' %}
-                </div>
+                        {% include 'tabs/shortlisted_resumes_tab.html' %}
+                    </div>
                 <div id="analyze-btn-container" class="mt-2 text-left">
-                    <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
-                        <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
-                    </button>
-                </div>
-            </form>
+                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+                            <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
+                        </button>
+                    </div>
+                </form>
         </div>
 
         <!-- Results Modal -->
@@ -534,7 +534,7 @@
             } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
                 document.getElementById('placeholder-audio').classList.remove('hidden');
             }
-
+            
             // Show selected technology and audio file name only for audio tab
             if (activeTab === 'audio') {
                 const selectedTech = document.getElementById('technology').value;
@@ -548,210 +548,210 @@
             } else {
                 metaInfoDiv.innerHTML = '';
             }
-
+            
             if (activeTab === 'resume') {
-                if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+            if (Array.isArray(result.resumes) && result.resumes.length > 0) {
                     resultCardDiv.classList.remove('hidden');
-                    // Sort resumes by match percentage in descending order
-                    result.resumes.sort((a, b) => {
-                        const scoreA = a.match_percentage || -1;
-                        const scoreB = b.match_percentage || -1;
-                        return scoreB - scoreA;
-                    });
-                    let allResumesHTML = result.resumes.map((r, idx) => {
-                        if (r.error) {
-                            return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
-                        } else {
-                            const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                            return `<div class='mb-4 p-4 border border-blue-100 rounded'>
-                                <p><strong>${r.filename}</strong></p>
-                                <div class="flex flex-row gap-6 my-4 items-center justify-center">
-                                    <div class="flex flex-col items-center">
-                                        <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
-                                        <div class="mt-2 text-center text-xs font-semibold">Match %</div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
-                                        <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <canvas id="donutExp${idx}" width="80" height="80"></canvas>
-                                        <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
-                                        <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <canvas id="donutCert${idx}" width="80" height="80"></canvas>
-                                        <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
-                                    </div>
-                                    <div class="flex flex-col items-center">
-                                        <canvas id="donutRole${idx}" width="80" height="80"></canvas>
-                                        <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
-                                    </div>
+                // Sort resumes by match percentage in descending order
+                result.resumes.sort((a, b) => {
+                    const scoreA = a.match_percentage || -1;
+                    const scoreB = b.match_percentage || -1;
+                    return scoreB - scoreA;
+                });
+                let allResumesHTML = result.resumes.map((r, idx) => {
+                    if (r.error) {
+                        return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
+                    } else {
+                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                        return `<div class='mb-4 p-4 border border-blue-100 rounded'>
+                            <p><strong>${r.filename}</strong></p>
+                            <div class="flex flex-row gap-6 my-4 items-center justify-center">
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Match %</div>
                                 </div>
-                                <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
-                                <p><strong>Explanation:</strong> ${r.explanation}</p>
-                            </div>`;
-                        }
-                    }).join('');
-                    resultDiv.innerHTML = allResumesHTML;
-                    // Robust donut rendering: wait for all canvases to exist
-                    function renderAllDonutsWhenReady(resumes) {
-                        let tries = 0;
-                        function tryRender() {
-                            let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
-                            if (allReady || tries > 20) {
-                                resumes.forEach((r, idx) => {
-                                    if (!r.error) {
-                                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                                        renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
-                                        renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
-                                        renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
-                                        renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
-                                        renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
-                                        renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
-                                    }
-                                });
-                            } else {
-                                tries++;
-                                setTimeout(tryRender, 100);
-                            }
-                        }
-                        tryRender();
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutExp${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutCert${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <canvas id="donutRole${idx}" width="80" height="80"></canvas>
+                                    <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
+                                </div>
+                            </div>
+                            <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
+                            <p><strong>Explanation:</strong> ${r.explanation}</p>
+                        </div>`;
                     }
-                    renderAllDonutsWhenReady(result.resumes);
-                } else if (result.resume_error) {
+                }).join('');
+                    resultDiv.innerHTML = allResumesHTML;
+                // Robust donut rendering: wait for all canvases to exist
+                function renderAllDonutsWhenReady(resumes) {
+                    let tries = 0;
+                    function tryRender() {
+                        let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
+                        if (allReady || tries > 20) {
+                            resumes.forEach((r, idx) => {
+                                if (!r.error) {
+                                    const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                                    renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
+                                    renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
+                                    renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
+                                    renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
+                                    renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
+                                    renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
+                                }
+                            });
+                        } else {
+                            tries++;
+                            setTimeout(tryRender, 100);
+                        }
+                    }
+                    tryRender();
+                }
+                renderAllDonutsWhenReady(result.resumes);
+            } else if (result.resume_error) {
                     resultCardDiv.classList.remove('hidden');
                     resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
-                }
+            }
             } else if (activeTab === 'audio') {
-                if (result.transcription || result.audio_error) {
+            if (result.transcription || result.audio_error) {
                     resultCardDiv.classList.remove('hidden');
-                    if (result.transcription) {
+                if (result.transcription) {
                         resultDiv.innerHTML = `
-                            <div class="space-y-4">
-                                <!-- Top row: Technical Score and Explanation -->
-                            <div class="flex flex-col sm:flex-row gap-6">
-                                <div class="flex-1">
-                                    <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
-                                    <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                        <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
-                                            <div class="flex flex-col items-center">
-                                                <canvas id="donutRelevance" width="120" height="120"></canvas>
-                                                <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
-                                            </div>
-                                            <div class="flex flex-col items-center">
-                                                <canvas id="donutConfidence" width="120" height="120"></canvas>
-                                                <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
-                                            </div>
-                                            <div class="flex flex-col items-center">
-                                                <canvas id="donutCommunication" width="120" height="120"></canvas>
-                                                <div class="mt-2 text-center text-sm font-semibold">Communication</div>
-                                            </div>
-                                            <div class="flex flex-col items-center">
-                                                <canvas id="donutClarity" width="120" height="120"></canvas>
-                                                <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
-                                            </div>
-                                            <div class="flex flex-col items-center">
-                                                <canvas id="donutProblemSolving" width="120" height="120"></canvas>
-                                                <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
-                                            </div>
-                                            <div class="flex flex-col items-center">
-                                                <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
-                                                <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
-                                            </div>
+                        <div class="space-y-4">
+                            <!-- Top row: Technical Score and Explanation -->
+                        <div class="flex flex-col sm:flex-row gap-6">
+                            <div class="flex-1">
+                                <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
+                                <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutRelevance" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutConfidence" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutCommunication" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Communication</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutClarity" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutProblemSolving" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                            <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
+                                            <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
                                         </div>
                                     </div>
                                 </div>
-                                <!-- Per-question grading -->
-                                ${Array.isArray(result.question_grades) && result.question_grades.length > 0 ? `
-                                <details class="mt-4">
-                                    <summary class="cursor-pointer text-lg font-semibold mb-2">Show Per-Question Grading</summary>
-                                    <div class="overflow-x-auto mt-2">
-                                        <table class="min-w-full text-sm border border-gray-200 rounded">
-                                            <thead>
-                                                <tr class="bg-gray-100">
-                                                    <th class="px-3 py-2 border-b text-left">Question</th>
-                                                    <th class="px-3 py-2 border-b text-left">Candidate Answer</th>
-                                                    <th class="px-3 py-2 border-b text-left">Score</th>
-                                                    <th class="px-3 py-2 border-b text-left">Explanation</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${result.question_grades.map(q => `
-                                                <tr>
-                                                    <td class="px-3 py-2 border-b align-top">${q.question}</td>
-                                                    <td class="px-3 py-2 border-b align-top">${q.answer}</td>
-                                                    <td class="px-3 py-2 border-b align-top font-bold text-blue-600">${q.score}/10</td>
-                                                    <td class="px-3 py-2 border-b align-top">${q.explanation}</td>
-                                                </tr>
-                                                `).join('')}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </details>
-                                ` : ''}
-                                <!-- Conversation History -->
-                                    <details class="mt-2">
-                                        <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
-                                        <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
-                                    </details>
                             </div>
-                        `;
-                        // Render the donut charts
-                        setTimeout(() => {
-                            function renderDonut(canvasId, value, color) {
-                                window.donutCharts = window.donutCharts || {};
-                                const canvas = document.getElementById(canvasId);
-                                if (!canvas) return;
-                                // Destroy previous chart if exists
-                                if (window.donutCharts[canvasId]) {
-                                    window.donutCharts[canvasId].destroy();
-                                }
-                                window.donutCharts[canvasId] = new Chart(canvas.getContext('2d'), {
-                                    type: 'doughnut',
-                                    data: {
-                                        datasets: [{
-                                            data: [value, 100 - value],
-                                            backgroundColor: [color, '#e5e7eb'],
-                                            borderWidth: 0
-                                        }]
-                                    },
-                                    options: {
-                                        cutout: '60%',
-                                        plugins: {
-                                            legend: { display: false },
-                                            tooltip: { enabled: false }
-                                        }
-                                    },
-                                    plugins: [{
-                                        id: 'centerText',
-                                        afterDraw: chart => {
-                                            const {ctx, chartArea: {width, height}} = chart;
-                                            ctx.save();
-                                            ctx.font = 'bold 1rem Inter, sans-serif';
-                                            ctx.textAlign = 'center';
-                                            ctx.textBaseline = 'middle';
-                                            ctx.fillStyle = color;
-                                            ctx.fillText(`${value}%`, width / 2, height / 2);
-                                            ctx.restore();
-                                        }
-                                    }]
-                                });
+                            <!-- Per-question grading -->
+                            ${Array.isArray(result.question_grades) && result.question_grades.length > 0 ? `
+                            <details class="mt-4">
+                                <summary class="cursor-pointer text-lg font-semibold mb-2">Show Per-Question Grading</summary>
+                                <div class="overflow-x-auto mt-2">
+                                    <table class="min-w-full text-sm border border-gray-200 rounded">
+                                        <thead>
+                                            <tr class="bg-gray-100">
+                                                <th class="px-3 py-2 border-b text-left">Question</th>
+                                                <th class="px-3 py-2 border-b text-left">Candidate Answer</th>
+                                                <th class="px-3 py-2 border-b text-left">Score</th>
+                                                <th class="px-3 py-2 border-b text-left">Explanation</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${result.question_grades.map(q => `
+                                            <tr>
+                                                <td class="px-3 py-2 border-b align-top">${q.question}</td>
+                                                <td class="px-3 py-2 border-b align-top">${q.answer}</td>
+                                                <td class="px-3 py-2 border-b align-top font-bold text-blue-600">${q.score}/10</td>
+                                                <td class="px-3 py-2 border-b align-top">${q.explanation}</td>
+                                            </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </details>
+                            ` : ''}
+                            <!-- Conversation History -->
+                                <details class="mt-2">
+                                    <summary class="cursor-pointer text-sm text-gray-600">Show Conversation History</summary>
+                                    <pre class="mt-2 text-sm text-gray-700 bg-gray-100 rounded p-2 overflow-x-auto" style="white-space: pre-wrap;">${result.separated_dialog ? result.separated_dialog : 'Not available.'}</pre>
+                                </details>
+                        </div>
+                    `;
+                    // Render the donut charts
+                    setTimeout(() => {
+                        function renderDonut(canvasId, value, color) {
+                            window.donutCharts = window.donutCharts || {};
+                            const canvas = document.getElementById(canvasId);
+                            if (!canvas) return;
+                            // Destroy previous chart if exists
+                            if (window.donutCharts[canvasId]) {
+                                window.donutCharts[canvasId].destroy();
                             }
-                            renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
-                            renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
-                            renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
-                            renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
-                            renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
-                            renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
-                        }, 100);
-                    } else if (result.audio_error) {
+                            window.donutCharts[canvasId] = new Chart(canvas.getContext('2d'), {
+                                type: 'doughnut',
+                                data: {
+                                    datasets: [{
+                                        data: [value, 100 - value],
+                                        backgroundColor: [color, '#e5e7eb'],
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    cutout: '60%',
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { enabled: false }
+                                    }
+                                },
+                                plugins: [{
+                                    id: 'centerText',
+                                    afterDraw: chart => {
+                                        const {ctx, chartArea: {width, height}} = chart;
+                                        ctx.save();
+                                        ctx.font = 'bold 1rem Inter, sans-serif';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillStyle = color;
+                                        ctx.fillText(`${value}%`, width / 2, height / 2);
+                                        ctx.restore();
+                                    }
+                                }]
+                            });
+                        }
+                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
+                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
+                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
+                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
+                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
+                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
+                    }, 100);
+                } else if (result.audio_error) {
                         resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
-                    }
                 }
+            }
             }
 
             // Save button event listener (remove previous, add new)
@@ -760,7 +760,7 @@
             newSaveBtn.addEventListener('click', async function() {
                 // Gather the latest analysis result from the correct resultDiv
                 let resumeHTML = '';
-                if (activeTab === 'resume') {
+            if (activeTab === 'resume') {
                     const blocks = resultDiv.querySelectorAll('div.mb-4');
                     if (blocks.length > 0) {
                         resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
@@ -799,7 +799,7 @@
                         newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
                         newSaveBtn.classList.add('bg-green-700', 'cursor-default');
                         newSaveBtn.disabled = true;
-                        lucide.createIcons();
+                lucide.createIcons();
                         showToast('Analysis saved successfully!', 'success');
                     } else {
                         newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
@@ -814,60 +814,60 @@
             });
 
             // Shortlist button event listener (remove previous, add new)
-            shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
+                shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
             const newShortlistBtn = document.getElementById(shortlistBtnId);
-            newShortlistBtn.addEventListener('click', async function() {
-                let formData = new FormData();
-                let timestamp = new Date().toLocaleString();
-                let found = false;
-                if (activeTab === 'audio') {
-                    const techResumeInput = document.getElementById('tech_resume');
-                    if (!techResumeInput.files || techResumeInput.files.length === 0) {
-                        document.getElementById('tech_resume_error').classList.remove('hidden');
-                        newShortlistBtn.disabled = false;
-                        return;
-                    }
-                    formData.append('shortlist_resume', techResumeInput.files[0]);
-                    found = true;
-                } else if (activeTab === 'resume') {
-                    const resumeInputs = document.querySelectorAll('.resume-file');
-                    resumeInputs.forEach(input => {
-                        if (input.files && input.files.length > 0 && !found) {
-                            formData.append('shortlist_resume', input.files[0]);
-                            found = true;
+                newShortlistBtn.addEventListener('click', async function() {
+                    let formData = new FormData();
+                    let timestamp = new Date().toLocaleString();
+                    let found = false;
+                    if (activeTab === 'audio') {
+                        const techResumeInput = document.getElementById('tech_resume');
+                        if (!techResumeInput.files || techResumeInput.files.length === 0) {
+                            document.getElementById('tech_resume_error').classList.remove('hidden');
+                            newShortlistBtn.disabled = false;
+                            return;
                         }
-                    });
-                    if (!found) {
-                        document.getElementById('resume_error').classList.remove('hidden');
-                        newShortlistBtn.disabled = false;
-                        return;
+                        formData.append('shortlist_resume', techResumeInput.files[0]);
+                        found = true;
+                    } else if (activeTab === 'resume') {
+                        const resumeInputs = document.querySelectorAll('.resume-file');
+                        resumeInputs.forEach(input => {
+                            if (input.files && input.files.length > 0 && !found) {
+                                formData.append('shortlist_resume', input.files[0]);
+                                found = true;
+                            }
+                        });
+                        if (!found) {
+                            document.getElementById('resume_error').classList.remove('hidden');
+                            newShortlistBtn.disabled = false;
+                            return;
+                        }
                     }
-                }
-                formData.append('timestamp', timestamp);
-                try {
-                    newShortlistBtn.disabled = true;
-                    newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
-                    const response = await fetch('/shortlist_resume', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
-                        newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                        newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+                    formData.append('timestamp', timestamp);
+                    try {
                         newShortlistBtn.disabled = true;
-                        lucide.createIcons();
-                        showToast('Resume shortlisted!', 'shortlist');
-                    } else {
+                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
+                        const response = await fetch('/shortlist_resume', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const result = await response.json();
+                        if (result.status === 'success') {
+                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
+                            newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                            newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+                            newShortlistBtn.disabled = true;
+                            lucide.createIcons();
+                            showToast('Resume shortlisted!', 'shortlist');
+                        } else {
+                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                            newShortlistBtn.disabled = false;
+                        }
+                    } catch (err) {
                         newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
                         newShortlistBtn.disabled = false;
                     }
-                } catch (err) {
-                    newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                    newShortlistBtn.disabled = false;
-                }
-            });
+                });
 
             // After results are rendered (after fetch and DOM update):
             // Hide loader, show results and buttons in right column
@@ -1098,14 +1098,7 @@
                     metaInfoBlock += '</div>';
                 }
                 div.innerHTML = `
-                    <div class=\"flex justify-between items-center mb-2\">
-                        <div class=\"text-xs text-gray-400\">Saved: ${file.timestamp}</div>
-                        <button class=\"text-red-500 text-xs font-semibold\" onclick=\"event.stopPropagation(); deleteSavedAnalysis('${file.id}')\">Delete</button>
-                    </div>
-                    ${metaInfoBlock}
-                    ${resumeSummary}
-                    ${audioSummary}
-                `;
+                    <div class=\"flex justify-between items-center mb-2\">\n                        <div class=\"text-xs text-gray-400\">Saved: ${file.timestamp}</div>\n                        <button type=\"button\" class=\"text-red-500 text-xs font-semibold\" onclick=\"event.stopPropagation(); deleteSavedAnalysis('${file.id}')\">Delete</button>\n                    </div>\n                    ${metaInfoBlock}\n                    ${resumeSummary}\n                    ${audioSummary}\n                `;
                 list.appendChild(div);
                 if (meta.rawData) {
                     reRenderDonuts(div, meta.rawData, file.id);
@@ -1558,7 +1551,7 @@
                 div.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <div class="text-xs text-gray-400">Shortlisted: ${file.timestamp}</div>
-                        <button class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.id}')">Delete</button>
+                        <button type="button" class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.id}')">Delete</button>
                     </div>
                     ${resumeBlock}
                 `;
