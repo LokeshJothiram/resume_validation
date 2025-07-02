@@ -450,36 +450,46 @@
                 // Hide/show errors based on validity
                 if (activeTab === 'resume') {
                     if (!jobDesc) {
-                        document.getElementById('job_description_error').classList.remove('hidden');
+                        const el = document.getElementById('job_description_error');
+                        if (el) el.classList.remove('hidden');
                         valid = false;
                     } else {
-                        document.getElementById('job_description_error').classList.add('hidden');
+                        const el = document.getElementById('job_description_error');
+                        if (el) el.classList.add('hidden');
                     }
                     if (resumeFiles.length === 0) {
-                        document.getElementById('resume_error').classList.remove('hidden');
+                        const el = document.getElementById('resume_error');
+                        if (el) el.classList.remove('hidden');
                         valid = false;
                     } else {
-                        document.getElementById('resume_error').classList.add('hidden');
+                        const el = document.getElementById('resume_error');
+                        if (el) el.classList.add('hidden');
                     }
                 } else if (activeTab === 'audio') {
                     if (!audioFile) {
-                        document.getElementById('audio_error').classList.remove('hidden');
+                        const el = document.getElementById('audio_error');
+                        if (el) el.classList.remove('hidden');
                         valid = false;
                     } else {
-                        document.getElementById('audio_error').classList.add('hidden');
+                        const el = document.getElementById('audio_error');
+                        if (el) el.classList.add('hidden');
                     }
                     if (!technology) {
-                        document.getElementById('technology_error').classList.remove('hidden');
+                        const el = document.getElementById('technology_error');
+                        if (el) el.classList.remove('hidden');
                         valid = false;
                     } else {
-                        document.getElementById('technology_error').classList.add('hidden');
+                        const el = document.getElementById('technology_error');
+                        if (el) el.classList.add('hidden');
                     }
                     // Custom validation for tech_resume
                     if (!techResumeInput.files || techResumeInput.files.length === 0) {
-                        document.getElementById('tech_resume_error').classList.remove('hidden');
+                        const el = document.getElementById('tech_resume_error');
+                        if (el) el.classList.remove('hidden');
                         valid = false;
                     } else {
-                        document.getElementById('tech_resume_error').classList.add('hidden');
+                        const el = document.getElementById('tech_resume_error');
+                        if (el) el.classList.add('hidden');
                     }
                 }
                 if (!valid) return;
@@ -529,28 +539,39 @@
                 });
 
                 // Show loader, hide results and buttons in right column
-                document.getElementById(loaderId).classList.remove('hidden');
-                document.getElementById(resultsId).classList.add('hidden');
-                document.getElementById(actionBtnsId).classList.add('hidden');
-                // Hide placeholder when analyzing
-                if (activeTab === 'resume') {
-                    document.getElementById('placeholder-resume').classList.add('hidden');
-                } else if (activeTab === 'audio') {
-                    document.getElementById('placeholder-audio').classList.add('hidden');
+                if (loaderId && resultsId && actionBtnsId) {
+                    let loaderElem = document.getElementById(loaderId);
+                    if (loaderElem) loaderElem.classList.remove('hidden');
+                    const resultsElem = document.getElementById(resultsId);
+                    if (resultsElem) resultsElem.classList.add('hidden');
+                    const actionBtnsElem = document.getElementById(actionBtnsId);
+                    if (actionBtnsElem) actionBtnsElem.classList.add('hidden');
+                    // Hide placeholder when analyzing
+                    if (activeTab === 'resume') {
+                        const ph = document.getElementById('placeholder-resume');
+                        if (ph) ph.classList.add('hidden');
+                    } else if (activeTab === 'audio') {
+                        const ph = document.getElementById('placeholder-audio');
+                        if (ph) ph.classList.add('hidden');
+                    }
                 }
 
                 // Reset Save/Shortlist button state
-                const saveBtn = document.getElementById(saveBtnId);
-                const shortlistBtn = document.getElementById(shortlistBtnId);
-                saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                saveBtn.classList.remove('bg-green-700', 'cursor-default');
-                saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-                saveBtn.disabled = false;
-                shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-                shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-                shortlistBtn.disabled = false;
-                lucide.createIcons();
+                if (saveBtnId && shortlistBtnId) {
+                    const saveBtn = document.getElementById(saveBtnId);
+                    const shortlistBtn = document.getElementById(shortlistBtnId);
+                    if (saveBtn && shortlistBtn) {
+                        saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                        saveBtn.classList.remove('bg-green-700', 'cursor-default');
+                        saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                        saveBtn.disabled = false;
+                        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
+                        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                        shortlistBtn.disabled = false;
+                        lucide.createIcons();
+                    }
+                }
 
                 // CHANGED: Dynamically select endpoint based on active tab
                 const endpoint = (activeTab === 'audio') ? '/process_audio' : '/process';
@@ -563,9 +584,14 @@
                 latestAnalysisResult = result; // Store the latest result
 
                 // Hide loader, show results and buttons in right column
-                document.getElementById(loaderId).classList.add('hidden');
-                document.getElementById(resultsId).classList.remove('hidden');
-                document.getElementById(actionBtnsId).classList.remove('hidden');
+                if (loaderId && resultsId && actionBtnsId) {
+                    loaderElem = document.getElementById(loaderId);
+                    if (loaderElem) loaderElem.classList.add('hidden');
+                    const resultsElem = document.getElementById(resultsId);
+                    if (resultsElem) resultsElem.classList.remove('hidden');
+                    const actionBtnsElem = document.getElementById(actionBtnsId);
+                    if (actionBtnsElem) actionBtnsElem.classList.remove('hidden');
+                }
 
                 // Render results in the correct tab's containers
                 const metaInfoDiv = document.getElementById(metaInfoId);
@@ -577,23 +603,28 @@
                 if (resultCardDiv) resultCardDiv.classList.add('hidden');
                 // If no results, show placeholder again
                 if (activeTab === 'resume' && (!result || (!result.resumes && !result.resume_error))) {
-                    document.getElementById('placeholder-resume').classList.remove('hidden');
+                    const ph = document.getElementById('placeholder-resume');
+                    if (ph) ph.classList.remove('hidden');
                 } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
-                    document.getElementById('placeholder-audio').classList.remove('hidden');
+                    const ph = document.getElementById('placeholder-audio');
+                    if (ph) ph.classList.remove('hidden');
                 }
                 
                 // Show selected technology and audio file name only for audio tab
                 if (activeTab === 'audio') {
-                    const selectedTech = document.getElementById('technology').value;
+                    const selectedTechInput = document.getElementById('technology');
+                    const selectedTech = selectedTechInput ? selectedTechInput.value : '';
                     const audioInput = document.getElementById('audio');
                     let audioFileName = '';
-                    if (audioInput.files && audioInput.files.length > 0) {
+                    if (audioInput && audioInput.files && audioInput.files.length > 0) {
                         audioFileName = audioInput.files[0].name;
                     }
-                    metaInfoDiv.innerHTML = `<p><strong>Selected Technology:</strong> ${selectedTech || 'N/A'}</p>` +
-                        (audioFileName ? `<p><strong>Audio File:</strong> ${audioFileName}</p>` : '');
+                    if (metaInfoDiv) {
+                        metaInfoDiv.innerHTML = `<p><strong>Selected Technology:</strong> ${selectedTech || 'N/A'}</p>` +
+                            (audioFileName ? `<p><strong>Audio File:</strong> ${audioFileName}</p>` : '');
+                    }
                 } else {
-                    metaInfoDiv.innerHTML = '';
+                    if (metaInfoDiv) metaInfoDiv.innerHTML = '';
                 }
                 
                 if (activeTab === 'resume') {
@@ -803,125 +834,142 @@
             }
 
             // Save button event listener (remove previous, add new)
-            saveBtn.replaceWith(saveBtn.cloneNode(true));
-            const newSaveBtn = document.getElementById(saveBtnId);
-            newSaveBtn.addEventListener('click', async function() {
-                // Gather the latest analysis result from the correct resultDiv
-                let resumeHTML = '';
-            if (activeTab === 'resume') {
-                    const blocks = resultDiv.querySelectorAll('div.mb-4');
-                    if (blocks.length > 0) {
-                        resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
-                    } else {
-                        resumeHTML = resultDiv.innerHTML;
-                    }
-                }
-                let audioHTML = '';
-                if (activeTab === 'audio') {
-                    audioHTML = resultDiv.innerHTML;
-                }
-                const metaInfo = metaInfoDiv.innerHTML;
-                const timestamp = new Date().toLocaleString();
-                let technology = '';
-                let audioFileName = '';
-                if (activeTab === 'audio') {
-                    const techInput = document.getElementById('technology');
-                    if (techInput) technology = techInput.value;
-                    const audioInput = document.getElementById('audio');
-                    if (audioInput && audioInput.files && audioInput.files.length > 0) {
-                        audioFileName = audioInput.files[0].name;
-                    }
-                }
-                const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName, rawData: latestAnalysisResult };
-                try {
-                    newSaveBtn.disabled = true;
-                    newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
-                    const response = await fetch('/save_analysis', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
+            if (saveBtnId) {
+                const saveBtn = document.getElementById(saveBtnId);
+                if (saveBtn) {
+                    saveBtn.replaceWith(saveBtn.cloneNode(true));
+                    const newSaveBtn = document.getElementById(saveBtnId);
+                    newSaveBtn.addEventListener('click', async function() {
+                        // Gather the latest analysis result from the correct resultDiv
+                        let resumeHTML = '';
+                        if (activeTab === 'resume') {
+                            const blocks = resultDiv.querySelectorAll('div.mb-4');
+                            if (blocks.length > 0) {
+                                resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
+                            } else {
+                                resumeHTML = resultDiv.innerHTML;
+                            }
+                        }
+                        let audioHTML = '';
+                        if (activeTab === 'audio') {
+                            audioHTML = resultDiv.innerHTML;
+                        }
+                        const metaInfo = metaInfoDiv.innerHTML;
+                        const timestamp = new Date().toLocaleString();
+                        let technology = '';
+                        let audioFileName = '';
+                        if (activeTab === 'audio') {
+                            const techInput = document.getElementById('technology');
+                            if (techInput) technology = techInput.value;
+                            const audioInput = document.getElementById('audio');
+                            if (audioInput && audioInput.files && audioInput.files.length > 0) {
+                                audioFileName = audioInput.files[0].name;
+                            }
+                        }
+                        const data = { resumeHTML, audioHTML, metaInfo, timestamp, technology, audioFileName, rawData: latestAnalysisResult };
+                        try {
+                            newSaveBtn.disabled = true;
+                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
+                            const response = await fetch('/save_analysis', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(data)
+                            });
+                            const result = await response.json();
+                            if (result.status === 'success') {
+                                newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
+                                newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                                newSaveBtn.classList.add('bg-green-700', 'cursor-default');
+                                newSaveBtn.disabled = true;
+                                lucide.createIcons();
+                                showToast('Analysis saved successfully!', 'success');
+                            } else {
+                                newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                                newSaveBtn.disabled = false;
+                                showToast('Failed to save analysis.', 'error');
+                            }
+                        } catch (err) {
+                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                            newSaveBtn.disabled = false;
+                            showToast('Error saving analysis.', 'error');
+                        }
                     });
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
-                        newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                        newSaveBtn.classList.add('bg-green-700', 'cursor-default');
-                        newSaveBtn.disabled = true;
-                lucide.createIcons();
-                        showToast('Analysis saved successfully!', 'success');
-                    } else {
-                        newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                        newSaveBtn.disabled = false;
-                        showToast('Failed to save analysis.', 'error');
-                    }
-                } catch (err) {
-                    newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                    newSaveBtn.disabled = false;
-                    showToast('Error saving analysis.', 'error');
                 }
-            });
+            }
 
             // Shortlist button event listener (remove previous, add new)
-                shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
-            const newShortlistBtn = document.getElementById(shortlistBtnId);
-                newShortlistBtn.addEventListener('click', async function() {
-                    let formData = new FormData();
-                    let timestamp = new Date().toLocaleString();
-                    let found = false;
-                    if (activeTab === 'audio') {
-                        const techResumeInput = document.getElementById('tech_resume');
-                        if (!techResumeInput.files || techResumeInput.files.length === 0) {
-                            document.getElementById('tech_resume_error').classList.remove('hidden');
-                            newShortlistBtn.disabled = false;
-                            return;
-                        }
-                        formData.append('shortlist_resume', techResumeInput.files[0]);
-                        found = true;
-                    } else if (activeTab === 'resume') {
-                        const resumeInputs = document.querySelectorAll('.resume-file');
-                        resumeInputs.forEach(input => {
-                            if (input.files && input.files.length > 0 && !found) {
-                                formData.append('shortlist_resume', input.files[0]);
-                                found = true;
+            if (shortlistBtnId) {
+                const shortlistBtn = document.getElementById(shortlistBtnId);
+                if (shortlistBtn) {
+                    shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
+                    const newShortlistBtn = document.getElementById(shortlistBtnId);
+                    newShortlistBtn.addEventListener('click', async function() {
+                        let formData = new FormData();
+                        let timestamp = new Date().toLocaleString();
+                        let found = false;
+                        if (activeTab === 'audio') {
+                            const techResumeInput = document.getElementById('tech_resume');
+                            if (!techResumeInput.files || techResumeInput.files.length === 0) {
+                                const el = document.getElementById('tech_resume_error');
+                                if (el) el.classList.remove('hidden');
+                                newShortlistBtn.disabled = false;
+                                return;
                             }
-                        });
-                        if (!found) {
-                            document.getElementById('resume_error').classList.remove('hidden');
-                            newShortlistBtn.disabled = false;
-                            return;
+                            formData.append('shortlist_resume', techResumeInput.files[0]);
+                            found = true;
+                        } else if (activeTab === 'resume') {
+                            const resumeInputs = document.querySelectorAll('.resume-file');
+                            resumeInputs.forEach(input => {
+                                if (input.files && input.files.length > 0 && !found) {
+                                    formData.append('shortlist_resume', input.files[0]);
+                                    found = true;
+                                }
+                            });
+                            if (!found) {
+                                const el = document.getElementById('resume_error');
+                                if (el) el.classList.remove('hidden');
+                                newShortlistBtn.disabled = false;
+                                return;
+                            }
                         }
-                    }
-                    formData.append('timestamp', timestamp);
-                    try {
-                        newShortlistBtn.disabled = true;
-                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
-                        const response = await fetch('/shortlist_resume', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const result = await response.json();
-                        if (result.status === 'success') {
-                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
-                            newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                            newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+                        formData.append('timestamp', timestamp);
+                        try {
                             newShortlistBtn.disabled = true;
-                            lucide.createIcons();
-                            showToast('Resume shortlisted!', 'shortlist');
-                        } else {
+                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
+                            const response = await fetch('/shortlist_resume', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const result = await response.json();
+                            if (result.status === 'success') {
+                                newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
+                                newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+                                newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+                                newShortlistBtn.disabled = true;
+                                lucide.createIcons();
+                                showToast('Resume shortlisted!', 'shortlist');
+                            } else {
+                                newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                                newShortlistBtn.disabled = false;
+                            }
+                        } catch (err) {
                             newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
                             newShortlistBtn.disabled = false;
                         }
-                    } catch (err) {
-                        newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                        newShortlistBtn.disabled = false;
-                    }
-                });
+                    });
+                }
+            }
 
             // After results are rendered (after fetch and DOM update):
             // Hide loader, show results and buttons in right column
-            document.getElementById(loaderId).classList.add('hidden');
-            document.getElementById(resultsId).classList.remove('hidden');
-            document.getElementById(actionBtnsId).classList.remove('hidden');
+            if (loaderId && resultsId && actionBtnsId) {
+                loaderElem = document.getElementById(loaderId);
+                if (loaderElem) loaderElem.classList.add('hidden');
+                const resultsElem = document.getElementById(resultsId);
+                if (resultsElem) resultsElem.classList.remove('hidden');
+                const actionBtnsElem = document.getElementById(actionBtnsId);
+                if (actionBtnsElem) actionBtnsElem.classList.remove('hidden');
+            }
 
             // Re-enable all tab buttons after loading
             tabIds.forEach(id => {
@@ -935,7 +983,8 @@
         const jobDescInput = document.getElementById('job_description');
         jobDescInput.addEventListener('input', () => {
             if (jobDescInput.value.trim()) {
-                document.getElementById('job_description_error').classList.add('hidden');
+                const el = document.getElementById('job_description_error');
+                if (el) el.classList.add('hidden');
             }
         });
         // Hide error when any resume input changes
@@ -946,7 +995,8 @@
                     if (input.files && input.files.length > 0) hasFile = true;
                 });
                 if (hasFile) {
-                    document.getElementById('resume_error').classList.add('hidden');
+                    const el = document.getElementById('resume_error');
+                    if (el) el.classList.add('hidden');
                 }
             }
         });
@@ -955,18 +1005,21 @@
         const techInput = document.getElementById('technology');
         audioInput.addEventListener('change', () => {
             if (audioInput.files && audioInput.files.length > 0) {
-                document.getElementById('audio_error').classList.add('hidden');
+                const el = document.getElementById('audio_error');
+                if (el) el.classList.add('hidden');
             }
         });
         techInput.addEventListener('change', () => {
             if (techInput.value) {
-                document.getElementById('technology_error').classList.add('hidden');
+                const el = document.getElementById('technology_error');
+                if (el) el.classList.add('hidden');
             }
         });
         if (techResumeInput) {
             techResumeInput.addEventListener('change', () => {
                 if (techResumeInput.files && techResumeInput.files.length > 0) {
-                    document.getElementById('tech_resume_error').classList.add('hidden');
+                    const el = document.getElementById('tech_resume_error');
+                    if (el) el.classList.add('hidden');
                 }
             });
         }
@@ -992,7 +1045,8 @@
                 if (idx !== '') {
                     const saved = JSON.parse(localStorage.getItem('jobDescriptions') || '[]');
                     document.getElementById('job_description').value = saved[idx];
-                    document.getElementById('job_description_error').classList.add('hidden');
+                    const el = document.getElementById('job_description_error');
+                    if (el) el.classList.add('hidden');
                 }
             });
         });
@@ -1006,7 +1060,8 @@
                         .then(function(result) {
                             const jdText = result.value;
                             document.getElementById('job_description').value = jdText;
-                            document.getElementById('job_description_error').classList.add('hidden');
+                            const el = document.getElementById('job_description_error');
+                            if (el) el.classList.add('hidden');
                         })
                         .catch(function(err) {
                             alert('Could not read the Word file.');
@@ -1370,6 +1425,14 @@
 
         // --- Interview Question Generator Tab Logic ---
         function setTabNavigationEnabled(enabled) {
+            const loader = document.getElementById('question-gen-loader');
+            const loaderVisible = loader ? !loader.classList.contains('hidden') : false;
+            console.log('setTabNavigationEnabled called with:', enabled, '| Loader visible:', loaderVisible);
+            // Only allow disabling if loader is visible, otherwise always enable
+            if (!enabled && !loaderVisible) {
+                // Don't disable tabs if loader is not visible
+                enabled = true;
+            }
             const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
             tabIds.forEach(id => {
                 const btn = document.getElementById(id);
@@ -1397,6 +1460,7 @@
             const numQuestions = parseInt(document.getElementById('num_questions').value, 10) || 5;
             const jdError = document.getElementById('question_gen_jd_error');
             const numQuestionsError = document.getElementById('num_questions_error');
+            const level = document.querySelector('input[name="question_level"]:checked').value;
             if (!jd) {
                 jdError.classList.remove('hidden');
                 valid = false;
@@ -1412,7 +1476,8 @@
             const loader = document.getElementById('question-gen-loader');
             const resultDiv = document.getElementById('question-gen-result');
             const listPre = document.getElementById('question-gen-list');
-            loader.classList.remove('hidden');
+            const loaderElem = document.getElementById('question-gen-loader');
+            if (loaderElem) loaderElem.classList.remove('hidden');
             resultDiv.classList.add('hidden');
             listPre.textContent = '';
             setTabNavigationEnabled(false); // Disable tabs while loading
@@ -1420,10 +1485,11 @@
                 const resp = await fetch('/generate_questions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ technology: '', job_description: jd, num_questions: numQuestions })
+                    body: JSON.stringify({ technology: '', job_description: jd, num_questions: numQuestions, level: level })
                 });
                 const data = await resp.json();
-                loader.classList.add('hidden');
+                const loaderElem = document.getElementById('question-gen-loader');
+                if (loaderElem) loaderElem.classList.add('hidden');
                 setTabNavigationEnabled(true); // Enable tabs after loading
                 if (data.questions && Array.isArray(data.questions)) {
                     listPre.textContent = data.questions.map((q, i) => `${i+1}. ${q}`).join('\n');
@@ -1432,20 +1498,19 @@
                     showToast(data.error || 'Failed to generate questions.', 'error');
                 }
             } catch (e) {
-                loader.classList.add('hidden');
+                const loaderElem = document.getElementById('question-gen-loader');
+                if (loaderElem) loaderElem.classList.add('hidden');
                 setTabNavigationEnabled(true); // Enable tabs after loading
                 showToast('Error generating questions.', 'error');
             }
         });
         document.getElementById('copy-questions-btn').addEventListener('click', function() {
-            setTabNavigationEnabled(true); // Always enable tabs after copy
             const listPre = document.getElementById('question-gen-list');
             navigator.clipboard.writeText(listPre.textContent).then(() => {
                 showToast('Questions copied!', 'success');
             });
         });
         document.getElementById('download-questions-btn').addEventListener('click', function() {
-            setTabNavigationEnabled(true); // Always enable tabs after download
             const listPre = document.getElementById('question-gen-list');
             const blob = new Blob([listPre.textContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1466,7 +1531,8 @@
                     mammoth.extractRawText({arrayBuffer: event.target.result})
                         .then(function(result) {
                             document.getElementById('question_gen_jd').value = result.value;
-                            document.getElementById('question_gen_jd_error').classList.add('hidden');
+                            const el = document.getElementById('question_gen_jd_error');
+                            if (el) el.classList.add('hidden');
                         })
                         .catch(function(err) {
                             alert('Could not read the Word file.');
@@ -1487,7 +1553,8 @@
         }); */
         document.getElementById('question_gen_jd').addEventListener('input', () => {
             if (document.getElementById('question_gen_jd').value.trim()) {
-                document.getElementById('question_gen_jd_error').classList.add('hidden');
+                const el = document.getElementById('question_gen_jd_error');
+                if (el) el.classList.add('hidden');
             }
         });
 

@@ -10,6 +10,7 @@ def generate_questions():
     technology = data.get('technology', '').strip()
     job_description = data.get('job_description', '').strip()
     num_questions = int(data.get('num_questions', 5))
+    level = data.get('level', 'easy').strip().lower()
     if num_questions > 20:
         num_questions = 20
     if num_questions < 1:
@@ -17,6 +18,8 @@ def generate_questions():
     prompt = f"""
 You are an expert interviewer. Generate a list of {num_questions} relevant, challenging, and up-to-date interview questions for a {technology or 'General'} role.
 """
+    if level in ['easy', 'medium', 'hard']:
+        prompt += f"\nThe questions should be at a {level} level of difficulty."
     if job_description:
         prompt += f"\nThe job description is as follows:\n{job_description}\n"
     prompt += "\nReturn ONLY a numbered list of questions, no explanations."
