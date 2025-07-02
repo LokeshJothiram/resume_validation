@@ -72,6 +72,15 @@
       <!-- Sidebar: fixed -->
       <div id="fixed-sidebar" class="fixed top-16 left-0 w-56 h-full bg-white border-r pt-4 z-40">
         <div class="flex flex-col gap-1 pl-0 pr-0">
+          <button id="tab-dashboard" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
+            <span class="flex items-start">
+              <i data-lucide="layout-dashboard" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Dashboard</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">Overview and analytics</span>
+              </span>
+            </span>
+          </button>
           {% if session.role == 'admin' %}
           <button id="tab-job-upload" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
               <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
@@ -131,96 +140,94 @@
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
                     <form id="talentForm" enctype="multipart/form-data" novalidate>
-                        <!-- Resume Match Tab -->
-                        <div id="resume-tab-content">
-                        <div class="flex flex-col items-start w-full">
-                            <div class="w-full pr-0 self-start">
-                            {% include 'tabs/resume_match_tab.html' %}
-                            </div>
-                            <div class="w-full pl-0 mt-8">
-                                <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
-                                <!-- Loader under Analysis Results -->
-                                <div id="loader-resume" class="text-center p-8 hidden">
-                                    <div role="status" class="flex flex-col items-center justify-center">
-                                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                        </svg>
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                        <div id="dashboard-tab-content" class="tab-content">
+                            {% include 'tabs/dashboard_tab.html' %}
+                        </div>
+                        <div id="resume-tab-content" class="tab-content hidden">
+                            <div class="flex flex-col items-start w-full">
+                                <div class="w-full pr-0 self-start">
+                                {% include 'tabs/resume_match_tab.html' %}
                                 </div>
-                                <!-- Save and Shortlist buttons -->
-                                <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
-                                    <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                    </button>
-                                    <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                    </button>
-                                </div>
-                                <div id="results-resume" class="p-0">
-                                     <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
-                                     <div class="space-y-6">
-                                        <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
-                                            <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                            <div id="resume_result_resume"></div>
+                                <div class="w-full pl-0 mt-8">
+                                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                                    <!-- Loader under Analysis Results -->
+                                    <div id="loader-resume" class="text-center p-8 hidden">
+                                        <div role="status" class="flex flex-col items-center justify-center">
+                                            <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                                <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                            </svg>
+                                            <span class="sr-only">Loading...</span>
                                         </div>
-                                     </div>
-                                 </div>
-                            </div>
-                        </div>
-                        </div>
-                        <!-- Technical Proficiency Tab -->
-                        <div id="audio-tab-content" class="hidden">
-                        <div class="flex flex-col items-start w-full">
-                            <div class="w-full pr-0 self-start">
-                            {% include 'tabs/technical_proficiency_tab.html' %}
-                            </div>
-                            <div class="w-full pl-0 mt-8">
-                                <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
-                                <!-- Loader under Analysis Results -->
-                                <div id="loader-audio" class="text-center p-8 hidden">
-                                    <div role="status" class="flex flex-col items-center justify-center">
-                                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                        </svg>
-                                        <span class="sr-only">Loading...</span>
+                                        <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
                                     </div>
-                                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-                                </div>
-                                <!-- Save and Shortlist buttons -->
-                                <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
-                                    <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                    </button>
-                                    <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                    </button>
-                                </div>
-                                <div id="results-audio" class="p-0">
-                                     <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                                     <div class="space-y-6">
-                                        <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
-                                            <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                            <div id="audio_result_audio"></div>
-                                        </div>
+                                    <!-- Save and Shortlist buttons -->
+                                    <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
+                                        <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                            <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                                        </button>
+                                        <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                            <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                                        </button>
+                                    </div>
+                                    <div id="results-resume" class="p-0">
+                                         <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
+                                         <div class="space-y-6">
+                                            <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
+                                                <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                                <div id="resume_result_resume"></div>
+                                            </div>
+                                         </div>
                                      </div>
-                                 </div>
+                                </div>
                             </div>
                         </div>
+                        <div id="audio-tab-content" class="tab-content hidden">
+                            <div class="flex flex-col items-start w-full">
+                                <div class="w-full pr-0 self-start">
+                                {% include 'tabs/technical_proficiency_tab.html' %}
+                                </div>
+                                <div class="w-full pl-0 mt-8">
+                                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                                    <!-- Loader under Analysis Results -->
+                                    <div id="loader-audio" class="text-center p-8 hidden">
+                                        <div role="status" class="flex flex-col items-center justify-center">
+                                            <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                                <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                            </svg>
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                        <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                                    </div>
+                                    <!-- Save and Shortlist buttons -->
+                                    <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
+                                        <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                            <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                                        </button>
+                                        <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                            <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                                        </button>
+                                    </div>
+                                    <div id="results-audio" class="p-0">
+                                         <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+                                         <div class="space-y-6">
+                                            <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
+                                                <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                                <div id="audio_result_audio"></div>
+                                            </div>
+                                         </div>
+                                     </div>
+                                </div>
+                            </div>
                         </div>
-                        <!-- Interview Question Generator Tab -->
-                    <div id="question-gen-tab-content" class="hidden w-full text-left">
+                        <div id="question-gen-tab-content" class="tab-content hidden">
                             {% include 'tabs/interview_question_generator_tab.html' %}
                         </div>
-                        <!-- Saved Analyses Tab -->
-                    <div id="saved-tab-content" class="hidden w-full text-left">
+                        <div id="saved-tab-content" class="tab-content hidden">
                             {% include 'tabs/saved_analyses_tab.html' %}
                         </div>
-                        <!-- Shortlisted Resumes Tab -->
-                    <div id="shortlisted-tab-content" class="hidden w-full text-left">
+                        <div id="shortlisted-tab-content" class="tab-content hidden">
                             {% include 'tabs/shortlisted_resumes_tab.html' %}
                         </div>
                     </form>
@@ -287,24 +294,24 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             // Tab navigation button IDs (define once, globally)
-            const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
+            const tabIds = ['tab-dashboard', 'tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
 
-            // Define tab and content variables
+            const tabDashboard = document.getElementById('tab-dashboard');
             const tabResume = document.getElementById('tab-resume');
             const tabAudio = document.getElementById('tab-audio');
             const tabQuestionGen = document.getElementById('tab-question-gen');
             const tabSaved = document.getElementById('tab-saved');
             const tabShortlisted = document.getElementById('tab-shortlisted');
+            const dashboardTabContent = document.getElementById('dashboard-tab-content');
             const resumeTabContent = document.getElementById('resume-tab-content');
             const audioTabContent = document.getElementById('audio-tab-content');
             const questionGenTabContent = document.getElementById('question-gen-tab-content');
             const savedTabContent = document.getElementById('saved-tab-content');
             const shortlistedTabContent = document.getElementById('shortlisted-tab-content');
 
-            let activeTab = 'resume';
+            let activeTab = 'dashboard';
 
             function setActiveTab(tab) {
-                // Remove active classes from all
                 tabIds.forEach(id => {
                     const btn = document.getElementById(id);
                     if (btn) {
@@ -312,7 +319,6 @@
                         btn.classList.add('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
                     }
                 });
-                // Add active classes to selected
                 const activeBtn = document.getElementById(`tab-${tab}`);
                 if (activeBtn) {
                     activeBtn.classList.remove('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
@@ -320,8 +326,69 @@
                 }
             }
 
-            // Initial active tab
-            setActiveTab('resume');
+            function hideAllTabs() {
+              document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+              tabIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.classList.remove('active-gradient');
+              });
+            }
+            function showTab(tabId, contentId) {
+              hideAllTabs();
+              const btn = document.getElementById(tabId);
+              const content = document.getElementById(contentId);
+              if (btn) btn.classList.add('active-gradient');
+              if (content) content.classList.remove('hidden');
+              window.activeTab = tabId.replace('tab-', '');
+              lucide.createIcons();
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              showTab('tab-dashboard', 'dashboard-tab-content');
+            });
+
+            if (tabDashboard) {
+              tabDashboard.addEventListener('click', () => {
+                setActiveTab('dashboard');
+                showTab('tab-dashboard', 'dashboard-tab-content');
+                activeTab = 'dashboard';
+              });
+            }
+            if (tabResume) {
+              tabResume.addEventListener('click', () => {
+                setActiveTab('resume');
+                showTab('tab-resume', 'resume-tab-content');
+                activeTab = 'resume';
+              });
+            }
+            if (tabAudio) {
+              tabAudio.addEventListener('click', () => {
+                setActiveTab('audio');
+                showTab('tab-audio', 'audio-tab-content');
+                activeTab = 'audio';
+              });
+            }
+            if (tabQuestionGen) {
+              tabQuestionGen.addEventListener('click', () => {
+                setActiveTab('question-gen');
+                showTab('tab-question-gen', 'question-gen-tab-content');
+                activeTab = 'question-gen';
+              });
+            }
+            if (tabSaved) {
+              tabSaved.addEventListener('click', () => {
+                setActiveTab('saved');
+                showTab('tab-saved', 'saved-tab-content');
+                activeTab = 'saved';
+              });
+            }
+            if (tabShortlisted) {
+              tabShortlisted.addEventListener('click', () => {
+                setActiveTab('shortlisted');
+                showTab('tab-shortlisted', 'shortlisted-tab-content');
+                activeTab = 'shortlisted';
+              });
+            }
 
             // Wait for DOMContentLoaded to ensure all elements are available
             document.addEventListener('DOMContentLoaded', function() {
@@ -1265,29 +1332,41 @@
             } else {
                 deleteModalTitle.textContent = 'Delete this saved analysis?';
             }
-            document.getElementById('delete-modal').classList.remove('hidden');
-            document.getElementById('analyze-btn-container').classList.add('hidden');
+            const deleteModal = document.getElementById('delete-modal');
+            if (deleteModal) {
+              deleteModal.classList.remove('hidden');
+            }
+            const analyzeBtnContainer = document.getElementById('analyze-btn-container');
+            if (analyzeBtnContainer) {
+              analyzeBtnContainer.classList.add('hidden');
+            }
 
             const resultsOverlay = document.getElementById('results-overlay');
 
             if (activeTab === 'saved') {
                 wasResultsOverlayOpen = false;
-                resultsOverlay.classList.add('hidden');
-                resultsOverlay.style.display = 'none';
-                resultsOverlay.style.visibility = 'hidden';
+                if (resultsOverlay) {
+                  resultsOverlay.classList.add('hidden');
+                  resultsOverlay.style.display = 'none';
+                  resultsOverlay.style.visibility = 'hidden';
+                }
                 // Extra defensive: force hide overlay parent as well
                 setTimeout(() => {
+                  if (resultsOverlay) {
                     resultsOverlay.classList.add('hidden');
                     resultsOverlay.style.display = 'none';
                     resultsOverlay.style.visibility = 'hidden';
+                  }
                 }, 10);
                 return;
             }
 
             wasResultsOverlayOpen = !resultsOverlay.classList.contains('hidden');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
+            if (resultsOverlay) {
+              resultsOverlay.classList.add('hidden');
+              resultsOverlay.style.display = 'none';
+              resultsOverlay.style.visibility = 'hidden';
+            }
         }
 
         document.getElementById('delete-modal-cancel').onclick = function() {
@@ -1425,7 +1504,7 @@
         function showToast(message, type) {
             const toast = document.getElementById('toast');
             let icon = '';
-            toast.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2';
+            toast.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2'
             if (type === 'success') {
                 toast.classList.add('bg-green-600', 'text-white');
                 icon = '<i data-lucide="check-circle" class="w-5 h-5 mr-1"></i>';
