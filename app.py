@@ -614,6 +614,7 @@ def delete_saved_analysis(filename):
 def shortlist_resume():
     resume_file = request.files.get('shortlist_resume')
     timestamp = request.form.get('timestamp', '')
+    match_percentage = request.form.get('match_percentage', None)
     user = get_current_user()
     user_id = user.id if user else None
     saved_resume_filename = ''
@@ -629,7 +630,8 @@ def shortlist_resume():
             user_id=user_id,
             original_filename=original_filename,
             stored_filename=saved_resume_filename,
-            timestamp=datetime.datetime.now()
+            timestamp=datetime.datetime.now(),
+            match_percentage=match_percentage
         )
         db.session.add(shortlist)
         db.session.commit()
@@ -649,7 +651,8 @@ def list_shortlisted():
             'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
             'original_filename': r.original_filename,
             'stored_filename': r.stored_filename,
-            'user_id': r.user_id
+            'user_id': r.user_id,
+            'match_percentage': r.match_percentage
         } for r in resumes
     ]
     return jsonify(result)
@@ -664,7 +667,8 @@ def get_shortlisted(resume_id):
         'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
         'original_filename': r.original_filename,
         'stored_filename': r.stored_filename,
-        'user_id': r.user_id
+        'user_id': r.user_id,
+        'match_percentage': r.match_percentage
     })
 
 @app.route('/delete_shortlisted/<int:resume_id>', methods=['DELETE'])

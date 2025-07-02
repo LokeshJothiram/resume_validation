@@ -18,6 +18,19 @@
         cursor: not-allowed !important;
         pointer-events: auto;
       }
+      /* Gradient for active and hover tabs */
+      .tab-btn.active-gradient {
+        background: linear-gradient(90deg, #3b82f6 0%, #a855f7 100%) !important;
+        color: #fff !important;
+        font-weight: bold;
+      }
+      .tab-btn:hover:not(:disabled):not(.active-gradient) {
+        background: linear-gradient(90deg, #dbeafe 0%, #f3e8ff 100%) !important;
+        color: #3b82f6 !important;
+      }
+      .tab-btn:not(.active-gradient) {
+        color: #374151 !important; /* Tailwind gray-700 */
+      }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -38,14 +51,14 @@
     </div>
     <div class="flex w-full">
       <!-- Sidebar: fixed -->
-      <div id="fixed-sidebar" class="fixed top-16 left-0 w-56 h-[calc(100vh-64px)] bg-white border-r pt-4 z-40">
+      <div id="fixed-sidebar" class="fixed top-16 left-0 w-56 h-full bg-white border-r pt-4 z-40">
         <div class="flex flex-col gap-1 pl-0 pr-0">
           {% if session.role == 'admin' %}
-          <button id="tab-job-upload" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg whitespace-nowrap">
+          <button id="tab-job-upload" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
               <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
           </button>
           {% else %}
-          <button id="tab-resume" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+          <button id="tab-resume" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
             <span class="flex items-start">
               <i data-lucide="file-search" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
               <span class="flex flex-col items-start">
@@ -54,7 +67,7 @@
               </span>
             </span>
           </button>
-          <button id="tab-audio" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+          <button id="tab-audio" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
             <span class="flex items-start">
               <i data-lucide="mic" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
               <span class="flex flex-col items-start">
@@ -63,7 +76,7 @@
               </span>
             </span>
           </button>
-          <button id="tab-question-gen" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+          <button id="tab-question-gen" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
             <span class="flex items-start">
               <i data-lucide="help-circle" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
               <span class="flex flex-col items-start">
@@ -72,7 +85,7 @@
               </span>
             </span>
           </button>
-          <button id="tab-saved" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+          <button id="tab-saved" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
             <span class="flex items-start">
               <i data-lucide="bookmark" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
               <span class="flex flex-col items-start">
@@ -81,7 +94,7 @@
               </span>
             </span>
           </button>
-          <button id="tab-shortlisted" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+          <button id="tab-shortlisted" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
             <span class="flex items-start">
               <i data-lucide="users" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
               <span class="flex flex-col items-start">
@@ -276,7 +289,7 @@
                 tabIds.forEach(id => {
                     const btn = document.getElementById(id);
                     if (btn) {
-                        btn.classList.remove('text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
+                        btn.classList.remove('active-gradient', 'text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
                         btn.classList.add('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
                     }
                 });
@@ -284,7 +297,7 @@
                 const activeBtn = document.getElementById(`tab-${tab}`);
                 if (activeBtn) {
                     activeBtn.classList.remove('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
-                    activeBtn.classList.add('text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
+                    activeBtn.classList.add('active-gradient');
                 }
             }
 
@@ -907,6 +920,7 @@
                         let formData = new FormData();
                         let timestamp = new Date().toLocaleString();
                         let found = false;
+                        let matchPercent = 0;
                         if (activeTab === 'audio') {
                             const techResumeInput = document.getElementById('tech_resume');
                             if (!techResumeInput.files || techResumeInput.files.length === 0) {
@@ -917,6 +931,10 @@
                             }
                             formData.append('shortlist_resume', techResumeInput.files[0]);
                             found = true;
+                            // Technical Proficiency: use technical_score * 10
+                            if (latestAnalysisResult && latestAnalysisResult.technical_score !== undefined) {
+                                matchPercent = latestAnalysisResult.technical_score * 10;
+                            }
                         } else if (activeTab === 'resume') {
                             const resumeInputs = document.querySelectorAll('.resume-file');
                             resumeInputs.forEach(input => {
@@ -925,14 +943,13 @@
                                     found = true;
                                 }
                             });
-                            if (!found) {
-                                const el = document.getElementById('resume_error');
-                                if (el) el.classList.remove('hidden');
-                                newShortlistBtn.disabled = false;
-                                return;
+                            // Resume Match: use first resume's match_percentage
+                            if (latestAnalysisResult && Array.isArray(latestAnalysisResult.resumes) && latestAnalysisResult.resumes.length > 0) {
+                                matchPercent = latestAnalysisResult.resumes[0].match_percentage || 0;
                             }
                         }
                         formData.append('timestamp', timestamp);
+                        formData.append('match_percentage', matchPercent);
                         try {
                             newShortlistBtn.disabled = true;
                             newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
@@ -1172,6 +1189,7 @@
                 }
                 const div = document.createElement('div');
                 div.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
+                div.setAttribute('data-card-id', file.id);
                 // Resume summary extraction for saved analyses
                 let resumeSummary = (data.resumeHTML || (file.data && file.data.resumeHTML)) || '';
                 let audioSummary = (data.audioHTML || (file.data && file.data.audioHTML)) || '';
@@ -1321,19 +1339,10 @@
                 }
                 await fetch(deleteUrl, { method: 'DELETE' });
                 showToast('Deleted successfully.', 'success');
-                
                 // Remove the deleted item from the DOM instead of re-rendering everything
+                const card = document.querySelector(`[data-card-id="${pendingDeleteFilename}"]`);
+                if (card) card.remove();
                 const list = (activeTab === 'shortlisted') ? document.getElementById('shortlisted-list') : document.getElementById('saved_analyses_list');
-                const items = list.querySelectorAll('div.bg-white');
-                for (let item of items) {
-                    const deleteBtn = item.querySelector('button[onclick*="deleteSavedAnalysis"]');
-                    if (deleteBtn && deleteBtn.getAttribute('onclick').includes(pendingDeleteFilename)) {
-                        item.remove();
-                        break;
-                    }
-                }
-                
-                // If no items left, show empty message
                 if (list.children.length === 0) {
                     list.innerHTML = `<div class="text-gray-500 text-center">No ${activeTab === 'shortlisted' ? 'shortlisted resumes' : 'saved analyses'} yet.</div>`;
                 }
@@ -1643,27 +1652,70 @@
                 } catch (e) {
                     data = { metaInfo: '', resumeHTML: '<div class="text-red-500">Failed to load file.</div>', audioHTML: '' };
                 }
-                const div = document.createElement('div');
-                div.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
-                let resumeBlock = '';
-                if (data.original_filename && data.stored_filename) {
-                    resumeBlock = `
-                        <div class="mb-2">
-                            <div class="font-bold mb-1">${data.original_filename}</div>
-                            <a href="/shortlist/${data.stored_filename}" download class="text-blue-600 underline text-sm">Download Resume</a>
-                        </div>
-                    `;
-                } else {
-                    resumeBlock = '<div class="text-gray-400 text-sm">No resume file found.</div>';
-                }
-                div.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="text-xs text-gray-400">Shortlisted: ${file.timestamp}</div>
-                        <button type="button" class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.id}')">Delete</button>
-                    </div>
-                    ${resumeBlock}
-                `;
-                list.appendChild(div);
+                // --- CARD LAYOUT ---
+                // Fallbacks for missing data
+                const initials = data.initials || (data.original_filename ? data.original_filename.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase() : 'NA');
+                const name = data.name || data.original_filename || 'Candidate Name';
+                const title = data.title || 'Job Title';
+                const email = data.email || 'candidate@email.com';
+                const phone = data.phone || '+1 (555) 123-4567';
+                const location = data.location || 'San Francisco, CA';
+                const skills = Array.isArray(data.skills) ? data.skills : ['JavaScript', 'SQL'];
+                const matchPercent = data.match_percentage || 0;
+                const resumeUrl = data.stored_filename ? `/shortlist/${data.stored_filename}` : '#';
+                const card = document.createElement('div');
+                card.className = "flex items-center bg-white rounded-xl shadow p-6 justify-between";
+                card.setAttribute('data-card-id', file.id);
+                card.innerHTML = `
+      <div class="flex items-center gap-6">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style="background: linear-gradient(135deg, #7f5af0 0%, #00c6fb 100%);">
+          ${initials}
+        </div>
+        <div>
+          <div class="font-bold text-lg text-gray-900">${name}</div>
+          <div class="text-gray-500 text-sm mb-2">${title}</div>
+          <div class="flex items-center text-gray-500 text-sm gap-4">
+            <span><i data-lucide="mail" class="inline w-4 h-4 mr-1"></i> ${email}</span>
+            <span><i data-lucide="phone" class="inline w-4 h-4 mr-1"></i> ${phone}</span>
+            <span><i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i> ${location}</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col items-start gap-2">
+        <div class="text-xs text-gray-500 font-semibold">Key Skills</div>
+        <div class="flex gap-2 flex-wrap">
+          ${skills.map(skill => `<span class=\"bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold\">${skill}</span>`).join('')}
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="flex items-center bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold text-sm">
+            <i data-lucide="star" class="inline w-4 h-4 mr-1"></i> ${matchPercent}%
+          </span>
+          <button class="delete-shortlist-btn ml-2" data-id="${file.id}" title="Delete">
+            <i data-lucide="trash-2" class="inline w-5 h-5 text-red-500"></i>
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-semibold">Schedule Interview</button>
+          <a href="${resumeUrl}" target="_blank" class="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded font-semibold">View Full Resume</a>
+        </div>
+      </div>
+    `;
+                list.appendChild(card);
+            }
+            // Add delete icon event listeners
+            list.querySelectorAll('.delete-shortlist-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-id');
+                    pendingDeleteFilename = id;
+                    document.getElementById('delete-modal').classList.remove('hidden');
+                });
+            });
+            // Re-render Lucide icons
+            if (window.lucide && window.lucide.createIcons) {
+                lucide.createIcons();
             }
         }
 
