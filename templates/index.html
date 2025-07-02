@@ -34,625 +34,690 @@
         </form>
       </div>
     </div>
-    <!-- Tabs Bar: left-aligned, below header, visually distinct -->
-    <div class="w-full bg-transparent border-b mb-0">
-      <div class="flex border-b-0 pl-4">
-                    {% if session.role == 'admin' %}
-                    <button id="tab-job-upload" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-                        <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
-                    </button>
-                    {% else %}
-                    <button id="tab-resume" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-blue-700 border-blue-600 focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-                        <i data-lucide="file-search" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Resume Match
-                    </button>
-                    <button id="tab-audio" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-                        <i data-lucide="mic" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Technical Proficiency
-                    </button>
-                    <button id="tab-question-gen" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-                        <i data-lucide="help-circle" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Interview Question Generator
-                    </button>
-                    <button id="tab-saved" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-                        <i data-lucide="archive" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Saved Analyses
-                    </button>
-                    <button id="tab-shortlisted" type="button" class="tab-btn px-4 py-2 font-semibold border-b-2 text-gray-500 border-transparent focus:outline-none hover:text-blue-700 hover:border-blue-300 whitespace-nowrap">
-                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Shortlisted Resumes
-                    </button>
-                    {% endif %}
-                </div>
-    </div>
-    <!-- Horizontal separator below tabs -->
+    <!-- Horizontal separator below header -->
     <div class="w-full border-b border-gray-200"></div>
-    <!-- Main Content: full width, no centering, no top margin -->
-    <div class="w-full p-0">
-        <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
-                <form id="talentForm" enctype="multipart/form-data" novalidate>
-                    <!-- Resume Match Tab -->
-                    <div id="resume-tab-content">
-                    <div class="flex flex-col md:flex-row items-start w-full">
-                        <div class="w-full md:w-1/2 pr-0 md:pr-8 self-start">
-                        {% include 'tabs/resume_match_tab.html' %}
-                        </div>
-                        <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
-                        <div class="w-full md:w-1/2 pl-0 md:pl-8">
-                            <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
-                            <!-- Loader under Analysis Results -->
-                            <div id="loader-resume" class="text-center p-8 hidden">
-                                <div role="status" class="flex flex-col items-center justify-center">
-                                    <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                        <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                    </svg>
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                                <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-                            </div>
-                            <!-- Save and Shortlist buttons -->
-                            <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
-                                <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                </button>
-                                <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                </button>
-                            </div>
-                            <div id="results-resume" class="p-0">
-                                 <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
-                                 <div class="space-y-6">
-                                    <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
-                                        <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                        <div id="resume_result_resume"></div>
-                                    </div>
-                                 </div>
-                             </div>
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Technical Proficiency Tab -->
-                    <div id="audio-tab-content" class="hidden">
-                    <div class="flex flex-col md:flex-row items-start w-full">
-                        <div class="w-full md:w-1/2 pr-0 md:pr-8 self-start">
-                        {% include 'tabs/technical_proficiency_tab.html' %}
-                        </div>
-                        <div class="hidden md:block w-px bg-gray-200 mx-4"></div>
-                        <div class="w-full md:w-1/2 pl-0 md:pl-8">
-                            <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
-                            <!-- Loader under Analysis Results -->
-                            <div id="loader-audio" class="text-center p-8 hidden">
-                                <div role="status" class="flex flex-col items-center justify-center">
-                                    <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                        <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                    </svg>
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                                <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-                            </div>
-                            <!-- Save and Shortlist buttons -->
-                            <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
-                                <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                </button>
-                                <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                </button>
-                            </div>
-                            <div id="results-audio" class="p-0">
-                                 <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                                 <div class="space-y-6">
-                                    <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
-                                        <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                        <div id="audio_result_audio"></div>
-                                    </div>
-                                 </div>
-                             </div>
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Interview Question Generator Tab -->
-                <div id="question-gen-tab-content" class="hidden w-full text-left">
-                        {% include 'tabs/interview_question_generator_tab.html' %}
-                    </div>
-                    <!-- Saved Analyses Tab -->
-                <div id="saved-tab-content" class="hidden w-full text-left">
-                        {% include 'tabs/saved_analyses_tab.html' %}
-                    </div>
-                    <!-- Shortlisted Resumes Tab -->
-                <div id="shortlisted-tab-content" class="hidden w-full text-left">
-                        {% include 'tabs/shortlisted_resumes_tab.html' %}
-                    </div>
-                <div id="analyze-btn-container" class="mt-2 text-left">
-                        <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
-                            <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
-                        </button>
-                    </div>
-                </form>
+    <!-- Sidebar Layout: Tabs as vertical sidebar below header -->
+    <div class="flex w-full">
+      <!-- Sidebar -->
+      <div class="w-56 min-h-screen bg-white border-r pt-6">
+        <div class="flex flex-col gap-1 pl-0 pr-0">
+          {% if session.role == 'admin' %}
+          <button id="tab-job-upload" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg whitespace-nowrap">
+              <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
+          </button>
+          {% else %}
+          <button id="tab-resume" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+            <span class="flex items-start">
+              <i data-lucide="file-search" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Resume Match</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">AI-powered resume matching</span>
+              </span>
+            </span>
+          </button>
+          <button id="tab-audio" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+            <span class="flex items-start">
+              <i data-lucide="mic" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Technical Proficiency</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">Skill assessment tools</span>
+              </span>
+            </span>
+          </button>
+          <button id="tab-question-gen" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+            <span class="flex items-start">
+              <i data-lucide="help-circle" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Interview Question Generator</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">Question builder</span>
+              </span>
+            </span>
+          </button>
+          <button id="tab-saved" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+            <span class="flex items-start">
+              <i data-lucide="archive" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Saved Analyses</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">Previous assessments</span>
+              </span>
+            </span>
+          </button>
+          <button id="tab-shortlisted" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium border-l-4 border-transparent text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-r-lg">
+            <span class="flex items-start">
+              <i data-lucide="star" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Shortlisted Resumes</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">Candidate pipeline</span>
+              </span>
+            </span>
+          </button>
+          {% endif %}
         </div>
-
-        <!-- Results Modal -->
-        <div id="results-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto relative">
-                <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <i data-lucide="arrow-left" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Back
-                </button>
-                <button id="save-analysis-btn" class="absolute top-4 right-36 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center hidden">
-                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                </button>
-                <button id="shortlist-btn" class="absolute top-4 right-3 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                </button>
-                <!-- Loader -->
-                <div id="loader" class="text-center p-12">
-                    <div role="status" class="flex flex-col items-center justify-center">
-                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                        </svg>
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-                </div>
-
-                <!-- Results -->
-                <div id="results" class="p-6 sm:p-8 hidden">
-                    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Analysis Results</h2>
-                    <div id="meta_info" class="mb-6 text-center text-gray-700"></div>
-                    <div class="space-y-6">
-                        <div id="resume_result_card" class="bg-white p-6 rounded-lg shadow-md">
-                            <!-- <h3 class="text-xl font-semibold text-gray-800 mb-4">Resume Analysis</h3> -->
-                            <div id="resume_result"></div>
+      </div>
+      <!-- Main Content -->
+      <div class="flex-1">
+        <!-- Main Content: full width, no centering, no top margin -->
+        <div class="w-full p-0">
+            <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
+                    <form id="talentForm" enctype="multipart/form-data" novalidate>
+                        <!-- Resume Match Tab -->
+                        <div id="resume-tab-content">
+                        <div class="flex flex-col items-start w-full">
+                            <div class="w-full pr-0 self-start">
+                            {% include 'tabs/resume_match_tab.html' %}
+                            </div>
+                            <div class="w-full pl-0 mt-8">
+                                <div id="analyze-btn-container-resume" class="mt-2 text-left mb-4">
+                                    <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+                                        <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
+                                    </button>
+                                </div>
+                                <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                                <!-- Loader under Analysis Results -->
+                                <div id="loader-resume" class="text-center p-8 hidden">
+                                    <div role="status" class="flex flex-col items-center justify-center">
+                                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                        </svg>
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                                </div>
+                                <!-- Save and Shortlist buttons -->
+                                <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
+                                    <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                                    </button>
+                                    <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                                    </button>
+                                </div>
+                                <div id="results-resume" class="p-0">
+                                     <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
+                                     <div class="space-y-6">
+                                        <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
+                                            <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                            <div id="resume_result_resume"></div>
+                                        </div>
+                                     </div>
+                                 </div>
+                            </div>
                         </div>
-                        <div id="audio_result_card" class="bg-white p-6 rounded-lg shadow-md">
-                            <!-- <h3 class="text-xl font-semibold text-gray-800 mb-4">Audio Analysis</h3> -->
-                            <div id="audio_result"></div>
+                        </div>
+                        <!-- Technical Proficiency Tab -->
+                        <div id="audio-tab-content" class="hidden">
+                        <div class="flex flex-col items-start w-full">
+                            <div class="w-full pr-0 self-start">
+                            {% include 'tabs/technical_proficiency_tab.html' %}
+                            </div>
+                            <div class="w-full pl-0 mt-8">
+                                <div id="analyze-btn-container-audio" class="mt-2 text-left mb-4">
+                                    <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105">
+                                        <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
+                                    </button>
+                                </div>
+                                <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                                <!-- Loader under Analysis Results -->
+                                <div id="loader-audio" class="text-center p-8 hidden">
+                                    <div role="status" class="flex flex-col items-center justify-center">
+                                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                        </svg>
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                                </div>
+                                <!-- Save and Shortlist buttons -->
+                                <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
+                                    <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                                    </button>
+                                    <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                                    </button>
+                                </div>
+                                <div id="results-audio" class="p-0">
+                                     <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+                                     <div class="space-y-6">
+                                        <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
+                                            <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                            <div id="audio_result_audio"></div>
+                                        </div>
+                                     </div>
+                                 </div>
+                            </div>
+                        </div>
+                        </div>
+                        <!-- Interview Question Generator Tab -->
+                    <div id="question-gen-tab-content" class="hidden w-full text-left">
+                            {% include 'tabs/interview_question_generator_tab.html' %}
+                        </div>
+                        <!-- Saved Analyses Tab -->
+                    <div id="saved-tab-content" class="hidden w-full text-left">
+                            {% include 'tabs/saved_analyses_tab.html' %}
+                        </div>
+                        <!-- Shortlisted Resumes Tab -->
+                    <div id="shortlisted-tab-content" class="hidden w-full text-left">
+                            {% include 'tabs/shortlisted_resumes_tab.html' %}
+                        </div>
+                    </form>
+            </div>
+
+            <!-- Results Modal -->
+            <div id="results-overlay" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-full overflow-y-auto relative">
+                    <button id="back-button" class="absolute top-4 left-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i data-lucide="arrow-left" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Back
+                    </button>
+                    <button id="save-analysis-btn" class="absolute top-4 right-36 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center hidden">
+                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                    </button>
+                    <button id="shortlist-btn" class="absolute top-4 right-3 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                    </button>
+                    <!-- Loader -->
+                    <div id="loader" class="text-center p-12">
+                        <div role="status" class="flex flex-col items-center justify-center">
+                            <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                            </svg>
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="results" class="p-6 sm:p-8 hidden">
+                        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Analysis Results</h2>
+                        <div id="meta_info" class="mb-6 text-center text-gray-700"></div>
+                        <div class="space-y-6">
+                            <div id="resume_result_card" class="bg-white p-6 rounded-lg shadow-md">
+                                <!-- <h3 class="text-xl font-semibold text-gray-800 mb-4">Resume Analysis</h3> -->
+                                <div id="resume_result"></div>
+                            </div>
+                            <div id="audio_result_card" class="bg-white p-6 rounded-lg shadow-md">
+                                <!-- <h3 class="text-xl font-semibold text-gray-800 mb-4">Audio Analysis</h3> -->
+                                <div id="audio_result"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2"></div>
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2"></div>
 
-    <!-- Custom Delete Confirmation Modal -->
-    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
-            <div class="text-lg font-semibold mb-4">Delete this saved analysis?</div>
-            <div class="flex justify-center gap-4 mt-6">
-                <button id="delete-modal-confirm" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 font-semibold">Delete</button>
-                <button id="delete-modal-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+        <!-- Custom Delete Confirmation Modal -->
+        <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
+            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+                <div class="text-lg font-semibold mb-4">Delete this saved analysis?</div>
+                <div class="flex justify-center gap-4 mt-6">
+                    <button id="delete-modal-confirm" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 font-semibold">Delete</button>
+                    <button id="delete-modal-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Tab navigation button IDs (define once, globally)
-        const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            // Tab navigation button IDs (define once, globally)
+            const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
 
-        // Tab switching logic
-        const tabResume = document.getElementById('tab-resume');
-        const tabAudio = document.getElementById('tab-audio');
-        const tabQuestionGen = document.getElementById('tab-question-gen');
-        const tabSaved = document.getElementById('tab-saved');
-        const tabShortlisted = document.getElementById('tab-shortlisted');
-        const resumeTabContent = document.getElementById('resume-tab-content');
-        const audioTabContent = document.getElementById('audio-tab-content');
-        const questionGenTabContent = document.getElementById('question-gen-tab-content');
-        const savedTabContent = document.getElementById('saved-tab-content');
-        const shortlistedTabContent = document.getElementById('shortlisted-tab-content');
-        let activeTab = 'resume';
+            // Define tab and content variables
+            const tabResume = document.getElementById('tab-resume');
+            const tabAudio = document.getElementById('tab-audio');
+            const tabQuestionGen = document.getElementById('tab-question-gen');
+            const tabSaved = document.getElementById('tab-saved');
+            const tabShortlisted = document.getElementById('tab-shortlisted');
+            const resumeTabContent = document.getElementById('resume-tab-content');
+            const audioTabContent = document.getElementById('audio-tab-content');
+            const questionGenTabContent = document.getElementById('question-gen-tab-content');
+            const savedTabContent = document.getElementById('saved-tab-content');
+            const shortlistedTabContent = document.getElementById('shortlisted-tab-content');
 
-        const techResumeInput = document.getElementById('tech_resume');
-        let latestAnalysisResult = null;
-
-        tabResume.addEventListener('click', () => {
-            tabResume.classList.add('text-blue-700', 'border-blue-600');
-            tabResume.classList.remove('text-gray-500');
-            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
-            tabAudio.classList.add('text-gray-500');
-            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
-            tabQuestionGen.classList.add('text-gray-500');
-            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
-            tabSaved.classList.add('text-gray-500');
-            tabShortlisted.classList.remove('text-blue-700', 'border-blue-600');
-            tabShortlisted.classList.add('text-gray-500');
-            resumeTabContent.classList.remove('hidden');
-            audioTabContent.classList.add('hidden');
-            questionGenTabContent.classList.add('hidden');
-            savedTabContent.classList.add('hidden');
-            shortlistedTabContent.classList.add('hidden');
-            activeTab = 'resume';
-            document.getElementById('analyze-btn-container').classList.remove('hidden');
-            if (techResumeInput) techResumeInput.required = false;
-        });
-        tabAudio.addEventListener('click', () => {
-            tabAudio.classList.add('text-blue-700', 'border-blue-600');
-            tabAudio.classList.remove('text-gray-500');
-            tabResume.classList.remove('text-blue-700', 'border-blue-600');
-            tabResume.classList.add('text-gray-500');
-            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
-            tabQuestionGen.classList.add('text-gray-500');
-            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
-            tabSaved.classList.add('text-gray-500');
-            tabShortlisted.classList.remove('text-blue-700', 'border-blue-600');
-            tabShortlisted.classList.add('text-gray-500');
-            audioTabContent.classList.remove('hidden');
-            resumeTabContent.classList.add('hidden');
-            questionGenTabContent.classList.add('hidden');
-            savedTabContent.classList.add('hidden');
-            shortlistedTabContent.classList.add('hidden');
-            activeTab = 'audio';
-            document.getElementById('analyze-btn-container').classList.remove('hidden');
-            if (techResumeInput) techResumeInput.required = true;
-        });
-        tabQuestionGen.addEventListener('click', () => {
-            tabQuestionGen.classList.add('text-blue-700', 'border-blue-600');
-            tabQuestionGen.classList.remove('text-gray-500');
-            tabResume.classList.remove('text-blue-700', 'border-blue-600');
-            tabResume.classList.add('text-gray-500');
-            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
-            tabAudio.classList.add('text-gray-500');
-            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
-            tabSaved.classList.add('text-gray-500');
-            tabShortlisted.classList.remove('text-blue-700', 'border-blue-600');
-            tabShortlisted.classList.add('text-gray-500');
-            questionGenTabContent.classList.remove('hidden');
-            resumeTabContent.classList.add('hidden');
-            audioTabContent.classList.add('hidden');
-            savedTabContent.classList.add('hidden');
-            shortlistedTabContent.classList.add('hidden');
-            renderSavedAnalyses();
-            activeTab = 'question-gen';
-            document.getElementById('analyze-btn-container').classList.add('hidden');
-            const resultsOverlay = document.getElementById('results-overlay');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
-            wasResultsOverlayOpen = false;
-            // Also hide the delete modal when switching to Saved Analyses tab
-            const deleteModal = document.getElementById('delete-modal');
-            deleteModal.classList.add('hidden');
-            if (techResumeInput) techResumeInput.required = false;
-        });
-        tabSaved.addEventListener('click', () => {
-            tabSaved.classList.add('text-blue-700', 'border-blue-600');
-            tabSaved.classList.remove('text-gray-500');
-            tabResume.classList.remove('text-blue-700', 'border-blue-600');
-            tabResume.classList.add('text-gray-500');
-            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
-            tabAudio.classList.add('text-gray-500');
-            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
-            tabQuestionGen.classList.add('text-gray-500');
-            tabShortlisted.classList.remove('text-blue-700', 'border-blue-600');
-            tabShortlisted.classList.add('text-gray-500');
-            savedTabContent.classList.remove('hidden');
-            resumeTabContent.classList.add('hidden');
-            audioTabContent.classList.add('hidden');
-            questionGenTabContent.classList.add('hidden');
-            shortlistedTabContent.classList.add('hidden');
-            renderSavedAnalyses();
-            activeTab = 'saved';
-            document.getElementById('analyze-btn-container').classList.add('hidden');
-            const resultsOverlay = document.getElementById('results-overlay');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
-            wasResultsOverlayOpen = false;
-            // Also hide the delete modal when switching to Saved Analyses tab
-            const deleteModal = document.getElementById('delete-modal');
-            deleteModal.classList.add('hidden');
-            if (techResumeInput) techResumeInput.required = false;
-        });
-        tabShortlisted.addEventListener('click', () => {
-            tabShortlisted.classList.add('text-blue-700', 'border-blue-600');
-            tabShortlisted.classList.remove('text-gray-500');
-            tabResume.classList.remove('text-blue-700', 'border-blue-600');
-            tabResume.classList.add('text-gray-500');
-            tabAudio.classList.remove('text-blue-700', 'border-blue-600');
-            tabAudio.classList.add('text-gray-500');
-            tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600');
-            tabQuestionGen.classList.add('text-gray-500');
-            tabSaved.classList.remove('text-blue-700', 'border-blue-600');
-            tabSaved.classList.add('text-gray-500');
-            shortlistedTabContent.classList.remove('hidden');
-            resumeTabContent.classList.add('hidden');
-            audioTabContent.classList.add('hidden');
-            questionGenTabContent.classList.add('hidden');
-            savedTabContent.classList.add('hidden');
-            renderShortlistedResumes();
-            activeTab = 'shortlisted';
-            document.getElementById('analyze-btn-container').classList.add('hidden');
-            const resultsOverlay = document.getElementById('results-overlay');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
-            wasResultsOverlayOpen = false;
-            // Also hide the delete modal when switching to Saved Analyses tab
-            const deleteModal = document.getElementById('delete-modal');
-            deleteModal.classList.add('hidden');
-            if (techResumeInput) techResumeInput.required = false;
-        });
-
-        document.getElementById('talentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            let valid = true;
-
-            // Resume tab
-            const jobDesc = document.getElementById('job_description').value.trim();
-            const resumeInputs = document.querySelectorAll('.resume-file');
-            let resumeFiles = [];
-            resumeInputs.forEach(input => {
-                if (input.files && input.files.length > 0) {
-                    resumeFiles.push(input.files[0]);
-                }
-            });
-            // Technical tab
-            const audioFile = document.getElementById('audio').files[0];
-            const technology = document.getElementById('technology').value;
-
-            // Hide/show errors based on validity
-            if (activeTab === 'resume') {
-                if (!jobDesc) {
-                    document.getElementById('job_description_error').classList.remove('hidden');
-                    valid = false;
-                } else {
-                    document.getElementById('job_description_error').classList.add('hidden');
-                }
-                if (resumeFiles.length === 0) {
-                    document.getElementById('resume_error').classList.remove('hidden');
-                    valid = false;
-                } else {
-                    document.getElementById('resume_error').classList.add('hidden');
-                }
-            } else if (activeTab === 'audio') {
-                if (!audioFile) {
-                    document.getElementById('audio_error').classList.remove('hidden');
-                    valid = false;
-                } else {
-                    document.getElementById('audio_error').classList.add('hidden');
-                }
-                if (!technology) {
-                    document.getElementById('technology_error').classList.remove('hidden');
-                    valid = false;
-                } else {
-                    document.getElementById('technology_error').classList.add('hidden');
-                }
-                // Custom validation for tech_resume
-                if (!techResumeInput.files || techResumeInput.files.length === 0) {
-                    document.getElementById('tech_resume_error').classList.remove('hidden');
-                    valid = false;
-                } else {
-                    document.getElementById('tech_resume_error').classList.add('hidden');
-                }
-            }
-            if (!valid) return;
-            const form = document.getElementById('talentForm');
-            const formData = new FormData();
-            // Add all form fields except resume
-            Array.from(form.elements).forEach(el => {
-                if (el.name && el.type !== 'file' && el.type !== 'submit') {
-                    formData.append(el.name, el.value);
-                }
-            });
-            // Add all selected resume files
-            if (activeTab === 'resume' && resumeFiles.length > 0) {
-                for (let i = 0; i < resumeFiles.length; i++) {
-                    formData.append('resume', resumeFiles[i]);
-                }
-            } else if (activeTab === 'audio') {
-                if (audioFile) formData.append('audio', audioFile);
-            }
-
-            // Use unique IDs for each tab
-            let loaderId, resultsId, actionBtnsId, saveBtnId, shortlistBtnId, metaInfoId, resultCardId, resultDivId;
-            if (activeTab === 'resume') {
-                loaderId = 'loader-resume';
-                resultsId = 'results-resume';
-                actionBtnsId = 'action-btns-resume';
-                saveBtnId = 'save-analysis-btn-resume';
-                shortlistBtnId = 'shortlist-btn-resume';
-                metaInfoId = 'meta_info_resume';
-                resultCardId = 'resume_result_card_resume';
-                resultDivId = 'resume_result_resume';
-            } else if (activeTab === 'audio') {
-                loaderId = 'loader-audio';
-                resultsId = 'results-audio';
-                actionBtnsId = 'action-btns-audio';
-                saveBtnId = 'save-analysis-btn-audio';
-                shortlistBtnId = 'shortlist-btn-audio';
-                metaInfoId = 'meta_info_audio';
-                resultCardId = 'audio_result_card_audio';
-                resultDivId = 'audio_result_audio';
-            }
-
-            // Disable all tab buttons while loading, except the active tab
-            tabIds.forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn && id !== `tab-${activeTab}`) btn.disabled = true;
-            });
-
-            // Show loader, hide results and buttons in right column
-            document.getElementById(loaderId).classList.remove('hidden');
-            document.getElementById(resultsId).classList.add('hidden');
-            document.getElementById(actionBtnsId).classList.add('hidden');
-            // Hide placeholder when analyzing
-            if (activeTab === 'resume') {
-                document.getElementById('placeholder-resume').classList.add('hidden');
-            } else if (activeTab === 'audio') {
-                document.getElementById('placeholder-audio').classList.add('hidden');
-            }
-
-            // Reset Save/Shortlist button state
-            const saveBtn = document.getElementById(saveBtnId);
-            const shortlistBtn = document.getElementById(shortlistBtnId);
-            saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-            saveBtn.classList.remove('bg-green-700', 'cursor-default');
-            saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-            saveBtn.disabled = false;
-            shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-            shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-            shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-            shortlistBtn.disabled = false;
-            lucide.createIcons();
-
-            // CHANGED: Dynamically select endpoint based on active tab
-            const endpoint = (activeTab === 'audio') ? '/process_audio' : '/process';
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            latestAnalysisResult = result; // Store the latest result
-
-            // Hide loader, show results and buttons in right column
-            document.getElementById(loaderId).classList.add('hidden');
-            document.getElementById(resultsId).classList.remove('hidden');
-            document.getElementById(actionBtnsId).classList.remove('hidden');
-
-            // Render results in the correct tab's containers
-            const metaInfoDiv = document.getElementById(metaInfoId);
-            const resultCardDiv = document.getElementById(resultCardId);
-            const resultDiv = document.getElementById(resultDivId);
-            // Clear previous results
-            if (metaInfoDiv) metaInfoDiv.innerHTML = '';
-            if (resultDiv) resultDiv.innerHTML = '';
-            if (resultCardDiv) resultCardDiv.classList.add('hidden');
-            // If no results, show placeholder again
-            if (activeTab === 'resume' && (!result || (!result.resumes && !result.resume_error))) {
-                document.getElementById('placeholder-resume').classList.remove('hidden');
-            } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
-                document.getElementById('placeholder-audio').classList.remove('hidden');
-            }
-            
-            // Show selected technology and audio file name only for audio tab
-            if (activeTab === 'audio') {
-                const selectedTech = document.getElementById('technology').value;
-                const audioInput = document.getElementById('audio');
-                let audioFileName = '';
-                if (audioInput.files && audioInput.files.length > 0) {
-                    audioFileName = audioInput.files[0].name;
-                }
-                metaInfoDiv.innerHTML = `<p><strong>Selected Technology:</strong> ${selectedTech || 'N/A'}</p>` +
-                    (audioFileName ? `<p><strong>Audio File:</strong> ${audioFileName}</p>` : '');
-            } else {
-                metaInfoDiv.innerHTML = '';
-            }
-            
-            if (activeTab === 'resume') {
-            if (Array.isArray(result.resumes) && result.resumes.length > 0) {
-                    resultCardDiv.classList.remove('hidden');
-                // Sort resumes by match percentage in descending order
-                result.resumes.sort((a, b) => {
-                    const scoreA = a.match_percentage || -1;
-                    const scoreB = b.match_percentage || -1;
-                    return scoreB - scoreA;
+            function setActiveTab(tab) {
+                // Remove active classes from all
+                tabIds.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.classList.remove('text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
+                        btn.classList.add('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
+                    }
                 });
-                let allResumesHTML = result.resumes.map((r, idx) => {
-                    if (r.error) {
-                        return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
-                    } else {
-                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                        return `<div class='mb-4 p-4 border border-blue-100 rounded'>
-                            <p><strong>${r.filename}</strong></p>
-                            <div class="flex flex-row gap-6 my-4 items-center justify-center">
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Match %</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutExp${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutCert${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
-                                </div>
-                                <div class="flex flex-col items-center">
-                                    <canvas id="donutRole${idx}" width="80" height="80"></canvas>
-                                    <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
-                                </div>
-                            </div>
-                            <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
-                            <p><strong>Explanation:</strong> ${r.explanation}</p>
-                        </div>`;
-                    }
-                }).join('');
-                    resultDiv.innerHTML = allResumesHTML;
-                // Robust donut rendering: wait for all canvases to exist
-                function renderAllDonutsWhenReady(resumes) {
-                    let tries = 0;
-                    function tryRender() {
-                        let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
-                        if (allReady || tries > 20) {
-                            resumes.forEach((r, idx) => {
-                                if (!r.error) {
-                                    const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                                    renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
-                                    renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
-                                    renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
-                                    renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
-                                    renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
-                                    renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
-                                }
-                            });
-                        } else {
-                            tries++;
-                            setTimeout(tryRender, 100);
-                        }
-                    }
-                    tryRender();
+                // Add active classes to selected
+                const activeBtn = document.getElementById(`tab-${tab}`);
+                if (activeBtn) {
+                    activeBtn.classList.remove('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
+                    activeBtn.classList.add('text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
                 }
-                renderAllDonutsWhenReady(result.resumes);
-            } else if (result.resume_error) {
-                    resultCardDiv.classList.remove('hidden');
-                    resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
             }
-            } else if (activeTab === 'audio') {
-            if (result.transcription || result.audio_error) {
-                    resultCardDiv.classList.remove('hidden');
-                if (result.transcription) {
-                        resultDiv.innerHTML = `
-                        <div class="space-y-4">
-                            <!-- Top row: Technical Score and Explanation -->
-                        <div class="flex flex-col sm:flex-row gap-6">
-                            <div class="flex-1">
-                                <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
-                                <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                    <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutRelevance" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutConfidence" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutCommunication" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Communication</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutClarity" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutProblemSolving" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                            <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
-                                            <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
+
+            // Initial active tab
+            setActiveTab('resume');
+
+            // Wait for DOMContentLoaded to ensure all elements are available
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.lucide && window.lucide.createIcons) {
+                    lucide.createIcons();
+                }
+            });
+
+            const techResumeInput = document.getElementById('tech_resume');
+            let latestAnalysisResult = null;
+
+            if (tabResume) {
+                tabResume.addEventListener('click', () => {
+                    setActiveTab('resume');
+                    if (tabResume) { tabResume.classList.add('text-blue-700', 'border-blue-600'); tabResume.classList.remove('text-gray-500'); }
+                    if (tabAudio) { tabAudio.classList.remove('text-blue-700', 'border-blue-600'); tabAudio.classList.add('text-gray-500'); }
+                    if (tabQuestionGen) { tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600'); tabQuestionGen.classList.add('text-gray-500'); }
+                    if (tabSaved) { tabSaved.classList.remove('text-blue-700', 'border-blue-600'); tabSaved.classList.add('text-gray-500'); }
+                    if (tabShortlisted) { tabShortlisted.classList.remove('text-blue-700', 'border-blue-600'); tabShortlisted.classList.add('text-gray-500'); }
+                    if (resumeTabContent) resumeTabContent.classList.remove('hidden');
+                    if (audioTabContent) audioTabContent.classList.add('hidden');
+                    if (questionGenTabContent) questionGenTabContent.classList.add('hidden');
+                    if (savedTabContent) savedTabContent.classList.add('hidden');
+                    if (shortlistedTabContent) shortlistedTabContent.classList.add('hidden');
+                    activeTab = 'resume';
+                    const analyzeBtn = document.getElementById('analyze-btn-container');
+                    if (analyzeBtn) analyzeBtn.classList.remove('hidden');
+                    if (techResumeInput) techResumeInput.required = false;
+                });
+            }
+            if (tabAudio) {
+                tabAudio.addEventListener('click', () => {
+                    setActiveTab('audio');
+                    if (tabAudio) { tabAudio.classList.add('text-blue-700', 'border-blue-600'); tabAudio.classList.remove('text-gray-500'); }
+                    if (tabResume) { tabResume.classList.remove('text-blue-700', 'border-blue-600'); tabResume.classList.add('text-gray-500'); }
+                    if (tabQuestionGen) { tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600'); tabQuestionGen.classList.add('text-gray-500'); }
+                    if (tabSaved) { tabSaved.classList.remove('text-blue-700', 'border-blue-600'); tabSaved.classList.add('text-gray-500'); }
+                    if (tabShortlisted) { tabShortlisted.classList.remove('text-blue-700', 'border-blue-600'); tabShortlisted.classList.add('text-gray-500'); }
+                    if (audioTabContent) audioTabContent.classList.remove('hidden');
+                    if (resumeTabContent) resumeTabContent.classList.add('hidden');
+                    if (questionGenTabContent) questionGenTabContent.classList.add('hidden');
+                    if (savedTabContent) savedTabContent.classList.add('hidden');
+                    if (shortlistedTabContent) shortlistedTabContent.classList.add('hidden');
+                    activeTab = 'audio';
+                    const analyzeBtn = document.getElementById('analyze-btn-container');
+                    if (analyzeBtn) analyzeBtn.classList.remove('hidden');
+                    if (techResumeInput) techResumeInput.required = true;
+                });
+            }
+            if (tabQuestionGen) {
+                tabQuestionGen.addEventListener('click', () => {
+                    setActiveTab('question-gen');
+                    if (tabQuestionGen) { tabQuestionGen.classList.add('text-blue-700', 'border-blue-600'); tabQuestionGen.classList.remove('text-gray-500'); }
+                    if (tabResume) { tabResume.classList.remove('text-blue-700', 'border-blue-600'); tabResume.classList.add('text-gray-500'); }
+                    if (tabAudio) { tabAudio.classList.remove('text-blue-700', 'border-blue-600'); tabAudio.classList.add('text-gray-500'); }
+                    if (tabSaved) { tabSaved.classList.remove('text-blue-700', 'border-blue-600'); tabSaved.classList.add('text-gray-500'); }
+                    if (tabShortlisted) { tabShortlisted.classList.remove('text-blue-700', 'border-blue-600'); tabShortlisted.classList.add('text-gray-500'); }
+                    if (questionGenTabContent) questionGenTabContent.classList.remove('hidden');
+                    if (resumeTabContent) resumeTabContent.classList.add('hidden');
+                    if (audioTabContent) audioTabContent.classList.add('hidden');
+                    if (savedTabContent) savedTabContent.classList.add('hidden');
+                    if (shortlistedTabContent) shortlistedTabContent.classList.add('hidden');
+                    if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
+                    activeTab = 'question-gen';
+                    const analyzeBtn = document.getElementById('analyze-btn-container');
+                    if (analyzeBtn) analyzeBtn.classList.add('hidden');
+                    const resultsOverlay = document.getElementById('results-overlay');
+                    if (resultsOverlay) {
+                        resultsOverlay.classList.add('hidden');
+                        resultsOverlay.style.display = 'none';
+                        resultsOverlay.style.visibility = 'hidden';
+                    }
+                    wasResultsOverlayOpen = false;
+                    // Also hide the delete modal when switching to Saved Analyses tab
+                    const deleteModal = document.getElementById('delete-modal');
+                    if (deleteModal) deleteModal.classList.add('hidden');
+                    if (techResumeInput) techResumeInput.required = false;
+                });
+            }
+            if (tabSaved) {
+                tabSaved.addEventListener('click', () => {
+                    setActiveTab('saved');
+                    if (tabSaved) { tabSaved.classList.add('text-blue-700', 'border-blue-600'); tabSaved.classList.remove('text-gray-500'); }
+                    if (tabResume) { tabResume.classList.remove('text-blue-700', 'border-blue-600'); tabResume.classList.add('text-gray-500'); }
+                    if (tabAudio) { tabAudio.classList.remove('text-blue-700', 'border-blue-600'); tabAudio.classList.add('text-gray-500'); }
+                    if (tabQuestionGen) { tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600'); tabQuestionGen.classList.add('text-gray-500'); }
+                    if (tabShortlisted) { tabShortlisted.classList.remove('text-blue-700', 'border-blue-600'); tabShortlisted.classList.add('text-gray-500'); }
+                    if (savedTabContent) savedTabContent.classList.remove('hidden');
+                    if (resumeTabContent) resumeTabContent.classList.add('hidden');
+                    if (audioTabContent) audioTabContent.classList.add('hidden');
+                    if (questionGenTabContent) questionGenTabContent.classList.add('hidden');
+                    if (shortlistedTabContent) shortlistedTabContent.classList.add('hidden');
+                    if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
+                    activeTab = 'saved';
+                    const analyzeBtn = document.getElementById('analyze-btn-container');
+                    if (analyzeBtn) analyzeBtn.classList.add('hidden');
+                    const resultsOverlay = document.getElementById('results-overlay');
+                    if (resultsOverlay) {
+                        resultsOverlay.classList.add('hidden');
+                        resultsOverlay.style.display = 'none';
+                        resultsOverlay.style.visibility = 'hidden';
+                    }
+                    wasResultsOverlayOpen = false;
+                    // Also hide the delete modal when switching to Saved Analyses tab
+                    const deleteModal = document.getElementById('delete-modal');
+                    if (deleteModal) deleteModal.classList.add('hidden');
+                    if (techResumeInput) techResumeInput.required = false;
+                });
+            }
+            if (tabShortlisted) {
+                tabShortlisted.addEventListener('click', () => {
+                    setActiveTab('shortlisted');
+                    if (tabShortlisted) { tabShortlisted.classList.add('text-blue-700', 'border-blue-600'); tabShortlisted.classList.remove('text-gray-500'); }
+                    if (tabResume) { tabResume.classList.remove('text-blue-700', 'border-blue-600'); tabResume.classList.add('text-gray-500'); }
+                    if (tabAudio) { tabAudio.classList.remove('text-blue-700', 'border-blue-600'); tabAudio.classList.add('text-gray-500'); }
+                    if (tabQuestionGen) { tabQuestionGen.classList.remove('text-blue-700', 'border-blue-600'); tabQuestionGen.classList.add('text-gray-500'); }
+                    if (tabSaved) { tabSaved.classList.remove('text-blue-700', 'border-blue-600'); tabSaved.classList.add('text-gray-500'); }
+                    if (shortlistedTabContent) shortlistedTabContent.classList.remove('hidden');
+                    if (resumeTabContent) resumeTabContent.classList.add('hidden');
+                    if (audioTabContent) audioTabContent.classList.add('hidden');
+                    if (questionGenTabContent) questionGenTabContent.classList.add('hidden');
+                    if (savedTabContent) savedTabContent.classList.add('hidden');
+                    if (typeof renderShortlistedResumes === 'function') renderShortlistedResumes();
+                    activeTab = 'shortlisted';
+                    const analyzeBtn = document.getElementById('analyze-btn-container');
+                    if (analyzeBtn) analyzeBtn.classList.add('hidden');
+                    const resultsOverlay = document.getElementById('results-overlay');
+                    if (resultsOverlay) {
+                        resultsOverlay.classList.add('hidden');
+                        resultsOverlay.style.display = 'none';
+                        resultsOverlay.style.visibility = 'hidden';
+                    }
+                    wasResultsOverlayOpen = false;
+                    // Also hide the delete modal when switching to Saved Analyses tab
+                    const deleteModal = document.getElementById('delete-modal');
+                    if (deleteModal) deleteModal.classList.add('hidden');
+                    if (techResumeInput) techResumeInput.required = false;
+                });
+            }
+
+            document.getElementById('talentForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                let valid = true;
+
+                // Resume tab
+                const jobDesc = document.getElementById('job_description').value.trim();
+                const resumeInputs = document.querySelectorAll('.resume-file');
+                let resumeFiles = [];
+                resumeInputs.forEach(input => {
+                    if (input.files && input.files.length > 0) {
+                        resumeFiles.push(input.files[0]);
+                    }
+                });
+                // Technical tab
+                const audioFile = document.getElementById('audio').files[0];
+                const technology = document.getElementById('technology').value;
+
+                // Hide/show errors based on validity
+                if (activeTab === 'resume') {
+                    if (!jobDesc) {
+                        document.getElementById('job_description_error').classList.remove('hidden');
+                        valid = false;
+                    } else {
+                        document.getElementById('job_description_error').classList.add('hidden');
+                    }
+                    if (resumeFiles.length === 0) {
+                        document.getElementById('resume_error').classList.remove('hidden');
+                        valid = false;
+                    } else {
+                        document.getElementById('resume_error').classList.add('hidden');
+                    }
+                } else if (activeTab === 'audio') {
+                    if (!audioFile) {
+                        document.getElementById('audio_error').classList.remove('hidden');
+                        valid = false;
+                    } else {
+                        document.getElementById('audio_error').classList.add('hidden');
+                    }
+                    if (!technology) {
+                        document.getElementById('technology_error').classList.remove('hidden');
+                        valid = false;
+                    } else {
+                        document.getElementById('technology_error').classList.add('hidden');
+                    }
+                    // Custom validation for tech_resume
+                    if (!techResumeInput.files || techResumeInput.files.length === 0) {
+                        document.getElementById('tech_resume_error').classList.remove('hidden');
+                        valid = false;
+                    } else {
+                        document.getElementById('tech_resume_error').classList.add('hidden');
+                    }
+                }
+                if (!valid) return;
+                const form = document.getElementById('talentForm');
+                const formData = new FormData();
+                // Add all form fields except resume
+                Array.from(form.elements).forEach(el => {
+                    if (el.name && el.type !== 'file' && el.type !== 'submit') {
+                        formData.append(el.name, el.value);
+                    }
+                });
+                // Add all selected resume files
+                if (activeTab === 'resume' && resumeFiles.length > 0) {
+                    for (let i = 0; i < resumeFiles.length; i++) {
+                        formData.append('resume', resumeFiles[i]);
+                    }
+                } else if (activeTab === 'audio') {
+                    if (audioFile) formData.append('audio', audioFile);
+                }
+
+                // Use unique IDs for each tab
+                let loaderId, resultsId, actionBtnsId, saveBtnId, shortlistBtnId, metaInfoId, resultCardId, resultDivId;
+                if (activeTab === 'resume') {
+                    loaderId = 'loader-resume';
+                    resultsId = 'results-resume';
+                    actionBtnsId = 'action-btns-resume';
+                    saveBtnId = 'save-analysis-btn-resume';
+                    shortlistBtnId = 'shortlist-btn-resume';
+                    metaInfoId = 'meta_info_resume';
+                    resultCardId = 'resume_result_card_resume';
+                    resultDivId = 'resume_result_resume';
+                } else if (activeTab === 'audio') {
+                    loaderId = 'loader-audio';
+                    resultsId = 'results-audio';
+                    actionBtnsId = 'action-btns-audio';
+                    saveBtnId = 'save-analysis-btn-audio';
+                    shortlistBtnId = 'shortlist-btn-audio';
+                    metaInfoId = 'meta_info_audio';
+                    resultCardId = 'audio_result_card_audio';
+                    resultDivId = 'audio_result_audio';
+                }
+
+                // Disable all tab buttons while loading, except the active tab
+                tabIds.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn && id !== `tab-${activeTab}`) btn.disabled = true;
+                });
+
+                // Show loader, hide results and buttons in right column
+                document.getElementById(loaderId).classList.remove('hidden');
+                document.getElementById(resultsId).classList.add('hidden');
+                document.getElementById(actionBtnsId).classList.add('hidden');
+                // Hide placeholder when analyzing
+                if (activeTab === 'resume') {
+                    document.getElementById('placeholder-resume').classList.add('hidden');
+                } else if (activeTab === 'audio') {
+                    document.getElementById('placeholder-audio').classList.add('hidden');
+                }
+
+                // Reset Save/Shortlist button state
+                const saveBtn = document.getElementById(saveBtnId);
+                const shortlistBtn = document.getElementById(shortlistBtnId);
+                saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                saveBtn.classList.remove('bg-green-700', 'cursor-default');
+                saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                saveBtn.disabled = false;
+                shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
+                shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+                shortlistBtn.disabled = false;
+                lucide.createIcons();
+
+                // CHANGED: Dynamically select endpoint based on active tab
+                const endpoint = (activeTab === 'audio') ? '/process_audio' : '/process';
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                latestAnalysisResult = result; // Store the latest result
+
+                // Hide loader, show results and buttons in right column
+                document.getElementById(loaderId).classList.add('hidden');
+                document.getElementById(resultsId).classList.remove('hidden');
+                document.getElementById(actionBtnsId).classList.remove('hidden');
+
+                // Render results in the correct tab's containers
+                const metaInfoDiv = document.getElementById(metaInfoId);
+                const resultCardDiv = document.getElementById(resultCardId);
+                const resultDiv = document.getElementById(resultDivId);
+                // Clear previous results
+                if (metaInfoDiv) metaInfoDiv.innerHTML = '';
+                if (resultDiv) resultDiv.innerHTML = '';
+                if (resultCardDiv) resultCardDiv.classList.add('hidden');
+                // If no results, show placeholder again
+                if (activeTab === 'resume' && (!result || (!result.resumes && !result.resume_error))) {
+                    document.getElementById('placeholder-resume').classList.remove('hidden');
+                } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
+                    document.getElementById('placeholder-audio').classList.remove('hidden');
+                }
+                
+                // Show selected technology and audio file name only for audio tab
+                if (activeTab === 'audio') {
+                    const selectedTech = document.getElementById('technology').value;
+                    const audioInput = document.getElementById('audio');
+                    let audioFileName = '';
+                    if (audioInput.files && audioInput.files.length > 0) {
+                        audioFileName = audioInput.files[0].name;
+                    }
+                    metaInfoDiv.innerHTML = `<p><strong>Selected Technology:</strong> ${selectedTech || 'N/A'}</p>` +
+                        (audioFileName ? `<p><strong>Audio File:</strong> ${audioFileName}</p>` : '');
+                } else {
+                    metaInfoDiv.innerHTML = '';
+                }
+                
+                if (activeTab === 'resume') {
+                if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+                        resultCardDiv.classList.remove('hidden');
+                    // Sort resumes by match percentage in descending order
+                    result.resumes.sort((a, b) => {
+                        const scoreA = a.match_percentage || -1;
+                        const scoreB = b.match_percentage || -1;
+                        return scoreB - scoreA;
+                    });
+                    let allResumesHTML = result.resumes.map((r, idx) => {
+                        if (r.error) {
+                            return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
+                        } else {
+                            const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                            return `<div class='mb-4 p-4 border border-blue-100 rounded'>
+                                <p><strong>${r.filename}</strong></p>
+                                <div class="flex flex-row gap-6 my-4 items-center justify-center">
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Match %</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutSkills${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutExp${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutEdu${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutCert${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutRole${idx}" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
+                                    </div>
+                                </div>
+                                <p><strong>Resume Match:</strong> <span class=\"font-bold text-blue-600\">${r.match_percentage}%</span></p>
+                                <p><strong>Explanation:</strong> ${r.explanation}</p>
+                            </div>`;
+                        }
+                    }).join('');
+                        resultDiv.innerHTML = allResumesHTML;
+                    // Robust donut rendering: wait for all canvases to exist
+                    function renderAllDonutsWhenReady(resumes) {
+                        let tries = 0;
+                        function tryRender() {
+                            let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
+                            if (allReady || tries > 20) {
+                                resumes.forEach((r, idx) => {
+                                    if (!r.error) {
+                                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                                        renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
+                                        renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
+                                        renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
+                                        renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
+                                        renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
+                                        renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
+                                    }
+                                });
+                            } else {
+                                tries++;
+                                setTimeout(tryRender, 100);
+                            }
+                        }
+                        tryRender();
+                    }
+                    renderAllDonutsWhenReady(result.resumes);
+                } else if (result.resume_error) {
+                        resultCardDiv.classList.remove('hidden');
+                        resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
+                }
+                } else if (activeTab === 'audio') {
+                if (result.transcription || result.audio_error) {
+                        resultCardDiv.classList.remove('hidden');
+                    if (result.transcription) {
+                            resultDiv.innerHTML = `
+                            <div class="space-y-4">
+                                <!-- Top row: Technical Score and Explanation -->
+                            <div class="flex flex-col sm:flex-row gap-6">
+                                <div class="flex-1">
+                                    <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
+                                    <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutRelevance" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutConfidence" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Confidence</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutCommunication" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Communication</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutClarity" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Clarity</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutProblemSolving" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Problem-Solving</div>
+                                            </div>
+                                            <div class="flex flex-col items-center">
+                                                <canvas id="donutTechnicalKnowledge" width="120" height="120"></canvas>
+                                                <div class="mt-2 text-center text-sm font-semibold">Technical Knowledge</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
