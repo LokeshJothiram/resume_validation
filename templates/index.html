@@ -72,6 +72,15 @@
       <!-- Sidebar: fixed -->
       <div id="fixed-sidebar" class="fixed top-16 left-0 w-56 h-full bg-white border-r pt-4 z-40">
         <div class="flex flex-col gap-1 pl-0 pr-0">
+          <button id="tab-dashboard" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
+            <span class="flex items-start">
+              <i data-lucide="layout-dashboard" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
+              <span class="flex flex-col items-start">
+                <span>Dashboard</span>
+                <span class="text-xs text-gray-400 font-normal leading-tight">Overview and analytics</span>
+              </span>
+            </span>
+          </button>
           {% if session.role == 'admin' %}
           <button id="tab-job-upload" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
               <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
@@ -130,100 +139,175 @@
         <!-- Main Content: full width, no centering, no top margin -->
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
-                    <form id="talentForm" enctype="multipart/form-data" novalidate>
-                        <!-- Resume Match Tab -->
-                        <div id="resume-tab-content">
-                        <div class="flex flex-col items-start w-full">
-                            <div class="w-full pr-0 self-start">
-                            {% include 'tabs/resume_match_tab.html' %}
+                <!-- Dashboard Tab Content -->
+                <div id="dashboard-tab-content">
+                  <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome to AI Talent Assistant</h1>
+                  <p class="text-lg text-gray-500 mb-6">Streamline your hiring process with AI-powered tools</p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+                      <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i>Resumes Analyzed</div>
+                      <div class="text-3xl font-bold text-gray-900 mb-1">1,247</div>
+                      <div class="text-green-500 text-xs font-semibold">+12% from last month</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+                      <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i>Skills Assessed</div>
+                      <div class="text-3xl font-bold text-gray-900 mb-1">856</div>
+                      <div class="text-green-500 text-xs font-semibold">+8% from last month</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+                      <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i>Interviews Generated</div>
+                      <div class="text-3xl font-bold text-gray-900 mb-1">423</div>
+                      <div class="text-green-500 text-xs font-semibold">+15% from last month</div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+                      <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i>Shortlisted Candidates</div>
+                      <div class="text-3xl font-bold text-gray-900 mb-1">89</div>
+                      <div class="text-green-500 text-xs font-semibold">+22% from last month</div>
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow p-6">
+                      <div class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</div>
+                      <div class="text-gray-400 text-sm mb-4">Latest actions in your talent pipeline</div>
+                      <div class="space-y-3">
+                        <div class="bg-blue-50 rounded-lg p-3 flex items-center gap-3">
+                          <i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>
+                          <span class="text-gray-700 text-sm">Resume analyzed for Frontend Developer</span>
+                          <span class="ml-auto text-xs text-gray-400">2 minutes ago</span>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-3 flex items-center gap-3">
+                          <i data-lucide="help-circle" class="w-5 h-5 text-purple-400"></i>
+                          <span class="text-gray-700 text-sm">Interview questions generated</span>
+                          <span class="ml-auto text-xs text-gray-400">15 minutes ago</span>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3 flex items-center gap-3">
+                          <i data-lucide="users" class="w-5 h-5 text-green-400"></i>
+                          <span class="text-gray-700 text-sm">Candidate shortlisted</span>
+                          <span class="ml-auto text-xs text-gray-400">30 minutes ago</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6">
+                      <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
+                      <div class="text-gray-400 text-sm mb-4">Get started with these common tasks</div>
+                      <div class="space-y-3">
+                        <div class="bg-blue-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition">
+                          <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i>
+                          <div>
+                            <div class="text-gray-700 text-sm font-semibold">Upload New Resume</div>
+                            <div class="text-xs text-gray-400">Start matching candidates</div>
+                          </div>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition">
+                          <i data-lucide="mic" class="w-5 h-5 text-purple-400"></i>
+                          <div>
+                            <div class="text-gray-700 text-sm font-semibold">Create Skill Assessment</div>
+                            <div class="text-xs text-gray-400">Test technical abilities</div>
+                          </div>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-green-100 transition">
+                          <i data-lucide="help-circle" class="w-5 h-5 text-green-400"></i>
+                          <div>
+                            <div class="text-gray-700 text-sm font-semibold">Generate Interview Questions</div>
+                            <div class="text-xs text-gray-400">Generate common tasks</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Resume Match Tab -->
+                <div id="resume-tab-content">
+                <div class="flex flex-col items-start w-full">
+                    <div class="w-full pr-0 self-start">
+                    {% include 'tabs/resume_match_tab.html' %}
+                    </div>
+                    <div class="w-full pl-0 mt-8">
+                        <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                        <!-- Loader under Analysis Results -->
+                        <div id="loader-resume" class="text-center p-8 hidden">
+                            <div role="status" class="flex flex-col items-center justify-center">
+                                <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                    <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                </svg>
+                                <span class="sr-only">Loading...</span>
                             </div>
-                            <div class="w-full pl-0 mt-8">
-                                <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
-                                <!-- Loader under Analysis Results -->
-                                <div id="loader-resume" class="text-center p-8 hidden">
-                                    <div role="status" class="flex flex-col items-center justify-center">
-                                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                        </svg>
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                            <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                        </div>
+                        <!-- Save and Shortlist buttons -->
+                        <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
+                            <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                            </button>
+                            <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                            </button>
+                        </div>
+                        <div id="results-resume" class="p-0">
+                             <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
+                             <div class="space-y-6">
+                                <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
+                                    <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                    <div id="resume_result_resume"></div>
                                 </div>
-                                <!-- Save and Shortlist buttons -->
-                                <div id="action-btns-resume" class="flex gap-4 mb-4 hidden">
-                                    <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                    </button>
-                                    <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                    </button>
-                                </div>
-                                <div id="results-resume" class="p-0">
-                                     <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
-                                     <div class="space-y-6">
-                                        <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
-                                            <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                            <div id="resume_result_resume"></div>
-                                        </div>
-                                     </div>
-                                 </div>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+                </div>
+                <!-- Technical Proficiency Tab -->
+                <div id="audio-tab-content" class="hidden">
+                <div class="flex flex-col items-start w-full">
+                    <div class="w-full pr-0 self-start">
+                    {% include 'tabs/technical_proficiency_tab.html' %}
+                    </div>
+                    <div class="w-full pl-0 mt-8">
+                        <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
+                        <!-- Loader under Analysis Results -->
+                        <div id="loader-audio" class="text-center p-8 hidden">
+                            <div role="status" class="flex flex-col items-center justify-center">
+                                <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                                    <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                                </svg>
+                                <span class="sr-only">Loading...</span>
                             </div>
+                            <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
                         </div>
+                        <!-- Save and Shortlist buttons -->
+                        <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
+                            <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
+                                <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                            </button>
+                            <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
+                                <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                            </button>
                         </div>
-                        <!-- Technical Proficiency Tab -->
-                        <div id="audio-tab-content" class="hidden">
-                        <div class="flex flex-col items-start w-full">
-                            <div class="w-full pr-0 self-start">
-                            {% include 'tabs/technical_proficiency_tab.html' %}
-                            </div>
-                            <div class="w-full pl-0 mt-8">
-                                <h2 class="text-2xl font-bold mb-4 text-gray-800">Analysis Results</h2>
-                                <!-- Loader under Analysis Results -->
-                                <div id="loader-audio" class="text-center p-8 hidden">
-                                    <div role="status" class="flex flex-col items-center justify-center">
-                                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                        </svg>
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                        <div id="results-audio" class="p-0">
+                             <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+                             <div class="space-y-6">
+                                <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
+                                    <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
+                                    <div id="audio_result_audio"></div>
                                 </div>
-                                <!-- Save and Shortlist buttons -->
-                                <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
-                                    <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                    </button>
-                                    <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                    </button>
-                                </div>
-                                <div id="results-audio" class="p-0">
-                                     <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                                     <div class="space-y-6">
-                                        <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
-                                            <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                            <div id="audio_result_audio"></div>
-                                        </div>
-                                     </div>
-                                 </div>
-                            </div>
-                        </div>
-                        </div>
-                        <!-- Interview Question Generator Tab -->
-                    <div id="question-gen-tab-content" class="hidden w-full text-left">
-                            {% include 'tabs/interview_question_generator_tab.html' %}
-                        </div>
-                        <!-- Saved Analyses Tab -->
-                    <div id="saved-tab-content" class="hidden w-full text-left">
-                            {% include 'tabs/saved_analyses_tab.html' %}
-                        </div>
-                        <!-- Shortlisted Resumes Tab -->
-                    <div id="shortlisted-tab-content" class="hidden w-full text-left">
-                            {% include 'tabs/shortlisted_resumes_tab.html' %}
-                        </div>
-                    </form>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+                </div>
+                <!-- Interview Question Generator Tab -->
+                <div id="question-gen-tab-content" class="hidden w-full text-left">
+                    {% include 'tabs/interview_question_generator_tab.html' %}
+                </div>
+                <!-- Saved Analyses Tab -->
+                <div id="saved-tab-content" class="hidden w-full text-left">
+                    {% include 'tabs/saved_analyses_tab.html' %}
+                </div>
+                <!-- Shortlisted Resumes Tab -->
+                <div id="shortlisted-tab-content" class="hidden w-full text-left">
+                    {% include 'tabs/shortlisted_resumes_tab.html' %}
+                </div>
             </div>
 
             <!-- Results Modal -->
@@ -286,8 +370,57 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            // Tab navigation button IDs (define once, globally)
-            const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
+            // Tab switching logic
+            const tabIds = [
+                'tab-dashboard',
+                'tab-resume',
+                'tab-audio',
+                'tab-question-gen',
+                'tab-saved',
+                'tab-shortlisted',
+                'tab-job-upload'
+            ];
+            const tabContentIds = [
+                'dashboard-tab-content',
+                'resume-tab-content',
+                'audio-tab-content',
+                'question-gen-tab-content',
+                'saved-tab-content',
+                'shortlisted-tab-content',
+                'job-upload-tab-content'
+            ];
+            // Hide all tab contents
+            function hideAllTabs() {
+                tabContentIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                tabIds.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) btn.classList.remove('active-gradient');
+                });
+            }
+            // Show a tab by id
+            function showTab(tabId, contentId) {
+                hideAllTabs();
+                const btn = document.getElementById(tabId);
+                const content = document.getElementById(contentId);
+                if (btn) btn.classList.add('active-gradient');
+                if (content) content.style.display = '';
+                window.activeTab = tabId.replace('tab-', '');
+                lucide.createIcons();
+            }
+            // Add event listeners
+            tabIds.forEach((tabId, idx) => {
+                const btn = document.getElementById(tabId);
+                if (btn && tabContentIds[idx]) {
+                    btn.addEventListener('click', () => showTab(tabId, tabContentIds[idx]));
+                }
+            });
+            // On page load, show Dashboard by default
+            document.addEventListener('DOMContentLoaded', function() {
+                showTab('tab-dashboard', 'dashboard-tab-content');
+            });
 
             // Define tab and content variables
             const tabResume = document.getElementById('tab-resume');
