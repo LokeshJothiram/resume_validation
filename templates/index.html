@@ -43,99 +43,47 @@
 <body class="bg-gray-50">
     <!-- Wrap the header in a fixed div -->
     <div id="fixed-header" class="fixed top-0 left-0 w-full z-50 bg-white shadow" style="height: 64px;">
-      <!-- Move your header content here (from the original header location) -->
-      <!-- Header: Gradient Title (left), Logout (right) -->
       <div class="flex items-center justify-between w-full py-2 px-6">
         <!-- Gradient Title Left -->
-        <span class="header-gradient font-bold text-2xl sm:text-2xl">AI Talent Assistant</span>
-        <div class="flex items-center gap-4">
-          <!-- Search and Icons (static, as per image) -->
-          <div class="flex items-center gap-3">
-            <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 transition" style="min-width: 260px;">
-              <input type="text" placeholder="Enter your search request..." class="bg-transparent outline-none border-none text-gray-500 w-full placeholder-gray-400 text-base px-1 focus:ring-0 focus:outline-none" style="min-width: 160px;" />
-              <i data-lucide="search" class="w-5 h-5 text-gray-400 ml-2"></i>
-            </div>
-            <button class="bg-white rounded-full p-2 shadow border border-gray-200"><i data-lucide="map-pin" class="w-5 h-5 text-gray-400"></i></button>
-            <button class="bg-white rounded-full p-2 shadow border border-gray-200"><i data-lucide="bell" class="w-5 h-5 text-gray-400"></i></button>
+        <span class="flex items-center font-bold text-2xl sm:text-2xl">
+          <span style="display:inline-block;width:22px;height:18px;position:relative;margin-right:8px;">
+            <span style="display:block;width:100%;height:100%;background:linear-gradient(90deg, #2563eb 0%, #a21caf 100%);clip-path:polygon(0 0, 80% 0, 100% 25%, 80% 50%, 100% 75%, 80% 100%, 0 100%);border-radius:2px;"></span>
+          </span>
+          <span class="header-gradient">TalentEdge AI</span>
+        </span>
+        <!-- Navigation Tabs Center -->
+        <div class="flex gap-2 ml-8">
+          <button id="tab-dashboard" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
+          {% if session.role == 'admin' %}
+          <button id="tab-job-upload" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Job Description Upload</button>
+          {% else %}
+          <button id="tab-resume" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
+          <button id="tab-audio" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Technical Proficiency</button>
+          <button id="tab-question-gen" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Interview Question Generator</button>
+          <button id="tab-saved" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Saved Analyses</button>
+          <button id="tab-shortlisted" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Shortlisted Resumes</button>
+          {% endif %}
+        </div>
+        <!-- Profile & Logout Right -->
+        <div class="relative flex items-center gap-4">
+          <button id="profile-btn" type="button" class="focus:outline-none">
             <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-9 h-9 rounded-full object-cover border border-gray-200" />
+          </button>
+          <!-- Profile Dropdown (hidden by default) -->
+          <div id="profile-dropdown" class="absolute right-0 mt-24 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 hidden z-50">
+            <form action="{{ url_for('logout') }}" method="post">
+              <button type="submit" id="logout" class="logout-btn w-full text-left px-4 py-2 flex items-center gap-2">
+                <i data-lucide="log-out" class="inline w-4 h-4 align-text-bottom"></i> Logout
+              </button>
+            </form>
           </div>
-          <!-- Logout Right -->
-          <form action="{{ url_for('logout') }}" method="post">
-            <button type="submit" id="logout" class="logout-btn flex items-center px-4 py-2 border border-gray-300 rounded-lg font-mono font-semibold bg-white hover:bg-gray-100 transition">
-              <i data-lucide="log-out" class="inline w-4 h-4 mr-2 align-text-bottom"></i> Logout
-            </button>
-          </form>
         </div>
       </div>
     </div>
     <div class="flex w-full">
-      <!-- Sidebar: fixed -->
-      <div id="fixed-sidebar" class="fixed top-16 left-0 w-56 h-full bg-white border-r pt-4 z-40">
-        <div class="flex flex-col gap-1 pl-0 pr-0">
-          <button id="tab-dashboard" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
-            <span class="flex items-start">
-              <i data-lucide="layout-dashboard" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
-              <span class="flex flex-col items-start">
-                <span>Dashboard</span>
-                <span class="text-xs text-gray-400 font-normal leading-tight">Overview and analytics</span>
-              </span>
-            </span>
-          </button>
-          {% if session.role == 'admin' %}
-          <button id="tab-job-upload" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">
-              <i data-lucide="upload" class="inline w-4 h-4 mr-1 align-text-bottom"></i> Job Description Upload
-          </button>
-          {% else %}
-          <button id="tab-resume" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
-            <span class="flex items-start">
-              <i data-lucide="file-search" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
-              <span class="flex flex-col items-start">
-                <span>Resume Match</span>
-                <span class="text-xs text-gray-400 font-normal leading-tight">AI-powered resume matching</span>
-              </span>
-            </span>
-          </button>
-          <button id="tab-audio" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
-            <span class="flex items-start">
-              <i data-lucide="mic" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
-              <span class="flex flex-col items-start">
-                <span>Technical Proficiency</span>
-                <span class="text-xs text-gray-400 font-normal leading-tight">Skill assessment tools</span>
-              </span>
-            </span>
-          </button>
-          <button id="tab-question-gen" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
-            <span class="flex items-start">
-              <i data-lucide="help-circle" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
-              <span class="flex flex-col items-start">
-                <span>Interview Question Generator</span>
-                <span class="text-xs text-gray-400 font-normal leading-tight">Question builder</span>
-              </span>
-            </span>
-          </button>
-          <button id="tab-saved" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
-            <span class="flex items-start">
-              <i data-lucide="bookmark" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
-              <span class="flex flex-col items-start">
-                <span>Saved Analyses</span>
-                <span class="text-xs text-gray-400 font-normal leading-tight">Previous assessments</span>
-              </span>
-            </span>
-          </button>
-          <button id="tab-shortlisted" type="button" class="tab-btn w-full text-left px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">
-            <span class="flex items-start">
-              <i data-lucide="users" class="inline w-5 h-5 mt-1 mr-2 align-text-bottom"></i>
-              <span class="flex flex-col items-start">
-                <span>Shortlisted Resumes</span>
-                <span class="text-xs text-gray-400 font-normal leading-tight">Candidate pipeline</span>
-              </span>
-            </span>
-          </button>
-          {% endif %}
-        </div>
-      </div>
+      <!-- Sidebar removed -->
       <!-- Main Content: scrollable -->
-      <div class="ml-56 mt-16 h-[calc(100vh-64px)] overflow-y-auto w-full">
+      <div class="mt-16 h-[calc(100vh-64px)] overflow-y-auto w-full">
         <!-- Main Content: full width, no centering, no top margin -->
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
@@ -1824,6 +1772,25 @@
                 localStorage.clear();
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          const profileBtn = document.getElementById('profile-btn');
+          const profileDropdown = document.getElementById('profile-dropdown');
+          if (profileBtn && profileDropdown) {
+            profileBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              profileDropdown.classList.toggle('hidden');
+            });
+            document.addEventListener('click', function(e) {
+              if (!profileDropdown.classList.contains('hidden')) {
+                profileDropdown.classList.add('hidden');
+              }
+            });
+            profileDropdown.addEventListener('click', function(e) {
+              e.stopPropagation();
+            });
+          }
+        });
     </script>
 </body>
 </html>
