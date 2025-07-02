@@ -239,7 +239,7 @@
         </div>
 
         <!-- Toast Notification -->
-        <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2"></div>
+        <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2" style="pointer-events: none;"></div>
 
         <!-- Custom Delete Confirmation Modal -->
         <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
@@ -1370,43 +1370,43 @@
         }
 
         // --- Interview Question Generator Tab Logic ---
+        function setTabNavigationEnabled(enabled) {
+            const tabIds = ['tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
+            tabIds.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    // Only disable if not the active tab
+                    if (id !== `tab-${activeTab}`) {
+                        btn.disabled = !enabled;
+                        if (!enabled) {
+                            btn.classList.add('opacity-50', 'pointer-events-none');
+                        } else {
+                            btn.classList.remove('opacity-50', 'pointer-events-none');
+                        }
+                    } else {
+                        // Always keep the active tab enabled and styled
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'pointer-events-none');
+                    }
+                }
+            });
+        }
         document.getElementById('generate-questions-btn').addEventListener('click', async function() {
-            // Force hide results overlay if visible
-            const resultsOverlay = document.getElementById('results-overlay');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
-            setTimeout(() => {
-                resultsOverlay.classList.add('hidden');
-                resultsOverlay.style.display = 'none';
-                resultsOverlay.style.visibility = 'hidden';
-            }, 100);
-
             // Validation for Interview Question Generator
             let valid = true;
-            // const tech = document.getElementById('question_gen_technology').value;
             const jd = document.getElementById('question_gen_jd').value.trim();
             const numQuestions = parseInt(document.getElementById('num_questions').value, 10) || 5;
-            // const techError = document.getElementById('question_gen_technology_error');
             const jdError = document.getElementById('question_gen_jd_error');
             const numQuestionsError = document.getElementById('num_questions_error');
-            /* if (!tech) {
-                techError.classList.remove('hidden');
-                valid = false;
-            } else {
-                techError.classList.add('hidden');
-            } */
             if (!jd) {
                 jdError.classList.remove('hidden');
                 valid = false;
             } else {
                 jdError.classList.add('hidden');
             }
-            // New: Validate number of questions
             if (numQuestions < 1 || numQuestions > 20) {
                 numQuestionsError.classList.remove('hidden');
                 valid = false;
-            } else {
                 numQuestionsError.classList.add('hidden');
             }
             if (!valid) return;
@@ -1416,6 +1416,7 @@
             loader.classList.remove('hidden');
             resultDiv.classList.add('hidden');
             listPre.textContent = '';
+            setTabNavigationEnabled(false); // Disable tabs while loading
             try {
                 const resp = await fetch('/generate_questions', {
                     method: 'POST',
@@ -1424,6 +1425,7 @@
                 });
                 const data = await resp.json();
                 loader.classList.add('hidden');
+                setTabNavigationEnabled(true); // Enable tabs after loading
                 if (data.questions && Array.isArray(data.questions)) {
                     listPre.textContent = data.questions.map((q, i) => `${i+1}. ${q}`).join('\n');
                     resultDiv.classList.remove('hidden');
@@ -1432,36 +1434,19 @@
                 }
             } catch (e) {
                 loader.classList.add('hidden');
+                setTabNavigationEnabled(true); // Enable tabs after loading
                 showToast('Error generating questions.', 'error');
             }
         });
         document.getElementById('copy-questions-btn').addEventListener('click', function() {
-            // Force hide results overlay if visible
-            const resultsOverlay = document.getElementById('results-overlay');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
-            setTimeout(() => {
-                resultsOverlay.classList.add('hidden');
-                resultsOverlay.style.display = 'none';
-                resultsOverlay.style.visibility = 'hidden';
-            }, 100);
+            setTabNavigationEnabled(true); // Always enable tabs after copy
             const listPre = document.getElementById('question-gen-list');
             navigator.clipboard.writeText(listPre.textContent).then(() => {
                 showToast('Questions copied!', 'success');
             });
         });
         document.getElementById('download-questions-btn').addEventListener('click', function() {
-            // Force hide results overlay if visible
-            const resultsOverlay = document.getElementById('results-overlay');
-            resultsOverlay.classList.add('hidden');
-            resultsOverlay.style.display = 'none';
-            resultsOverlay.style.visibility = 'hidden';
-            setTimeout(() => {
-                resultsOverlay.classList.add('hidden');
-                resultsOverlay.style.display = 'none';
-                resultsOverlay.style.visibility = 'hidden';
-            }, 100);
+            setTabNavigationEnabled(true); // Always enable tabs after download
             const listPre = document.getElementById('question-gen-list');
             const blob = new Blob([listPre.textContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
