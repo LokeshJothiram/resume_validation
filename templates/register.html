@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AI Talent Acquisition Assistant</title>
+    <title>Register - AI Talent Acquisition Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='tringapps_inc_logo.jpeg') }}">
@@ -11,13 +11,13 @@
 <body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center">
     <div class="mb-8 text-center relative -top-6">
         <img src="{{ url_for('static', filename='tringapps_inc_logo.jpeg') }}" alt="Tringapps Logo" class="mx-auto mb-4 w-20 h-20 shadow" />
-        <h1 class="text-3xl font-bold text-gray-800">Welcome to Tringapps!</h1>
-        <p class="text-gray-500 mt-2">Sign in to access the AI Talent Acquisition Assistant and streamline your hiring process.</p>
+        <h1 class="text-3xl font-bold text-gray-800">Register for Tringapps</h1>
+        <p class="text-gray-500 mt-2">Create an account to access the AI Talent Acquisition Assistant.</p>
     </div>
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm relative -top-10">
         <div class="flex flex-col items-center mb-6">
-            <i data-lucide="user" class="w-10 h-10 text-blue-600 mb-2"></i>
-            <h2 class="text-2xl font-bold text-gray-800">Login</h2>
+            <i data-lucide="user-plus" class="w-10 h-10 text-green-600 mb-2"></i>
+            <h2 class="text-2xl font-bold text-gray-800">Register</h2>
         </div>
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -31,32 +31,26 @@
                 <label for="username" class="block text-gray-700 mb-1">Username</label>
                 <input type="text" id="username" name="username" class="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" required autofocus>
             </div>
-            <div class="mb-6 relative">
+            <div class="mb-6">
                 <label for="password" class="block text-gray-700 mb-1">Password</label>
-                <input type="password" id="password" name="password" class="w-full p-2 pr-12 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" required>
-                <button type="button" id="togglePassword" tabindex="-1" class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 focus:outline-none p-1">
-                    <i data-lucide="eye" id="eyeIcon" class="w-5 h-5"></i>
-                </button>
+                <input type="password" id="password" name="password" class="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" required>
             </div>
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Login</button>
+            <div class="mb-6">
+                <label for="role" class="block text-gray-700 mb-1">Role</label>
+                <select id="role" name="role" class="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500">
+                    <option value="user">User</option>
+                    <option value="hr">HR</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700 transition">Register</button>
         </form>
         <div class="mt-4 text-center">
-            <a href="{{ url_for('auth.register') }}" class="text-blue-600 hover:underline">Don't have an account? Register</a>
+            <a href="{{ url_for('auth.login') }}" class="text-blue-600 hover:underline">Already have an account? Login</a>
         </div>
     </div>
     <script>
-      localStorage.clear();
       lucide.createIcons();
-      const passwordInput = document.getElementById('password');
-      const togglePassword = document.getElementById('togglePassword');
-      const eyeIcon = document.getElementById('eyeIcon');
-
-      togglePassword.addEventListener('click', function() {
-          const isPassword = passwordInput.type === 'password';
-          passwordInput.type = isPassword ? 'text' : 'password';
-          eyeIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
-          lucide.createIcons();
-      });
     </script>
 </body>
 </html> 
