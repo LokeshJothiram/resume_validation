@@ -285,6 +285,33 @@
             </div>
         </div>
 
+        <!-- Add User Modal -->
+        <div id="add-user-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
+            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+                <div class="text-lg font-semibold mb-4">Add New User</div>
+                <form id="add-user-form" class="space-y-4">
+                    <div>
+                        <input type="text" id="add-user-username" class="w-full p-2 border border-gray-300 rounded" placeholder="Username" required />
+                    </div>
+                    <div>
+                        <input type="password" id="add-user-password" class="w-full p-2 border border-gray-300 rounded" placeholder="Password" required />
+                    </div>
+                    <div>
+                        <select id="add-user-role" class="w-full p-2 border border-gray-300 rounded" required>
+                            <option value="">Select Role</option>
+                            <option value="hr">HR</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div id="add-user-error" class="text-red-600 text-sm hidden"></div>
+                    <div class="flex justify-center gap-4 mt-6">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold">Add</button>
+                        <button type="button" id="add-user-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
@@ -2237,21 +2264,48 @@
         }
         // Add User, Import, Export buttons
         const addUserBtn = document.getElementById('addUserBtn');
-        if (addUserBtn) addUserBtn.onclick = () => alert('Add User: Not implemented yet');
-        const importUsersBtn = document.getElementById('importUsersBtn');
-        if (importUsersBtn) importUsersBtn.onclick = () => alert('Import: Not implemented yet');
-        const exportUsersBtn = document.getElementById('exportUsersBtn');
-        if (exportUsersBtn) exportUsersBtn.onclick = async () => {
-          const resp = await fetch('/admin_users/export');
-          const data = await resp.json();
-          const blob = new Blob([JSON.stringify(data.users, null, 2)], {type: 'application/json'});
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'users_export.json';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        const addUserModal = document.getElementById('add-user-modal');
+        const addUserForm = document.getElementById('add-user-form');
+        const addUserCancel = document.getElementById('add-user-cancel');
+        const addUserError = document.getElementById('add-user-error');
+        if (addUserBtn) addUserBtn.onclick = () => {
+          addUserError.classList.add('hidden');
+          addUserForm.reset();
+          addUserModal.classList.remove('hidden');
+        };
+        if (addUserCancel) addUserCancel.onclick = () => {
+          addUserModal.classList.add('hidden');
+        };
+        if (addUserForm) addUserForm.onsubmit = async (e) => {
+          e.preventDefault();
+          addUserError.classList.add('hidden');
+          const username = document.getElementById('add-user-username').value.trim();
+          const password = document.getElementById('add-user-password').value;
+          const role = document.getElementById('add-user-role').value;
+          if (!username || !password || !role) {
+            addUserError.textContent = 'All fields are required.';
+            addUserError.classList.remove('hidden');
+            return;
+          }
+          try {
+            const resp = await fetch('/admin_users', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, password, role })
+            });
+            const data = await resp.json();
+            if (resp.ok && data.status === 'success') {
+              addUserModal.classList.add('hidden');
+              showToast('User added!', 'success');
+              renderUserManagement();
+            } else {
+              addUserError.textContent = data.error || 'Failed to add user.';
+              addUserError.classList.remove('hidden');
+            }
+          } catch (err) {
+            addUserError.textContent = 'Error adding user.';
+            addUserError.classList.remove('hidden');
+          }
         };
 
         // For mobile nav as well
