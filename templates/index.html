@@ -2135,12 +2135,8 @@
           const roleSel = document.getElementById('logRoleFilter');
           const actionSel = document.getElementById('logActionFilter');
           const container = document.getElementById('activityLogsContainer');
-          container.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
-          // Fetch logs
-          let url = '/activity_logs?limit=100';
-          if (userSel && userSel.value !== 'all') url += `&user_id=${userSel.value}`;
-          if (roleSel && roleSel.value !== 'all') url += `&role=${roleSel.value}`;
-          if (actionSel && actionSel.value !== 'all') url += `&action_type=${actionSel.value}`;
+          container.innerHTML = '<div class="text-gray-400 text-center py-12">Loading...</div>';
+          let url = '/activity_logs?limit=1000';
           let logs = [];
           try {
             const resp = await fetch(url);
@@ -2149,29 +2145,49 @@
             container.innerHTML = '<div class="text-red-500 text-center">Failed to load logs.</div>';
             return;
           }
-          if (!Array.isArray(logs) || !logs.length) {
-            container.innerHTML = '<div class="text-gray-500 text-center">No activity logs found.</div>';
+          // Filter client-side
+          let filtered = logs;
+          if (userSel && userSel.value !== 'all') filtered = filtered.filter(l => l.user_id == userSel.value);
+          if (roleSel && roleSel.value !== 'all') filtered = filtered.filter(l => l.role === roleSel.value);
+          if (actionSel && actionSel.value !== 'all') filtered = filtered.filter(l => l.action_type === actionSel.value);
+          if (!filtered.length) {
+            container.innerHTML = '<div class="text-gray-500 text-center py-12">No activity logs found.</div>';
             return;
           }
-          // Render table
-          let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white"><thead><tr class="bg-gray-100">
-            <th class="px-2 py-1 border-b text-left">Time</th>
-            <th class="px-2 py-1 border-b text-left">User</th>
-            <th class="px-2 py-1 border-b text-left">Role</th>
-            <th class="px-2 py-1 border-b text-left">Action</th>
-            <th class="px-2 py-1 border-b text-left">Details</th>
-          </tr></thead><tbody>`;
-          logs.forEach(log => {
-            html += `<tr>
-              <td class="px-2 py-1 border-b align-top">${new Date(log.timestamp).toLocaleString()}</td>
-              <td class="px-2 py-1 border-b align-top">${log.username || ''}</td>
-              <td class="px-2 py-1 border-b align-top">${log.role || ''}</td>
-              <td class="px-2 py-1 border-b align-top">${log.action_type}</td>
-              <td class="px-2 py-1 border-b align-top">${log.details ? JSON.stringify(log.details) : ''}</td>
-            </tr>`;
+          // Modern table with zebra striping, sticky header, icons
+          let html = `<div class="overflow-x-auto"><table class="min-w-full text-xs md:text-sm border-separate border-spacing-y-1"><thead class="sticky top-0 z-10 bg-white shadow"><tr class="bg-gray-100 text-gray-700">
+    <th class="px-3 py-2 text-left font-bold">Time</th>
+    <th class="px-3 py-2 text-left font-bold">User</th>
+    <th class="px-3 py-2 text-left font-bold">Role</th>
+    <th class="px-3 py-2 text-left font-bold">Action</th>
+    <th class="px-3 py-2 text-left font-bold">Details</th>
+  </tr></thead><tbody>`;
+          filtered.forEach((log, i) => {
+            const actionIcon = {
+              'login': '<i data-lucide="log-in" class="inline w-4 h-4 text-blue-500"></i>',
+              'logout': '<i data-lucide="log-out" class="inline w-4 h-4 text-gray-400"></i>',
+              'save_analysis': '<i data-lucide="save" class="inline w-4 h-4 text-green-600"></i>',
+              'delete_saved_analysis': '<i data-lucide="trash-2" class="inline w-4 h-4 text-red-500"></i>',
+              'shortlist_resume': '<i data-lucide="star" class="inline w-4 h-4 text-yellow-500"></i>',
+              'delete_shortlisted': '<i data-lucide="trash-2" class="inline w-4 h-4 text-red-400"></i>',
+              'register': '<i data-lucide="user-plus" class="inline w-4 h-4 text-purple-500"></i>',
+              'admin_add_user': '<i data-lucide="user-plus" class="inline w-4 h-4 text-blue-400"></i>',
+              'admin_edit_user': '<i data-lucide="edit" class="inline w-4 h-4 text-blue-400"></i>',
+              'admin_deactivate_user': '<i data-lucide="user-x" class="inline w-4 h-4 text-red-400"></i>',
+              'admin_reset_password': '<i data-lucide="key" class="inline w-4 h-4 text-yellow-400"></i>',
+              'admin_import_user': '<i data-lucide="upload" class="inline w-4 h-4 text-green-400"></i>',
+            }[log.action_type] || '<i data-lucide="activity" class="inline w-4 h-4 text-gray-400"></i>';
+            html += `<tr class="${i%2===0?'bg-white':'bg-gray-50'} hover:bg-blue-50 transition">
+      <td class="px-3 py-2 align-top whitespace-nowrap">${new Date(log.timestamp).toLocaleString()}</td>
+      <td class="px-3 py-2 align-top">${log.username || ''}</td>
+      <td class="px-3 py-2 align-top">${log.role || ''}</td>
+      <td class="px-3 py-2 align-top">${actionIcon} <span class="ml-1">${log.action_type.replace(/_/g,' ')}</span></td>
+      <td class="px-3 py-2 align-top font-mono text-xs text-gray-600">${log.details ? JSON.stringify(log.details) : ''}</td>
+    </tr>`;
           });
-          html += '</tbody></table>';
+          html += '</tbody></table></div>';
           container.innerHTML = html;
+          if (window.lucide && window.lucide.createIcons) lucide.createIcons();
         }
         // Filters: reload logs on change
         ['logUserFilter','logRoleFilter','logActionFilter'].forEach(id => {
@@ -2286,6 +2302,117 @@
             renderUserManagement();
           });
         }
+
+        // --- Activity Logs Filter Population and Modern Table Rendering ---
+        async function fetchLogFilterOptions() {
+          // Fetch users
+          let users = [];
+          try {
+            const resp = await fetch('/admin_users');
+            users = await resp.json();
+          } catch {}
+          // Fetch all logs (for unique roles/actions)
+          let logs = [];
+          try {
+            const resp = await fetch('/activity_logs?limit=1000');
+            logs = await resp.json();
+          } catch {}
+          // Unique roles and actions
+          const roles = Array.from(new Set(logs.map(l => l.role).filter(Boolean)));
+          const actions = Array.from(new Set(logs.map(l => l.action_type).filter(Boolean)));
+          return { users, roles, actions };
+        }
+
+        async function populateLogFilters() {
+          const { users, roles, actions } = await fetchLogFilterOptions();
+          const userSel = document.getElementById('logUserFilter');
+          const roleSel = document.getElementById('logRoleFilter');
+          const actionSel = document.getElementById('logActionFilter');
+          if (userSel) {
+            userSel.innerHTML = '<option value="all">All Users</option>' + users.map(u => `<option value="${u.id}">${u.username}</option>`).join('');
+          }
+          if (roleSel) {
+            roleSel.innerHTML = '<option value="all">All Roles</option>' + roles.map(r => `<option value="${r}">${r}</option>`).join('');
+          }
+          if (actionSel) {
+            actionSel.innerHTML = '<option value="all">All Actions</option>' + actions.map(a => `<option value="${a}">${a.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>`).join('');
+          }
+        }
+
+        async function renderActivityLogs() {
+          const userSel = document.getElementById('logUserFilter');
+          const roleSel = document.getElementById('logRoleFilter');
+          const actionSel = document.getElementById('logActionFilter');
+          const container = document.getElementById('activityLogsContainer');
+          container.innerHTML = '<div class="text-gray-400 text-center py-12">Loading...</div>';
+          let url = '/activity_logs?limit=1000';
+          let logs = [];
+          try {
+            const resp = await fetch(url);
+            logs = await resp.json();
+          } catch (e) {
+            container.innerHTML = '<div class="text-red-500 text-center">Failed to load logs.</div>';
+            return;
+          }
+          // Filter client-side
+          let filtered = logs;
+          if (userSel && userSel.value !== 'all') filtered = filtered.filter(l => l.user_id == userSel.value);
+          if (roleSel && roleSel.value !== 'all') filtered = filtered.filter(l => l.role === roleSel.value);
+          if (actionSel && actionSel.value !== 'all') filtered = filtered.filter(l => l.action_type === actionSel.value);
+          if (!filtered.length) {
+            container.innerHTML = '<div class="text-gray-500 text-center py-12">No activity logs found.</div>';
+            return;
+          }
+          // Modern table with zebra striping, sticky header, icons
+          let html = `<div class="overflow-x-auto"><table class="min-w-full text-xs md:text-sm border-separate border-spacing-y-1"><thead class="sticky top-0 z-10 bg-white shadow"><tr class="bg-gray-100 text-gray-700">
+    <th class="px-3 py-2 text-left font-bold">Time</th>
+    <th class="px-3 py-2 text-left font-bold">User</th>
+    <th class="px-3 py-2 text-left font-bold">Role</th>
+    <th class="px-3 py-2 text-left font-bold">Action</th>
+    <th class="px-3 py-2 text-left font-bold">Details</th>
+  </tr></thead><tbody>`;
+          filtered.forEach((log, i) => {
+            const actionIcon = {
+              'login': '<i data-lucide="log-in" class="inline w-4 h-4 text-blue-500"></i>',
+              'logout': '<i data-lucide="log-out" class="inline w-4 h-4 text-gray-400"></i>',
+              'save_analysis': '<i data-lucide="save" class="inline w-4 h-4 text-green-600"></i>',
+              'delete_saved_analysis': '<i data-lucide="trash-2" class="inline w-4 h-4 text-red-500"></i>',
+              'shortlist_resume': '<i data-lucide="star" class="inline w-4 h-4 text-yellow-500"></i>',
+              'delete_shortlisted': '<i data-lucide="trash-2" class="inline w-4 h-4 text-red-400"></i>',
+              'register': '<i data-lucide="user-plus" class="inline w-4 h-4 text-purple-500"></i>',
+              'admin_add_user': '<i data-lucide="user-plus" class="inline w-4 h-4 text-blue-400"></i>',
+              'admin_edit_user': '<i data-lucide="edit" class="inline w-4 h-4 text-blue-400"></i>',
+              'admin_deactivate_user': '<i data-lucide="user-x" class="inline w-4 h-4 text-red-400"></i>',
+              'admin_reset_password': '<i data-lucide="key" class="inline w-4 h-4 text-yellow-400"></i>',
+              'admin_import_user': '<i data-lucide="upload" class="inline w-4 h-4 text-green-400"></i>',
+            }[log.action_type] || '<i data-lucide="activity" class="inline w-4 h-4 text-gray-400"></i>';
+            html += `<tr class="${i%2===0?'bg-white':'bg-gray-50'} hover:bg-blue-50 transition">
+      <td class="px-3 py-2 align-top whitespace-nowrap">${new Date(log.timestamp).toLocaleString()}</td>
+      <td class="px-3 py-2 align-top">${log.username || ''}</td>
+      <td class="px-3 py-2 align-top">${log.role || ''}</td>
+      <td class="px-3 py-2 align-top">${actionIcon} <span class="ml-1">${log.action_type.replace(/_/g,' ')}</span></td>
+      <td class="px-3 py-2 align-top font-mono text-xs text-gray-600">${log.details ? JSON.stringify(log.details) : ''}</td>
+    </tr>`;
+          });
+          html += '</tbody></table></div>';
+          container.innerHTML = html;
+          if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+        }
+
+        // On tab show, populate filters and render logs
+        if (tabActivityLogs) {
+          tabActivityLogs.addEventListener('click', async () => {
+            setAdminActiveTab('activity-logs');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            activityLogsTabContent.classList.remove('hidden');
+            await populateLogFilters();
+            renderActivityLogs();
+          });
+        }
+        ['logUserFilter','logRoleFilter','logActionFilter'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.addEventListener('change', renderActivityLogs);
+        });
     </script>
 </body>
 </html>

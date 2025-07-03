@@ -9,7 +9,9 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        role = request.form.get('role', 'user')
+        role = request.form.get('role')
+        if role not in ['hr', 'admin']:
+            return 'Invalid role', 400
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'danger')
             return redirect(url_for('auth.register'))

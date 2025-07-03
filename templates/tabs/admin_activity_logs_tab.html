@@ -1,18 +1,25 @@
-<div class="p-2 md:p-4">
-  <h2 class="text-xl md:text-2xl font-bold mb-4 header-gradient">Activity Logs / Audit Trail</h2>
-  <div class="mb-4 flex flex-wrap gap-2 items-center">
-    <label class="text-xs font-semibold text-gray-700">Filter:</label>
-    <select id="logUserFilter" class="p-1 border border-gray-300 rounded text-xs">
-      <option value="all">All Users</option>
-    </select>
-    <select id="logRoleFilter" class="p-1 border border-gray-300 rounded text-xs">
-      <option value="all">All Roles</option>
-    </select>
-    <select id="logActionFilter" class="p-1 border border-gray-300 rounded text-xs">
-      <option value="all">All Actions</option>
-    </select>
+<div class="p-2 md:p-4 w-full">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+    <div>
+      <h2 class="text-2xl md:text-3xl font-extrabold mb-1 header-gradient">Activity Logs <span class="text-gray-400 font-normal">/ Audit Trail</span></h2>
+      <div class="text-sm text-gray-500 font-medium">Track all user and system actions for transparency and security.</div>
+    </div>
+    <div class="flex flex-wrap gap-2 items-center">
+      <label class="text-xs font-semibold text-gray-700">Action:</label>
+      <select id="logActionFilter" class="px-3 py-1 rounded-full border border-gray-300 bg-gray-50 text-xs font-semibold focus:ring-2 focus:ring-blue-400 transition">
+        <option value="all">All Actions</option>
+      </select>
+      <label class="text-xs font-semibold text-gray-700">Role:</label>
+      <select id="logRoleFilter" class="px-3 py-1 rounded-full border border-gray-300 bg-gray-50 text-xs font-semibold focus:ring-2 focus:ring-blue-400 transition">
+        <option value="all">All Roles</option>
+      </select>
+      <label class="text-xs font-semibold text-gray-700">User:</label>
+      <select id="logUserFilter" class="px-3 py-1 rounded-full border border-gray-300 bg-gray-50 text-xs font-semibold focus:ring-2 focus:ring-blue-400 transition">
+        <option value="all">All Users</option>
+      </select>
+    </div>
   </div>
-  <div id="activityLogsContainer" class="bg-white rounded shadow-sm p-2 md:p-3 min-h-[200px]">
+  <div id="activityLogsContainer" class="bg-gray-50 rounded-xl shadow-inner p-0 min-h-[240px] overflow-x-auto w-full">
     <!-- Logs will be rendered here -->
   </div>
 </div> 
