@@ -1188,11 +1188,12 @@
             row.className = 'flex items-center mb-2 resume-input-row gap-2';
             const idx = container.querySelectorAll('.resume-input-row').length;
             row.innerHTML = `
-              <label class="relative cursor-pointer bg-white border border-gray-300 rounded px-3 py-1 text-base font-semibold text-gray-700 hover:bg-blue-50 transition" tabindex="0">
-                Choose File
-                <input type="file" name="resume" accept=".pdf,.docx" class="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer resume-file" onchange="document.getElementById('resumeFileName${idx}').textContent = this.files[0]?.name || 'No file chosen'">
+              <label class="custom-file-upload">
+                <i data-lucide="file-text"></i>
+                <span>Choose File</span>
+                <input type="file" name="resume" accept=".pdf,.docx" class="resume-file" onchange="document.getElementById('resumeFileName${idx}').textContent = this.files[0]?.name || 'No file chosen'">
               </label>
-              <span class="text-sm text-gray-500" id="resumeFileName${idx}">No file chosen</span>
+              <span class="file-name" id="resumeFileName${idx}">No file chosen</span>
               <button type="button" class="ml-2 remove-resume-btn" tabindex="-1"><i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i></button>
             `;
             container.appendChild(row);

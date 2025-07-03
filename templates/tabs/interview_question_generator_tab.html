@@ -10,11 +10,12 @@
       <div class="text-sm text-yellow-400 mb-4">Provide job requirements for question generation</div>
       <label for="question_gen_jd_upload" class="block text-sm font-medium text-gray-700 mb-1">Upload or Paste Job Description</label>
       <div class="flex items-center gap-2 mb-2">
-        <label class="relative cursor-pointer bg-white border border-gray-300 rounded px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-yellow-100 transition" tabindex="0">
-          Choose File
-          <input type="file" id="question_gen_jd_upload" accept=".docx" class="absolute left-0 top-0 w-full h-full opacity-0 cursor-pointer" onchange="document.getElementById('questionGenJdUploadName').textContent = this.files[0]?.name || 'No file chosen'">
+        <label class="custom-file-upload">
+          <i data-lucide="file-text"></i>
+          <span>Choose File</span>
+          <input type="file" id="question_gen_jd_upload" accept=".docx" onchange="document.getElementById('questionGenJdUploadName').textContent = this.files[0]?.name || 'No file chosen'">
         </label>
-        <span class="text-sm text-gray-500" id="questionGenJdUploadName">No file chosen</span>
+        <span class="file-name" id="questionGenJdUploadName">No file chosen</span>
       </div>
       <textarea id="question_gen_jd" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500" rows="3" placeholder="Paste job description here"></textarea>
       <p id="question_gen_jd_error" class="text-red-500 text-xs mt-1 hidden">Job Description is required.</p>

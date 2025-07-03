@@ -67,3 +67,39 @@ canvas[id^="donut"] {
 #profile-dropdown.show {
   display: block !important;
 }
+
+/* Modern custom file upload button styles */
+.custom-file-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, #5b8df6 0%, #a855f7 100%);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 1.5rem;
+  padding: 0.4rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+  overflow: hidden;
+  font-size: 0.97rem;
+  border: none;
+  box-shadow: 0 2px 8px rgba(90, 60, 200, 0.08);
+  min-height: 36px;
+}
+.custom-file-upload:hover {
+  background: linear-gradient(90deg, #3b82f6 0%, #a855f7 100%);
+}
+.custom-file-upload input[type="file"] {
+  display: none;
+}
+.file-name {
+  margin-left: 1rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
