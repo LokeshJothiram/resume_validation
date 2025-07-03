@@ -1,4 +1,12 @@
 <div class="p-2 md:p-4">
+  <!-- Filter at the top -->
+  <div class="flex flex-wrap gap-2 items-center mb-3 md:mb-4">
+    <label for="roleFilter" class="block text-gray-700 font-semibold text-xs">Filter by Role:</label>
+    <select id="roleFilter" class="p-1 border border-gray-300 rounded w-32 text-xs">
+      <option value="all">All Roles</option>
+      <!-- Options will be populated dynamically -->
+    </select>
+  </div>
   <!-- Summary Row -->
   <div class="flex flex-wrap gap-2 md:gap-4 mb-3 md:mb-4">
     <div class="flex-1 min-w-[120px] bg-white rounded shadow-sm p-2 md:p-3 flex flex-col items-center justify-center">
@@ -38,14 +46,7 @@
     <h3 class="text-xs font-semibold mb-2 text-gray-700">Top Users by Activity</h3>
     <div id="topUsersContainer" class="flex flex-wrap gap-2"></div>
   </div>
-  <!-- Filter and User List -->
-  <div class="flex flex-wrap gap-2 items-center mb-2">
-    <label for="roleFilter" class="block text-gray-700 font-semibold text-xs">Filter by Role:</label>
-    <select id="roleFilter" class="p-1 border border-gray-300 rounded w-32 text-xs">
-      <option value="all">All Roles</option>
-      <!-- Options will be populated dynamically -->
-    </select>
-  </div>
+  <!-- User List -->
   <div id="userListByRole" class="bg-white rounded shadow-sm p-2 md:p-3">
     <h3 class="text-xs font-semibold mb-2 text-gray-700">Users in Selected Role</h3>
     <div id="userListContainer"></div>
