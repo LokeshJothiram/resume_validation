@@ -39,12 +39,19 @@
       .tab-btn .text-xs, .tab-btn .text-sm {
         font-size: 11px !important;
       }
+      @media (max-width: 1024px) {
+        .tab-btn, .tab-btn span, .tab-btn i {
+          font-size: 11px !important;
+          padding-left: 0.5rem !important;
+          padding-right: 0.5rem !important;
+        }
+      }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Responsive Header -->
-    <div id="fixed-header" class="fixed top-0 left-0 w-full z-50 bg-white shadow" style="height: 55px;">
-      <div class="flex items-center justify-between w-full py-2 px-3 sm:px-6">
+    <div id="fixed-header" class="fixed top-0 left-0 w-full z-50 bg-white shadow min-h-[55px] h-auto">
+      <div class="flex items-center justify-between w-full py-2 px-2 sm:px-4 md:px-6 flex-wrap">
         <!-- Logo and Hamburger -->
         <div class="flex items-center gap-2 sm:gap-4">
           <span class="flex items-center font-bold text-xl sm:text-2xl">
@@ -59,7 +66,7 @@
           </button>
         </div>
         <!-- Navigation Tabs Center (hidden on mobile) -->
-        <div id="nav-tabs" class="hidden sm:flex gap-2 ml-2 sm:ml-8">
+        <div id="nav-tabs" class="hidden sm:flex gap-2 md:gap-4 ml-1 sm:ml-4 md:ml-8 overflow-x-auto max-w-full">
           <button id="tab-dashboard" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
           {% if session.role == 'admin' %}
           <button id="tab-job-upload" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Job Description Upload</button>
@@ -106,7 +113,7 @@
     <div class="flex w-full">
       <!-- Sidebar removed -->
       <!-- Main Content: scrollable -->
-      <div class="mt-16 h-[calc(100vh-64px)] overflow-y-auto w-full">
+      <div class="mt-20 h-[calc(100vh-80px)] overflow-y-auto w-full">
         <!-- Main Content: full width, no centering, no top margin -->
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
