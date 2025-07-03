@@ -18,7 +18,7 @@ def register():
         user = User(username=username, password=password, role=role)
         db.session.add(user)
         db.session.commit()
-        log_activity(user, 'register')
+        log_activity(user, 'register', {'message': 'User registered', 'username': user.username})
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('auth.login'))
     return render_template('register.html')
@@ -32,7 +32,7 @@ def login():
         if user:
             session['user'] = username
             session['role'] = user.role
-            log_activity(user, 'login')
+            log_activity(user, 'login', {'message': 'User logged in', 'username': user.username})
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'danger')
@@ -41,5 +41,8 @@ def login():
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
+    user = User.query.filter_by(username=session.get('user')).first()
+    print("Logging out user:", user.username if user else None)
+    log_activity(user, 'logout', {'message': 'User logged out', 'username': user.username if user else None})
     session.pop('user', None)
     return redirect(url_for('auth.login')) 

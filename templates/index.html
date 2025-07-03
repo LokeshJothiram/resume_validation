@@ -46,6 +46,8 @@
           padding-right: 0.5rem !important;
         }
       }
+      /* Add this CSS for scrollable select */
+      .custom-scroll-select { max-height: 160px !important; overflow-y: auto !important; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -124,10 +126,10 @@
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
                     <form id="talentForm" enctype="multipart/form-data" novalidate>
-                        <div id="dashboard-tab-content" class="tab-content relative -top-5 md:-top-10">
+                        <div id="dashboard-tab-content" class="tab-content relative -top-5 md:-top-5">
                             {% include 'tabs/dashboard_tab.html' %}
                         </div>
-                        <div id="resume-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="resume-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             <div class="flex flex-col items-start w-full">
                                 <div class="w-full pr-0 self-start">
                                 {% include 'tabs/resume_match_tab.html' %}
@@ -166,7 +168,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="audio-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="audio-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             <div class="flex flex-col items-start w-full">
                                 <div class="w-full pr-0 self-start">
                                 {% include 'tabs/technical_proficiency_tab.html' %}
@@ -205,22 +207,22 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="question-gen-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="question-gen-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             {% include 'tabs/interview_question_generator_tab.html' %}
                         </div>
-                        <div id="saved-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="saved-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             {% include 'tabs/saved_analyses_tab.html' %}
                         </div>
-                        <div id="shortlisted-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="shortlisted-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             {% include 'tabs/shortlisted_resumes_tab.html' %}
                         </div>
-                        <div id="analytics-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="analytics-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                           {% include 'tabs/admin_analytics_tab.html' %}
                         </div>
-                        <div id="activity-logs-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="activity-logs-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                           {% include 'tabs/admin_activity_logs_tab.html' %}
                         </div>
-                        <div id="user-management-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                        <div id="user-management-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                           {% include 'tabs/admin_user_management_tab.html' %}
                         </div>
                     </form>
@@ -2324,7 +2326,7 @@
         }
 
         async function populateLogFilters() {
-          const { users, roles, actions } = await fetchLogFilterOptions();
+          const { users, roles, actions: _actions } = await fetchLogFilterOptions();
           const userSel = document.getElementById('logUserFilter');
           const roleSel = document.getElementById('logRoleFilter');
           const actionSel = document.getElementById('logActionFilter');
@@ -2335,7 +2337,22 @@
             roleSel.innerHTML = '<option value="all">All Roles</option>' + roles.map(r => `<option value="${r}">${r}</option>`).join('');
           }
           if (actionSel) {
-            actionSel.innerHTML = '<option value="all">All Actions</option>' + actions.map(a => `<option value="${a}">${a.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>`).join('');
+            // Hardcoded list of all possible actions
+            const allActions = [
+              'login',
+              'logout',
+              'save_analysis',
+              'delete_saved_analysis',
+              'shortlist_resume',
+              'delete_shortlisted',
+              'register',
+              'admin_add_user',
+              'admin_edit_user',
+              'admin_deactivate_user',
+              'admin_reset_password',
+              'admin_import_user'
+            ];
+            actionSel.innerHTML = '<option value="all">All Actions</option>' + allActions.map(a => `<option value="${a}">${a.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>`).join('');
           }
         }
 
@@ -2412,6 +2429,93 @@
         ['logUserFilter','logRoleFilter','logActionFilter'].forEach(id => {
           const el = document.getElementById(id);
           if (el) el.addEventListener('change', renderActivityLogs);
+        });
+
+        // --- More Actions Dropdown Logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+          const logActionFilter = document.getElementById('logActionFilter');
+          const moreDropdown = document.getElementById('moreActionsDropdown');
+          let lastValue = 'all';
+          if (logActionFilter && moreDropdown) {
+            logActionFilter.addEventListener('change', function(e) {
+              if (this.value === 'more') {
+                moreDropdown.classList.remove('hidden');
+                this.value = lastValue; // Prevent select from staying on 'more'
+              } else {
+                moreDropdown.classList.add('hidden');
+                lastValue = this.value;
+                renderActivityLogs();
+              }
+            });
+            moreDropdown.querySelectorAll('button').forEach(btn => {
+              btn.addEventListener('click', function() {
+                lastValue = this.getAttribute('data-value');
+                logActionFilter.value = 'more';
+                moreDropdown.classList.add('hidden');
+                window.selectedActionFilter = lastValue;
+                renderActivityLogs();
+              });
+            });
+            // Hide dropdown on outside click
+            document.addEventListener('click', function(e) {
+              if (!moreDropdown.contains(e.target) && e.target !== logActionFilter) {
+                moreDropdown.classList.add('hidden');
+              }
+            });
+            // Patch renderActivityLogs to use custom filter
+            const origRenderActivityLogs = renderActivityLogs;
+            renderActivityLogs = function() {
+              const userSel = document.getElementById('logUserFilter');
+              const roleSel = document.getElementById('logRoleFilter');
+              const container = document.getElementById('activityLogsContainer');
+              container.innerHTML = '<div class="text-gray-400 text-center py-12">Loading...</div>';
+              let url = '/activity_logs?limit=1000';
+              fetch(url).then(resp => resp.json()).then(logs => {
+                let filtered = logs;
+                if (userSel && userSel.value !== 'all') filtered = filtered.filter(l => l.user_id == userSel.value);
+                if (roleSel && roleSel.value !== 'all') filtered = filtered.filter(l => l.role === roleSel.value);
+                let actionValue = logActionFilter.value === 'more' ? window.selectedActionFilter : logActionFilter.value;
+                if (actionValue && actionValue !== 'all') filtered = filtered.filter(l => l.action_type === actionValue);
+                if (!filtered.length) {
+                  container.innerHTML = '<div class="text-gray-500 text-center py-12">No activity logs found.</div>';
+                  return;
+                }
+                let html = `<div class="overflow-x-auto"><table class="min-w-full text-xs md:text-sm border-separate border-spacing-y-1"><thead class="sticky top-0 z-10 bg-white shadow"><tr class="bg-gray-100 text-gray-700">
+          <th class="px-3 py-2 text-left font-bold">Time</th>
+          <th class="px-3 py-2 text-left font-bold">User</th>
+          <th class="px-3 py-2 text-left font-bold">Role</th>
+          <th class="px-3 py-2 text-left font-bold">Action</th>
+          <th class="px-3 py-2 text-left font-bold">Details</th>
+        </tr></thead><tbody>`;
+                filtered.forEach((log, i) => {
+                  const actionIcon = {
+                    'login': '<i data-lucide="log-in" class="inline w-4 h-4 text-blue-500"></i>',
+                    'logout': '<i data-lucide="log-out" class="inline w-4 h-4 text-gray-400"></i>',
+                    'save_analysis': '<i data-lucide="save" class="inline w-4 h-4 text-green-600"></i>',
+                    'delete_saved_analysis': '<i data-lucide="trash-2" class="inline w-4 h-4 text-red-500"></i>',
+                    'shortlist_resume': '<i data-lucide="star" class="inline w-4 h-4 text-yellow-500"></i>',
+                    'delete_shortlisted': '<i data-lucide="trash-2" class="inline w-4 h-4 text-red-400"></i>',
+                    'register': '<i data-lucide="user-plus" class="inline w-4 h-4 text-purple-500"></i>',
+                    'admin_add_user': '<i data-lucide="user-plus" class="inline w-4 h-4 text-blue-400"></i>',
+                    'admin_edit_user': '<i data-lucide="edit" class="inline w-4 h-4 text-blue-400"></i>',
+                    'admin_deactivate_user': '<i data-lucide="user-x" class="inline w-4 h-4 text-red-400"></i>',
+                    'admin_reset_password': '<i data-lucide="key" class="inline w-4 h-4 text-yellow-400"></i>',
+                    'admin_import_user': '<i data-lucide="upload" class="inline w-4 h-4 text-green-400"></i>',
+                  }[log.action_type] || '<i data-lucide="activity" class="inline w-4 h-4 text-gray-400"></i>';
+                  html += `<tr class="${i%2===0?'bg-white':'bg-gray-50'} hover:bg-blue-50 transition">
+                    <td class="px-3 py-2 align-top whitespace-nowrap">${new Date(log.timestamp).toLocaleString()}</td>
+                    <td class="px-3 py-2 align-top">${log.username || ''}</td>
+                    <td class="px-3 py-2 align-top">${log.role || ''}</td>
+                    <td class="px-3 py-2 align-top">${actionIcon} <span class="ml-1">${log.action_type.replace(/_/g,' ')}</span></td>
+                    <td class="px-3 py-2 align-top font-mono text-xs text-gray-600">${log.details ? JSON.stringify(log.details) : ''}</td>
+                  </tr>`;
+                });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+                if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+              });
+            };
+          }
         });
     </script>
 </body>

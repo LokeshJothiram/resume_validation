@@ -462,10 +462,13 @@ def login():
             flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET', 'POST'])
 def logout():
+    print("LOGOUT ROUTE CALLED")
+    user = get_current_user()
+    print("Logging out user:", user.username if user else None)
+    log_activity(user, 'logout', {'message': 'User logged out', 'username': user.username if user else None})
     session.pop('user', None)
-    log_activity(get_current_user(), 'logout')
     return redirect(url_for('login'))
 
 @app.route('/', methods=['GET', 'POST'])
