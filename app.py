@@ -21,8 +21,9 @@ import glob
 from routes import register_blueprints
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from database import db, User, SavedAnalysis, ShortlistedResume
+from database import db, User, SavedAnalysis, ShortlistedResume, ActivityLog
 from werkzeug.utils import secure_filename
+from utils import log_activity
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -455,6 +456,7 @@ def login():
         user = User.query.filter_by(username=username, password=password).first()
         if user:
             session['user'] = username
+            log_activity(user, 'login')
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'danger')
@@ -463,6 +465,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    log_activity(get_current_user(), 'logout')
     return redirect(url_for('login'))
 
 @app.route('/', methods=['GET', 'POST'])
@@ -576,6 +579,7 @@ def save_analysis():
     filepath = os.path.join(SAVED_FILES_FOLDER, filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    log_activity(get_current_user(), 'save_analysis', {'filename': filename})
     return jsonify({'status': 'success', 'filename': filename})
 
 # List all saved analysis files
@@ -608,6 +612,7 @@ def delete_saved_analysis(filename):
     if not os.path.exists(filepath):
         return jsonify({'error': 'File not found'}), 404
     os.remove(filepath)
+    log_activity(get_current_user(), 'delete_saved_analysis', {'filename': filename})
     return jsonify({'status': 'deleted'})
 
 @app.route('/shortlist_resume', methods=['POST'])
@@ -635,6 +640,7 @@ def shortlist_resume():
         )
         db.session.add(shortlist)
         db.session.commit()
+        log_activity(user, 'shortlist_resume', {'filename': saved_resume_filename})
         return jsonify({'status': 'success', 'id': shortlist.id})
     return jsonify({'status': 'error', 'message': 'No file uploaded'})
 
@@ -682,6 +688,7 @@ def delete_shortlisted(resume_id):
         os.remove(file_path)
     db.session.delete(r)
     db.session.commit()
+    log_activity(user, 'delete_shortlisted', {'resume_id': resume_id})
     return jsonify({'status': 'deleted'})
 
 @app.route('/shortlist/<filename>')
@@ -749,6 +756,129 @@ def admin_analytics_users():
             'analyses': analyses_counts.get(u.id, 0)
         })
     return jsonify(result)
+
+@app.route('/activity_logs', methods=['GET'])
+def get_activity_logs():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    user_id = request.args.get('user_id')
+    role = request.args.get('role')
+    action_type = request.args.get('action_type')
+    limit = int(request.args.get('limit', 100))
+    q = ActivityLog.query
+    if user_id:
+        q = q.filter_by(user_id=user_id)
+    if role:
+        q = q.filter_by(role=role)
+    if action_type:
+        q = q.filter_by(action_type=action_type)
+    logs = q.order_by(ActivityLog.timestamp.desc()).limit(limit).all()
+    return jsonify([
+        {
+            'id': log.id,
+            'user_id': log.user_id,
+            'username': log.username,
+            'role': log.role,
+            'action_type': log.action_type,
+            'details': log.details,
+            'timestamp': log.timestamp.isoformat()
+        }
+        for log in logs
+    ])
+
+@app.route('/admin_users', methods=['GET'])
+def admin_list_users():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    users = User.query.all()
+    return jsonify([
+        {'id': u.id, 'username': u.username, 'role': u.role, 'created_at': u.created_at.isoformat(), 'active': True} for u in users
+    ])
+
+@app.route('/admin_users', methods=['POST'])
+def admin_add_user():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    data = request.json
+    if not data.get('username') or not data.get('password') or not data.get('role'):
+        return jsonify({'error': 'Missing fields'}), 400
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({'error': 'Username exists'}), 400
+    user = User(username=data['username'], password=data['password'], role=data['role'])
+    db.session.add(user)
+    db.session.commit()
+    log_activity(user, 'admin_add_user')
+    return jsonify({'status': 'success', 'id': user.id})
+
+@app.route('/admin_users/<int:user_id>', methods=['PUT'])
+def admin_edit_user(user_id):
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    data = request.json
+    if 'username' in data:
+        user.username = data['username']
+    if 'role' in data:
+        user.role = data['role']
+    db.session.commit()
+    log_activity(user, 'admin_edit_user')
+    return jsonify({'status': 'success'})
+
+@app.route('/admin_users/<int:user_id>', methods=['DELETE'])
+def admin_deactivate_user(user_id):
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    # For now, just delete. For real deactivation, add an 'active' field.
+    db.session.delete(user)
+    db.session.commit()
+    log_activity(user, 'admin_deactivate_user')
+    return jsonify({'status': 'success'})
+
+@app.route('/admin_users/reset_password', methods=['POST'])
+def admin_reset_password():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    data = request.json
+    user = User.query.get(data.get('user_id'))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    user.password = data.get('new_password')
+    db.session.commit()
+    log_activity(user, 'admin_reset_password')
+    return jsonify({'status': 'success'})
+
+@app.route('/admin_users/import', methods=['POST'])
+def admin_import_users():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    users = request.json.get('users', [])
+    added = 0
+    for u in users:
+        if not u.get('username') or not u.get('password') or not u.get('role'):
+            continue
+        if User.query.filter_by(username=u['username']).first():
+            continue
+        user = User(username=u['username'], password=u['password'], role=u['role'])
+        db.session.add(user)
+        db.session.commit()
+        log_activity(user, 'admin_import_user')
+        added += 1
+    return jsonify({'status': 'success', 'added': added})
+
+@app.route('/admin_users/export', methods=['GET'])
+def admin_export_users():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    users = User.query.all()
+    data = [
+        {'id': u.id, 'username': u.username, 'role': u.role, 'created_at': u.created_at.isoformat()} for u in users
+    ]
+    return jsonify({'users': data})
 
 if __name__ == '__main__':
     with app.app_context():

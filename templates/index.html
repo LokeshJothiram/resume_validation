@@ -70,6 +70,8 @@
           <button id="tab-dashboard" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
           {% if session.role == 'admin' %}
             <button id="tab-analytics" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Analytics</button>
+            <button id="tab-activity-logs" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Activity Logs</button>
+            <button id="tab-user-management" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">User Management</button>
           {% endif %}
           {% if session.role != 'admin' %}
             <button id="tab-resume" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
@@ -102,6 +104,8 @@
         <button id="tab-dashboard-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
         {% if session.role == 'admin' %}
           <button id="tab-analytics-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Analytics</button>
+          <button id="tab-activity-logs-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Activity Logs</button>
+          <button id="tab-user-management-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">User Management</button>
         {% endif %}
         {% if session.role != 'admin' %}
           <button id="tab-resume-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
@@ -213,6 +217,12 @@
                         <div id="analytics-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                           {% include 'tabs/admin_analytics_tab.html' %}
                         </div>
+                        <div id="activity-logs-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                          {% include 'tabs/admin_activity_logs_tab.html' %}
+                        </div>
+                        <div id="user-management-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
+                          {% include 'tabs/admin_user_management_tab.html' %}
+                        </div>
                     </form>
             </div>
 
@@ -291,6 +301,13 @@
             const questionGenTabContent = document.getElementById('question-gen-tab-content');
             const savedTabContent = document.getElementById('saved-tab-content');
             const shortlistedTabContent = document.getElementById('shortlisted-tab-content');
+            // Add these lines:
+            const tabActivityLogs = document.getElementById('tab-activity-logs');
+            const tabUserManagement = document.getElementById('tab-user-management');
+            const activityLogsTabContent = document.getElementById('activity-logs-tab-content');
+            const userManagementTabContent = document.getElementById('user-management-tab-content');
+            // Add these lines for mobile nav:
+           
 
             let activeTab = 'dashboard';
 
@@ -2067,7 +2084,7 @@
           renderTopUsers(selectedRole);
         });
 
-        const adminTabIds = ['tab-dashboard', 'tab-analytics'];
+        const adminTabIds = ['tab-dashboard', 'tab-analytics', 'tab-activity-logs', 'tab-user-management'];
         function setAdminActiveTab(tab) {
           adminTabIds.forEach(id => {
             const btn = document.getElementById(id);
@@ -2093,6 +2110,180 @@
             document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
             analyticsTabContent.classList.remove('hidden');
             setActiveTab('analytics');
+          });
+        }
+        if (tabActivityLogs) {
+          tabActivityLogs.addEventListener('click', () => {
+            setAdminActiveTab('activity-logs');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            activityLogsTabContent.classList.remove('hidden');
+            renderActivityLogs();
+          });
+        }
+        if (tabUserManagement) {
+          tabUserManagement.addEventListener('click', () => {
+            setAdminActiveTab('user-management');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            userManagementTabContent.classList.remove('hidden');
+            renderUserManagement();
+          });
+        }
+
+        // Activity Logs logic
+        async function renderActivityLogs() {
+          const userSel = document.getElementById('logUserFilter');
+          const roleSel = document.getElementById('logRoleFilter');
+          const actionSel = document.getElementById('logActionFilter');
+          const container = document.getElementById('activityLogsContainer');
+          container.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
+          // Fetch logs
+          let url = '/activity_logs?limit=100';
+          if (userSel && userSel.value !== 'all') url += `&user_id=${userSel.value}`;
+          if (roleSel && roleSel.value !== 'all') url += `&role=${roleSel.value}`;
+          if (actionSel && actionSel.value !== 'all') url += `&action_type=${actionSel.value}`;
+          let logs = [];
+          try {
+            const resp = await fetch(url);
+            logs = await resp.json();
+          } catch (e) {
+            container.innerHTML = '<div class="text-red-500 text-center">Failed to load logs.</div>';
+            return;
+          }
+          if (!Array.isArray(logs) || !logs.length) {
+            container.innerHTML = '<div class="text-gray-500 text-center">No activity logs found.</div>';
+            return;
+          }
+          // Render table
+          let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white"><thead><tr class="bg-gray-100">
+            <th class="px-2 py-1 border-b text-left">Time</th>
+            <th class="px-2 py-1 border-b text-left">User</th>
+            <th class="px-2 py-1 border-b text-left">Role</th>
+            <th class="px-2 py-1 border-b text-left">Action</th>
+            <th class="px-2 py-1 border-b text-left">Details</th>
+          </tr></thead><tbody>`;
+          logs.forEach(log => {
+            html += `<tr>
+              <td class="px-2 py-1 border-b align-top">${new Date(log.timestamp).toLocaleString()}</td>
+              <td class="px-2 py-1 border-b align-top">${log.username || ''}</td>
+              <td class="px-2 py-1 border-b align-top">${log.role || ''}</td>
+              <td class="px-2 py-1 border-b align-top">${log.action_type}</td>
+              <td class="px-2 py-1 border-b align-top">${log.details ? JSON.stringify(log.details) : ''}</td>
+            </tr>`;
+          });
+          html += '</tbody></table>';
+          container.innerHTML = html;
+        }
+        // Filters: reload logs on change
+        ['logUserFilter','logRoleFilter','logActionFilter'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.addEventListener('change', renderActivityLogs);
+        });
+
+        // User Management logic
+        async function renderUserManagement() {
+          const container = document.getElementById('userManagementContainer');
+          container.innerHTML = '<div class="text-gray-400 text-center">Loading...</div>';
+          let users = [];
+          try {
+            const resp = await fetch('/admin_users');
+            users = await resp.json();
+          } catch (e) {
+            container.innerHTML = '<div class="text-red-500 text-center">Failed to load users.</div>';
+            return;
+          }
+          if (!Array.isArray(users) || !users.length) {
+            container.innerHTML = '<div class="text-gray-500 text-center">No users found.</div>';
+            return;
+          }
+          let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white"><thead><tr class="bg-gray-100">
+            <th class="px-2 py-1 border-b text-left">Username</th>
+            <th class="px-2 py-1 border-b text-left">Role</th>
+            <th class="px-2 py-1 border-b text-left">Created</th>
+            <th class="px-2 py-1 border-b text-left">Actions</th>
+          </tr></thead><tbody>`;
+          users.forEach(u => {
+            html += `<tr>
+              <td class="px-2 py-1 border-b align-top">${u.username}</td>
+              <td class="px-2 py-1 border-b align-top">${u.role}</td>
+              <td class="px-2 py-1 border-b align-top">${new Date(u.created_at).toLocaleDateString()}</td>
+              <td class="px-2 py-1 border-b align-top">
+                <button class="edit-user-btn text-blue-600 mr-2" data-id="${u.id}">Edit</button>
+                <button class="reset-pw-btn text-yellow-600 mr-2" data-id="${u.id}">Reset PW</button>
+                <button class="deactivate-user-btn text-red-600" data-id="${u.id}">Deactivate</button>
+              </td>
+            </tr>`;
+          });
+          html += '</tbody></table>';
+          container.innerHTML = html;
+          // TODO: Add event listeners for edit, reset, deactivate
+        }
+        // Add User, Import, Export buttons
+        const addUserBtn = document.getElementById('addUserBtn');
+        if (addUserBtn) addUserBtn.onclick = () => alert('Add User: Not implemented yet');
+        const importUsersBtn = document.getElementById('importUsersBtn');
+        if (importUsersBtn) importUsersBtn.onclick = () => alert('Import: Not implemented yet');
+        const exportUsersBtn = document.getElementById('exportUsersBtn');
+        if (exportUsersBtn) exportUsersBtn.onclick = async () => {
+          const resp = await fetch('/admin_users/export');
+          const data = await resp.json();
+          const blob = new Blob([JSON.stringify(data.users, null, 2)], {type: 'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'users_export.json';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+        };
+
+        // For mobile nav as well
+        const adminTabIdsM = ['tab-dashboard-m', 'tab-analytics-m', 'tab-activity-logs-m', 'tab-user-management-m'];
+        function setAdminActiveTabMobile(tab) {
+          adminTabIdsM.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.remove('active-gradient');
+          });
+          const activeBtn = document.getElementById(`tab-${tab}-m`);
+          if (activeBtn) activeBtn.classList.add('active-gradient');
+        }
+        // For mobile nav
+        const tabActivityLogsM = document.getElementById('tab-activity-logs-m');
+        const tabUserManagementM = document.getElementById('tab-user-management-m');
+        const tabDashboardM = document.getElementById('tab-dashboard-m');
+        if (tabDashboardM) {
+          tabDashboardM.addEventListener('click', () => {
+            setAdminActiveTabMobile('dashboard');
+            // Show dashboard content
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            document.getElementById('dashboard-tab-content').classList.remove('hidden');
+            setActiveTab('dashboard');
+          });
+        }
+        if (tabAnalyticsM) {
+          tabAnalyticsM.addEventListener('click', () => {
+            setAdminActiveTabMobile('analytics');
+            // Show analytics content
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            analyticsTabContent.classList.remove('hidden');
+            setActiveTab('analytics');
+          });
+        }
+        if (tabActivityLogsM) {
+          tabActivityLogsM.addEventListener('click', () => {
+            setAdminActiveTabMobile('activity-logs');
+            // Show activity logs content
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            activityLogsTabContent.classList.remove('hidden');
+            renderActivityLogs();
+          });
+        }
+        if (tabUserManagementM) {
+          tabUserManagementM.addEventListener('click', () => {
+            setAdminActiveTabMobile('user-management');
+            // Show user management content
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            userManagementTabContent.classList.remove('hidden');
+            renderUserManagement();
           });
         }
     </script>

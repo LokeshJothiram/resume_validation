@@ -30,3 +30,13 @@ class ShortlistedResume(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     match_percentage = db.Column(db.Float, nullable=True)
     # Add more fields as needed 
+
+class ActivityLog(db.Model):
+    __tablename__ = 'activity_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    username = db.Column(db.String(80), nullable=True)  # Store username for deleted users
+    role = db.Column(db.String(20), nullable=True)
+    action_type = db.Column(db.String(50), nullable=False)
+    details = db.Column(db.JSON, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False) 

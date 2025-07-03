@@ -6,6 +6,8 @@ import re
 import json
 from pydub import AudioSegment
 import tempfile
+from database import ActivityLog, db
+import datetime
 
 SAVED_FILES_FOLDER = 'saved_files'
 
@@ -263,4 +265,16 @@ Answers:
             "problem_solving_score": 0,
             "problem_solving_explanation": "",
             "question_grades": []
-        } 
+        }
+
+def log_activity(user, action_type, details=None):
+    log = ActivityLog(
+        user_id=getattr(user, 'id', None),
+        username=getattr(user, 'username', None),
+        role=getattr(user, 'role', None),
+        action_type=action_type,
+        details=details or {},
+        timestamp=datetime.datetime.utcnow()
+    )
+    db.session.add(log)
+    db.session.commit() 

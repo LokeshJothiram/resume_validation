@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session
-from database import db, SavedAnalysis, User
+from database import db, SavedAnalysis, User, ActivityLog
+from utils import log_activity
 import datetime
 
 saved_bp = Blueprint('saved', __name__)
@@ -22,6 +23,7 @@ def save_analysis():
     )
     db.session.add(analysis)
     db.session.commit()
+    log_activity(user, 'save_analysis', {'analysis_id': analysis.id})
     return jsonify({'status': 'success', 'id': analysis.id})
 
 @saved_bp.route('/list_saved_analyses', methods=['GET'])
@@ -52,4 +54,5 @@ def delete_saved_analysis(analysis_id):
     analysis = SavedAnalysis.query.filter_by(id=analysis_id, user_id=user.id).first_or_404()
     db.session.delete(analysis)
     db.session.commit()
+    log_activity(user, 'delete_saved_analysis', {'analysis_id': analysis_id})
     return jsonify({'status': 'deleted'}) 

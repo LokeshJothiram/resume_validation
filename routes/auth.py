@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from database import db, User
+from database import db, User, ActivityLog
+from utils import log_activity
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -15,6 +16,7 @@ def register():
         user = User(username=username, password=password, role=role)
         db.session.add(user)
         db.session.commit()
+        log_activity(user, 'register')
         flash('Registration successful! Please log in.', 'success')
         return redirect(url_for('auth.login'))
     return render_template('register.html')
@@ -28,6 +30,7 @@ def login():
         if user:
             session['user'] = username
             session['role'] = user.role
+            log_activity(user, 'login')
             return redirect(url_for('index'))
         else:
             flash('Invalid username or password', 'danger')
