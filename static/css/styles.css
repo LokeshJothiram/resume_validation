@@ -82,10 +82,10 @@ canvas[id^="donut"] {
   transition: background 0.2s;
   position: relative;
   overflow: hidden;
-  font-size: 0.97rem;
+  font-size: 0.82rem;
   border: none;
   box-shadow: 0 2px 8px rgba(90, 60, 200, 0.08);
-  min-height: 36px;
+  min-height: 24px;
 }
 .custom-file-upload:hover {
   background: linear-gradient(90deg, #3b82f6 0%, #a855f7 100%);
