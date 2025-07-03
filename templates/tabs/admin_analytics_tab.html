@@ -1,0 +1,53 @@
+<div class="p-2 md:p-4">
+  <!-- Summary Row -->
+  <div class="flex flex-wrap gap-2 md:gap-4 mb-3 md:mb-4">
+    <div class="flex-1 min-w-[120px] bg-white rounded shadow-sm p-2 md:p-3 flex flex-col items-center justify-center">
+      <div class="text-xs text-gray-500">Total Users</div>
+      <div id="summaryTotalUsers" class="font-bold text-lg text-blue-700">-</div>
+    </div>
+    <div class="flex-1 min-w-[120px] bg-white rounded shadow-sm p-2 md:p-3 flex flex-col items-center justify-center">
+      <div class="text-xs text-gray-500">Total Shortlisted</div>
+      <div id="summaryTotalShortlisted" class="font-bold text-lg text-green-600">-</div>
+    </div>
+    <div class="flex-1 min-w-[120px] bg-white rounded shadow-sm p-2 md:p-3 flex flex-col items-center justify-center">
+      <div class="text-xs text-gray-500">Total Analyses</div>
+      <div id="summaryTotalAnalyses" class="font-bold text-lg text-purple-600">-</div>
+    </div>
+  </div>
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 mb-3 md:mb-4 items-stretch">
+    <div class="bg-white rounded shadow-sm p-2 md:p-3 flex flex-col justify-between">
+      <h3 class="text-xs font-semibold mb-1 text-gray-700">Shortlisted by Role</h3>
+      <canvas id="shortlistedBarChart" height="80"></canvas>
+    </div>
+    <div class="bg-white rounded shadow-sm p-2 md:p-3 flex flex-col justify-between">
+      <h3 class="text-xs font-semibold mb-1 text-gray-700">Analyses by Role</h3>
+      <canvas id="analysesBarChart" height="80"></canvas>
+    </div>
+    <div class="bg-white rounded shadow-sm p-2 md:p-3 flex flex-col justify-between">
+      <h3 class="text-xs font-semibold mb-1 text-gray-700">User Distribution</h3>
+      <canvas id="userPieChart" height="80"></canvas>
+    </div>
+    <div class="bg-white rounded shadow-sm p-2 md:p-3 flex flex-col justify-between">
+      <h3 class="text-xs font-semibold mb-1 text-gray-700">Shortlisting Trend</h3>
+      <canvas id="shortlistTrendChart" height="80"></canvas>
+    </div>
+  </div>
+  <!-- Top Users Section -->
+  <div class="bg-white rounded shadow-sm p-2 md:p-3 mb-3 md:mb-4">
+    <h3 class="text-xs font-semibold mb-2 text-gray-700">Top Users by Activity</h3>
+    <div id="topUsersContainer" class="flex flex-wrap gap-2"></div>
+  </div>
+  <!-- Filter and User List -->
+  <div class="flex flex-wrap gap-2 items-center mb-2">
+    <label for="roleFilter" class="block text-gray-700 font-semibold text-xs">Filter by Role:</label>
+    <select id="roleFilter" class="p-1 border border-gray-300 rounded w-32 text-xs">
+      <option value="all">All Roles</option>
+      <!-- Options will be populated dynamically -->
+    </select>
+  </div>
+  <div id="userListByRole" class="bg-white rounded shadow-sm p-2 md:p-3">
+    <h3 class="text-xs font-semibold mb-2 text-gray-700">Users in Selected Role</h3>
+    <div id="userListContainer"></div>
+  </div>
+</div> 

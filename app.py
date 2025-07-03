@@ -688,6 +688,68 @@ def delete_shortlisted(resume_id):
 def download_shortlisted_resume(filename):
     return send_from_directory(SHORTLIST_FOLDER, filename, as_attachment=True)
 
+@app.route('/admin_analytics', methods=['GET'])
+def admin_analytics():
+    # Query all users and their roles
+    users = User.query.all()
+    role_stats = {}
+    for user in users:
+        role = user.role
+        if role not in role_stats:
+            role_stats[role] = {'shortlisted': 0, 'analyses': 0, 'questions': 0, 'users': 0}
+        role_stats[role]['users'] += 1
+    # Count shortlisted resumes per user
+    for sr in ShortlistedResume.query.all():
+        user = User.query.get(sr.user_id) if sr.user_id else None
+        if user:
+            role_stats[user.role]['shortlisted'] += 1
+    # Count saved analyses per user
+    for sa in SavedAnalysis.query.all():
+        user = User.query.get(sa.user_id) if sa.user_id else None
+        if user:
+            role_stats[user.role]['analyses'] += 1
+    # Count questions generated per user (assuming you have a QuestionGeneration model)
+    try:
+        from database import QuestionGeneration
+        for qg in QuestionGeneration.query.all():
+            user = User.query.get(qg.user_id) if qg.user_id else None
+            if user:
+                role_stats[user.role]['questions'] += 1
+    except ImportError:
+        pass  # If you don't have a QuestionGeneration model, skip
+    # Format for frontend
+    result = []
+    for role, stats in role_stats.items():
+        result.append({
+            'role': role,
+            'users': stats['users'],
+            'shortlisted': stats['shortlisted'],
+            'analyses': stats['analyses'],
+            'questions': stats['questions']
+        })
+    return jsonify(result)
+
+@app.route('/admin_analytics_users', methods=['GET'])
+def admin_analytics_users():
+    users = User.query.all()
+    shortlisted_counts = {u.id: 0 for u in users}
+    analyses_counts = {u.id: 0 for u in users}
+    for sr in ShortlistedResume.query.all():
+        if sr.user_id:
+            shortlisted_counts[sr.user_id] = shortlisted_counts.get(sr.user_id, 0) + 1
+    for sa in SavedAnalysis.query.all():
+        if sa.user_id:
+            analyses_counts[sa.user_id] = analyses_counts.get(sa.user_id, 0) + 1
+    result = []
+    for u in users:
+        result.append({
+            'username': u.username,
+            'role': u.role,
+            'shortlisted': shortlisted_counts.get(u.id, 0),
+            'analyses': analyses_counts.get(u.id, 0)
+        })
+    return jsonify(result)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

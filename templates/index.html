@@ -68,6 +68,9 @@
         <!-- Navigation Tabs Center (hidden on mobile) -->
         <div id="nav-tabs" class="hidden sm:flex gap-2 md:gap-4 ml-1 sm:ml-4 md:ml-8 overflow-x-auto max-w-full">
           <button id="tab-dashboard" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
+          {% if session.role == 'admin' %}
+            <button id="tab-analytics" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Analytics</button>
+          {% endif %}
           {% if session.role != 'admin' %}
             <button id="tab-resume" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
             <button id="tab-audio" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Technical Proficiency</button>
@@ -97,6 +100,9 @@
       <!-- Mobile nav menu -->
       <div id="mobile-nav" class="sm:hidden fixed top-14 left-0 w-full bg-white shadow-lg z-40 hidden flex-col gap-1 p-2">
         <button id="tab-dashboard-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
+        {% if session.role == 'admin' %}
+          <button id="tab-analytics-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Analytics</button>
+        {% endif %}
         {% if session.role != 'admin' %}
           <button id="tab-resume-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
           <button id="tab-audio-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Technical Proficiency</button>
@@ -114,10 +120,10 @@
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
                     <form id="talentForm" enctype="multipart/form-data" novalidate>
-                        <div id="dashboard-tab-content" class="tab-content">
+                        <div id="dashboard-tab-content" class="tab-content relative -top-10">
                             {% include 'tabs/dashboard_tab.html' %}
                         </div>
-                        <div id="resume-tab-content" class="tab-content hidden">
+                        <div id="resume-tab-content" class="tab-content hidden relative -top-10">
                             <div class="flex flex-col items-start w-full">
                                 <div class="w-full pr-0 self-start">
                                 {% include 'tabs/resume_match_tab.html' %}
@@ -156,7 +162,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="audio-tab-content" class="tab-content hidden">
+                        <div id="audio-tab-content" class="tab-content hidden relative -top-10">
                             <div class="flex flex-col items-start w-full">
                                 <div class="w-full pr-0 self-start">
                                 {% include 'tabs/technical_proficiency_tab.html' %}
@@ -195,14 +201,17 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="question-gen-tab-content" class="tab-content hidden">
+                        <div id="question-gen-tab-content" class="tab-content hidden relative -top-10">
                             {% include 'tabs/interview_question_generator_tab.html' %}
                         </div>
-                        <div id="saved-tab-content" class="tab-content hidden">
+                        <div id="saved-tab-content" class="tab-content hidden relative -top-10">
                             {% include 'tabs/saved_analyses_tab.html' %}
                         </div>
-                        <div id="shortlisted-tab-content" class="tab-content hidden">
+                        <div id="shortlisted-tab-content" class="tab-content hidden relative -top-10">
                             {% include 'tabs/shortlisted_resumes_tab.html' %}
+                        </div>
+                        <div id="analytics-tab-content" class="tab-content hidden relative -top-10">
+                          {% include 'tabs/admin_analytics_tab.html' %}
                         </div>
                     </form>
             </div>
@@ -1853,6 +1862,239 @@
             });
           }
         });
+
+        // --- Analytics Tab Logic ---
+        let analyticsData = null;
+        let userData = null;
+        let shortlistedBarChart = null;
+        let analysesBarChart = null;
+        let userPieChart = null;
+        let shortlistTrendChart = null;
+
+        function updateSummaryAndCharts(filteredData) {
+          // Update summary
+          const totalUsers = filteredData.reduce((sum, row) => sum + row.users, 0);
+          const totalShortlisted = filteredData.reduce((sum, row) => sum + row.shortlisted, 0);
+          const totalAnalyses = filteredData.reduce((sum, row) => sum + row.analyses, 0);
+          document.getElementById('summaryTotalUsers').textContent = totalUsers;
+          document.getElementById('summaryTotalShortlisted').textContent = totalShortlisted;
+          document.getElementById('summaryTotalAnalyses').textContent = totalAnalyses;
+          // Prepare chart data
+          const roles = filteredData.map(row => row.role);
+          const shortlisted = filteredData.map(row => row.shortlisted);
+          const analyses = filteredData.map(row => row.analyses);
+          const users = filteredData.map(row => row.users);
+          // Bar Chart: Resumes Shortlisted
+          if (shortlistedBarChart) shortlistedBarChart.destroy();
+          shortlistedBarChart = new Chart(document.getElementById('shortlistedBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: roles,
+              datasets: [{
+                label: 'Resumes Shortlisted',
+                data: shortlisted,
+                backgroundColor: '#6366f1',
+                borderRadius: 8,
+              }]
+            },
+            options: {
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+          // Bar Chart: Analyses Saved
+          if (analysesBarChart) analysesBarChart.destroy();
+          analysesBarChart = new Chart(document.getElementById('analysesBarChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: roles,
+              datasets: [{
+                label: 'Analyses Saved',
+                data: analyses,
+                backgroundColor: '#10b981',
+                borderRadius: 8,
+              }]
+            },
+            options: {
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+          // Pie Chart: User Distribution
+          if (userPieChart) userPieChart.destroy();
+          userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+              labels: roles,
+              datasets: [{
+                data: users,
+                backgroundColor: ['#6366f1', '#10b981', '#f59e42', '#f43f5e', '#a855f7', '#0ea5e9'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              cutout: '60%',
+              plugins: { legend: { position: 'bottom' } }
+            }
+          });
+          // Trend Chart: (simulate with static data for now)
+          if (shortlistTrendChart) shortlistTrendChart.destroy();
+          shortlistTrendChart = new Chart(document.getElementById('shortlistTrendChart').getContext('2d'), {
+            type: 'line',
+            data: {
+              labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+              datasets: [{
+                label: 'Shortlisted',
+                data: shortlisted.map(val => val),
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 2
+              }]
+            },
+            options: {
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true } }
+            }
+          });
+        }
+
+        function renderAnalyticsCharts(selectedRole = 'all') {
+          fetch('/admin_analytics')
+            .then(response => response.json())
+            .then(data => {
+              analyticsData = data;
+              // Populate role filter
+              const roleFilter = document.getElementById('roleFilter');
+              roleFilter.innerHTML = '<option value="all">All Roles</option>' + data.map(r => `<option value="${r.role}">${r.role}</option>`).join('');
+              // Filter data
+              let filtered = data;
+              if (selectedRole !== 'all') filtered = data.filter(row => row.role === selectedRole);
+              updateSummaryAndCharts(filtered);
+              renderUserListByRole(selectedRole);
+              renderTopUsers(selectedRole);
+            })
+            .catch(() => {
+              document.getElementById('userListContainer').innerHTML = '<div class="text-red-500">Failed to load analytics data.</div>';
+            });
+        }
+
+        function renderTopUsers(selectedRole = 'all') {
+          fetch('/admin_analytics_users')
+            .then(response => response.json())
+            .then(users => {
+              let filtered = users;
+              if (selectedRole !== 'all') filtered = users.filter(u => u.role === selectedRole);
+              // Sort by total activity (shortlisted + analyses)
+              filtered.sort((a, b) => (b.shortlisted + b.analyses) - (a.shortlisted + a.analyses));
+              const top = filtered.slice(0, 3);
+              let html = '';
+              if (!top.length) {
+                html = '<div class="text-gray-500">No users found for this role.</div>';
+              } else {
+                top.forEach(u => {
+                  html += `<div class="flex flex-col items-center bg-gray-50 rounded px-2 py-1 min-w-[90px]">
+                    <div class="font-bold text-blue-700 text-sm">${u.username}</div>
+                    <div class="text-xs text-gray-500">Shortlisted: <span class="text-green-600 font-semibold">${u.shortlisted}</span></div>
+                    <div class="text-xs text-gray-500">Analyses: <span class="text-purple-600 font-semibold">${u.analyses}</span></div>
+                  </div>`;
+                });
+              }
+              document.getElementById('topUsersContainer').innerHTML = html;
+            });
+        }
+
+        function renderUserListByRole(role) {
+          fetch('/admin_analytics_users')
+            .then(response => response.json())
+            .then(users => {
+              let filtered = users;
+              if (role !== 'all') filtered = users.filter(u => u.role === role);
+              if (!filtered.length) {
+                document.getElementById('userListContainer').innerHTML = '<div class="text-gray-500">No users found for this role.</div>';
+                return;
+              }
+              let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white">
+                <thead>
+                  <tr class="bg-gray-100">
+                    <th class="px-2 py-1 border-b text-left">Username</th>
+                    <th class="px-2 py-1 border-b text-left">Resumes Shortlisted</th>
+                    <th class="px-2 py-1 border-b text-left">Analyses Saved</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+              filtered.forEach(u => {
+                html += `<tr>
+                  <td class="px-2 py-1 border-b align-top font-bold text-blue-700">${u.username}</td>
+                  <td class="px-2 py-1 border-b align-top">${u.shortlisted}</td>
+                  <td class="px-2 py-1 border-b align-top">${u.analyses}</td>
+                </tr>`;
+              });
+              html += '</tbody></table>';
+              document.getElementById('userListContainer').innerHTML = html;
+            })
+            .catch(() => {
+              document.getElementById('userListContainer').innerHTML = '<div class="text-red-500">Failed to load analytics data.</div>';
+            });
+        }
+
+        const tabAnalytics = document.getElementById('tab-analytics');
+        const tabAnalyticsM = document.getElementById('tab-analytics-m');
+        const analyticsTabContent = document.getElementById('analytics-tab-content');
+        if (tabAnalytics) {
+          tabAnalytics.addEventListener('click', () => {
+            renderAnalyticsCharts('all');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            analyticsTabContent.classList.remove('hidden');
+            setActiveTab('analytics');
+          });
+        }
+        if (tabAnalyticsM) {
+          tabAnalyticsM.addEventListener('click', () => {
+            renderAnalyticsCharts('all');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            analyticsTabContent.classList.remove('hidden');
+            setActiveTab('analytics');
+          });
+        }
+        document.getElementById('roleFilter').addEventListener('change', function() {
+          const selectedRole = this.value;
+          let filtered = analyticsData;
+          if (selectedRole !== 'all') filtered = analyticsData.filter(row => row.role === selectedRole);
+          updateSummaryAndCharts(filtered);
+          renderUserListByRole(selectedRole);
+          renderTopUsers(selectedRole);
+        });
+
+        const adminTabIds = ['tab-dashboard', 'tab-analytics'];
+        function setAdminActiveTab(tab) {
+          adminTabIds.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.remove('active-gradient');
+          });
+          const activeBtn = document.getElementById(`tab-${tab}`);
+          if (activeBtn) activeBtn.classList.add('active-gradient');
+        }
+
+        if (tabDashboard) {
+          tabDashboard.addEventListener('click', () => {
+            setAdminActiveTab('dashboard');
+            // Show dashboard content
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            document.getElementById('dashboard-tab-content').classList.remove('hidden');
+            setActiveTab('dashboard');
+          });
+        }
+        if (tabAnalytics) {
+          tabAnalytics.addEventListener('click', () => {
+            setAdminActiveTab('analytics');
+            renderAnalyticsCharts('all');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            analyticsTabContent.classList.remove('hidden');
+            setActiveTab('analytics');
+          });
+        }
     </script>
 </body>
 </html>
