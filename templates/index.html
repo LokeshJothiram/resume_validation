@@ -2257,12 +2257,21 @@
             users = await resp.json();
           } catch (e) {
             container.innerHTML = '<div class="text-red-500 text-center">Failed to load users.</div>';
+            updateUserSummaryCards(0, 0, 0, 0);
             return;
           }
           if (!Array.isArray(users) || !users.length) {
             container.innerHTML = '<div class="text-gray-500 text-center">No users found.</div>';
+            updateUserSummaryCards(0, 0, 0, 0);
             return;
           }
+          // Update summary cards
+          updateUserSummaryCards(
+            users.length,
+            users.length, // all active for now
+            0,            // inactive
+            0             // pending
+          );
           let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white"><thead><tr class="bg-gray-100">
             <th class="px-2 py-1 border-b text-left">Username</th>
             <th class="px-2 py-1 border-b text-left">Role</th>
@@ -2328,6 +2337,13 @@
               };
             });
           });
+        }
+        // Add this function for summary cards
+        function updateUserSummaryCards(total, active, inactive, pending) {
+          document.getElementById('total-users-count').textContent = total;
+          document.getElementById('active-users-count').textContent = active;
+          document.getElementById('inactive-users-count').textContent = inactive;
+          document.getElementById('pending-users-count').textContent = pending;
         }
         // Add User, Import, Export buttons
         const addUserBtn = document.getElementById('addUserBtn');
