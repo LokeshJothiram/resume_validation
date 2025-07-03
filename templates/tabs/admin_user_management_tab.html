@@ -1,11 +1,13 @@
-<div class="p-2 md:p-4">
-  <h2 class="text-xl md:text-2xl font-bold mb-4 header-gradient">User Management</h2>
-  <div class="mb-4 flex flex-wrap gap-2 items-center">
-    <button id="addUserBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-semibold hover:bg-blue-700">Add User</button>
-    <button id="importUsersBtn" class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-semibold hover:bg-gray-300">Import</button>
-    <button id="exportUsersBtn" class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-semibold hover:bg-gray-300">Export</button>
+<div class="p-2 md:p-8 bg-gray-50 min-h-[80vh]">
+  <h2 class="text-2xl md:text-3xl font-bold mb-6 header-gradient">User Management</h2>
+  <div class="mb-6 flex flex-wrap gap-3 items-center">
+    <button id="addUserBtn" class="bg-blue-600 text-white px-5 py-2 rounded text-sm font-semibold shadow hover:bg-blue-700 transition">Add User</button>
+    <button id="importUsersBtn" class="bg-gray-200 text-gray-700 px-5 py-2 rounded text-sm font-semibold shadow hover:bg-gray-300 transition">Import</button>
+    <button id="exportUsersBtn" class="bg-gray-200 text-gray-700 px-5 py-2 rounded text-sm font-semibold shadow hover:bg-gray-300 transition">Export</button>
   </div>
-  <div id="userManagementContainer" class="bg-white rounded shadow-sm p-2 md:p-3 min-h-[200px]">
+  <div id="userManagementContainer" class="bg-white rounded-xl shadow-lg p-4 md:p-6 min-h-[400px] overflow-x-auto">
     <!-- User table and actions will be rendered here -->
   </div>
+  <!-- Edit User Modal Placeholder -->
+  <div id="edit-user-modal-root"></div>
 </div> 

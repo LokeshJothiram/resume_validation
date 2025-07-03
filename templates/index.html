@@ -312,6 +312,29 @@
             </div>
         </div>
 
+        <!-- Edit User Modal -->
+        <div id="edit-user-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
+            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+                <div class="text-lg font-semibold mb-4">Edit User</div>
+                <form id="edit-user-form" class="space-y-4">
+                    <div>
+                        <input type="text" id="edit-user-username" class="w-full p-2 border border-gray-300 rounded" placeholder="Username" required />
+                    </div>
+                    <div>
+                        <select id="edit-user-role" class="w-full p-2 border border-gray-300 rounded" required>
+                            <option value="hr">HR</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div id="edit-user-error" class="text-red-600 text-sm hidden"></div>
+                    <div class="flex justify-center gap-4 mt-6">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold">Save</button>
+                        <button type="button" id="edit-user-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
@@ -2261,6 +2284,50 @@
           html += '</tbody></table>';
           container.innerHTML = html;
           // TODO: Add event listeners for edit, reset, deactivate
+          // Add event listeners for edit
+          container.querySelectorAll('.edit-user-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              const userId = btn.getAttribute('data-id');
+              const user = users.find(u => u.id == userId);
+              if (!user) return;
+              document.getElementById('edit-user-username').value = user.username;
+              document.getElementById('edit-user-role').value = user.role;
+              document.getElementById('edit-user-error').classList.add('hidden');
+              document.getElementById('edit-user-modal').classList.remove('hidden');
+              document.getElementById('edit-user-form').onsubmit = async function(e) {
+                e.preventDefault();
+                const newUsername = document.getElementById('edit-user-username').value.trim();
+                const newRole = document.getElementById('edit-user-role').value;
+                if (!newUsername || !newRole) {
+                  document.getElementById('edit-user-error').textContent = 'All fields are required.';
+                  document.getElementById('edit-user-error').classList.remove('hidden');
+                  return;
+                }
+                try {
+                  const resp = await fetch(`/admin_users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: newUsername, role: newRole })
+                  });
+                  const data = await resp.json();
+                  if (resp.ok && data.status === 'success') {
+                    document.getElementById('edit-user-modal').classList.add('hidden');
+                    showToast('User updated!', 'success');
+                    renderUserManagement();
+                  } else {
+                    document.getElementById('edit-user-error').textContent = data.error || 'Failed to update user.';
+                    document.getElementById('edit-user-error').classList.remove('hidden');
+                  }
+                } catch (err) {
+                  document.getElementById('edit-user-error').textContent = 'Error updating user.';
+                  document.getElementById('edit-user-error').classList.remove('hidden');
+                }
+              };
+              document.getElementById('edit-user-cancel').onclick = function() {
+                document.getElementById('edit-user-modal').classList.add('hidden');
+              };
+            });
+          });
         }
         // Add User, Import, Export buttons
         const addUserBtn = document.getElementById('addUserBtn');
