@@ -792,7 +792,7 @@
                                 <div class="flex-1">
                                     <p class="text-2xl font-bold text-blue-700 mb-2">Technical Score: ${result.technical_score}/10</p>
                                     <p class="mb-4 text-gray-700"><strong>Technical Explanation:</strong> ${result.technical_explanation}</p>
-                                        <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-8 my-8" id="scoreDonuts">
+                                        <div class="grid grid-cols-1 sm:grid-cols-6 md:grid-cols-6 gap-4 my-8" id="scoreDonuts">
                                             <div class="flex flex-col items-center">
                                                 <canvas id="donutRelevance" width="120" height="120"></canvas>
                                                 <div class="mt-2 text-center text-sm font-semibold">Relevance of Tech</div>
@@ -897,12 +897,12 @@
                                 }]
                             });
                         }
-                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#2563eb');
-                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#3b82f6');
-                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#60a5fa');
-                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#93c5fd');
-                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#38bdf8');
-                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#0ea5e9');
+                        renderDonut('donutRelevance', (result.relevance_score || 0) * 10, '#ef4444');
+                        renderDonut('donutConfidence', (result.confidence_score || 0) * 10, '#f97316');
+                        renderDonut('donutCommunication', (result.communication_score || 0) * 10, '#eab308');
+                        renderDonut('donutClarity', (result.clarity_score || 0) * 10, '#22c55e');
+                        renderDonut('donutProblemSolving', (result.problem_solving_score || 0) * 10, '#06b6d4');
+                        renderDonut('donutTechnicalKnowledge', (result.depth_score || 0) * 10, '#8b5cf6');
                     }, 100);
                 } else if (result.audio_error) {
                         resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.audio_error}</p>`;
@@ -1442,7 +1442,7 @@
                     (rawData.problem_solving_score || 0) * 10,
                     (rawData.depth_score || 0) * 10
                 ];
-                const techColors = ['#2563eb', '#3b82f6', '#60a5fa', '#93c5fd', '#38bdf8', '#0ea5e9'];
+                const techColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#8b5cf6'];
                 
                 techCanvasIds.forEach((id, i) => {
                     const canvas = containerElement.querySelector(`#${id}_${fileId}`);
