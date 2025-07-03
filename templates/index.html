@@ -42,39 +42,45 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Wrap the header in a fixed div -->
+    <!-- Responsive Header -->
     <div id="fixed-header" class="fixed top-0 left-0 w-full z-50 bg-white shadow" style="height: 55px;">
-      <div class="flex items-center justify-between w-full py-2 px-6">
-        <!-- Gradient Title Left -->
-        <span class="flex items-center font-bold text-2xl sm:text-2xl">
-          <span style="display:inline-block;width:22px;height:18px;position:relative;margin-right:8px;">
-            <span style="display:block;width:100%;height:100%;background:linear-gradient(90deg, #2563eb 0%, #a21caf 100%);clip-path:polygon(0 0, 80% 0, 100% 25%, 80% 50%, 100% 75%, 80% 100%, 0 100%);border-radius:2px;"></span>
+      <div class="flex items-center justify-between w-full py-2 px-3 sm:px-6">
+        <!-- Logo and Hamburger -->
+        <div class="flex items-center gap-2 sm:gap-4">
+          <span class="flex items-center font-bold text-xl sm:text-2xl">
+            <span style="display:inline-block;width:20px;height:16px;position:relative;margin-right:6px;">
+              <span style="display:block;width:100%;height:100%;background:linear-gradient(90deg, #2563eb 0%, #a21caf 100%);clip-path:polygon(0 0, 80% 0, 100% 25%, 80% 50%, 100% 75%, 80% 100%, 0 100%);border-radius:2px;"></span>
+            </span>
+            <span class="header-gradient">TalentEdge AI</span>
           </span>
-          <span class="header-gradient">TalentEdge AI</span>
-        </span>
-        <!-- Navigation Tabs Center -->
-        <div class="flex gap-2 ml-8">
-          <button id="tab-dashboard" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
+          <!-- Hamburger for mobile -->
+          <button id="mobile-menu-btn" class="sm:hidden ml-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+        <!-- Navigation Tabs Center (hidden on mobile) -->
+        <div id="nav-tabs" class="hidden sm:flex gap-2 ml-2 sm:ml-8">
+          <button id="tab-dashboard" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
           {% if session.role == 'admin' %}
-          <button id="tab-job-upload" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Job Description Upload</button>
+          <button id="tab-job-upload" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Job Description Upload</button>
           {% else %}
-          <button id="tab-resume" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
-          <button id="tab-audio" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Technical Proficiency</button>
-          <button id="tab-question-gen" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Interview Question Generator</button>
-          <button id="tab-saved" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Saved Analyses</button>
-          <button id="tab-shortlisted" type="button" class="tab-btn px-3 py-2 text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Shortlisted Resumes</button>
+          <button id="tab-resume" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
+          <button id="tab-audio" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Technical Proficiency</button>
+          <button id="tab-question-gen" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Interview Question Generator</button>
+          <button id="tab-saved" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Saved Analyses</button>
+          <button id="tab-shortlisted" type="button" class="tab-btn px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Shortlisted Resumes</button>
           {% endif %}
         </div>
         <!-- Profile & Logout Right -->
-        <div class="relative flex items-center gap-4">
-          <button id="notification-btn" type="button" class="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 focus:outline-none border-none shadow-none">
-            <i data-lucide="bell" class="w-5 h-5 text-gray-700"></i>
+        <div class="relative flex items-center gap-2 sm:gap-4">
+          <button id="notification-btn" type="button" class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 focus:outline-none border-none shadow-none">
+            <i data-lucide="bell" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700"></i>
           </button>
           <button id="profile-btn" type="button" class="focus:outline-none">
-            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-8 h-8 rounded-full object-cover border border-gray-200" />
+            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200" />
           </button>
           <!-- Profile Dropdown (hidden by default) -->
-          <div id="profile-dropdown" class="absolute right-0 mt-24 w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 hidden z-50">
+          <div id="profile-dropdown" class="absolute right-0 mt-24 w-36 sm:w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 hidden z-50">
             <form action="{{ url_for('logout') }}" method="post">
               <button type="submit" id="logout" class="logout-btn w-full text-left px-4 py-2 flex items-center gap-2">
                 <i data-lucide="log-out" class="inline w-4 h-4 align-text-bottom"></i> Logout
@@ -82,6 +88,19 @@
             </form>
           </div>
         </div>
+      </div>
+      <!-- Mobile nav menu -->
+      <div id="mobile-nav" class="sm:hidden fixed top-14 left-0 w-full bg-white shadow-lg z-40 hidden flex-col gap-1 p-2">
+        <button id="tab-dashboard-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Dashboard</button>
+        {% if session.role == 'admin' %}
+        <button id="tab-job-upload-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg whitespace-nowrap">Job Description Upload</button>
+        {% else %}
+        <button id="tab-resume-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Resume Match</button>
+        <button id="tab-audio-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Technical Proficiency</button>
+        <button id="tab-question-gen-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Interview Question Generator</button>
+        <button id="tab-saved-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Saved Analyses</button>
+        <button id="tab-shortlisted-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Shortlisted Resumes</button>
+        {% endif %}
       </div>
     </div>
     <div class="flex w-full">
@@ -1792,6 +1811,41 @@
             });
             profileDropdown.addEventListener('click', function(e) {
               e.stopPropagation();
+            });
+          }
+        });
+
+        // Hamburger menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileNav = document.getElementById('mobile-nav');
+        if (mobileMenuBtn && mobileNav) {
+          mobileMenuBtn.addEventListener('click', function() {
+            mobileNav.classList.toggle('hidden');
+          });
+          // Hide menu when clicking outside
+          document.addEventListener('click', function(e) {
+            if (!mobileNav.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+              mobileNav.classList.add('hidden');
+            }
+          });
+        }
+        // Mobile tab switching
+        const tabMap = [
+          ['tab-dashboard-m', 'tab-dashboard', 'dashboard-tab-content'],
+          ['tab-job-upload-m', 'tab-job-upload', 'dashboard-tab-content'],
+          ['tab-resume-m', 'tab-resume', 'resume-tab-content'],
+          ['tab-audio-m', 'tab-audio', 'audio-tab-content'],
+          ['tab-question-gen-m', 'tab-question-gen', 'question-gen-tab-content'],
+          ['tab-saved-m', 'tab-saved', 'saved-tab-content'],
+          ['tab-shortlisted-m', 'tab-shortlisted', 'shortlisted-tab-content'],
+        ];
+        tabMap.forEach(([mid, did, cid]) => {
+          const mBtn = document.getElementById(mid);
+          const dBtn = document.getElementById(did);
+          if (mBtn && dBtn) {
+            mBtn.addEventListener('click', function() {
+              dBtn.click();
+              mobileNav.classList.add('hidden');
             });
           }
         });
