@@ -4,25 +4,6 @@ from utils import log_activity
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        role = request.form.get('role')
-        if role not in ['hr', 'admin']:
-            return 'Invalid role', 400
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'danger')
-            return redirect(url_for('auth.register'))
-        user = User(username=username, password=password, role=role)
-        db.session.add(user)
-        db.session.commit()
-        log_activity(user, 'register', {'message': 'User registered', 'username': user.username})
-        flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('auth.login'))
-    return render_template('register.html')
-
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':

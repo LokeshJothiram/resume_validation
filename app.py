@@ -810,7 +810,11 @@ def admin_add_user():
     user = User(username=data['username'], password=data['password'], role=data['role'])
     db.session.add(user)
     db.session.commit()
-    log_activity(user, 'admin_add_user')
+    log_activity(user, 'admin_add_user', {
+        'admin_username': session.get('user'),
+        'new_username': user.username,
+        'new_user_role': user.role
+    })
     return jsonify({'status': 'success', 'id': user.id})
 
 @app.route('/admin_users/<int:user_id>', methods=['PUT'])
