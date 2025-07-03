@@ -120,10 +120,10 @@
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
                     <form id="talentForm" enctype="multipart/form-data" novalidate>
-                        <div id="dashboard-tab-content" class="tab-content relative -top-10">
+                        <div id="dashboard-tab-content" class="tab-content relative -top-5 md:-top-10">
                             {% include 'tabs/dashboard_tab.html' %}
                         </div>
-                        <div id="resume-tab-content" class="tab-content hidden relative -top-10">
+                        <div id="resume-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                             <div class="flex flex-col items-start w-full">
                                 <div class="w-full pr-0 self-start">
                                 {% include 'tabs/resume_match_tab.html' %}
@@ -162,7 +162,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="audio-tab-content" class="tab-content hidden relative -top-10">
+                        <div id="audio-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                             <div class="flex flex-col items-start w-full">
                                 <div class="w-full pr-0 self-start">
                                 {% include 'tabs/technical_proficiency_tab.html' %}
@@ -201,16 +201,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="question-gen-tab-content" class="tab-content hidden relative -top-10">
+                        <div id="question-gen-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                             {% include 'tabs/interview_question_generator_tab.html' %}
                         </div>
-                        <div id="saved-tab-content" class="tab-content hidden relative -top-10">
+                        <div id="saved-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                             {% include 'tabs/saved_analyses_tab.html' %}
                         </div>
-                        <div id="shortlisted-tab-content" class="tab-content hidden relative -top-10">
+                        <div id="shortlisted-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                             {% include 'tabs/shortlisted_resumes_tab.html' %}
                         </div>
-                        <div id="analytics-tab-content" class="tab-content hidden relative -top-10">
+                        <div id="analytics-tab-content" class="tab-content hidden relative -top-5 md:-top-10">
                           {% include 'tabs/admin_analytics_tab.html' %}
                         </div>
                     </form>
