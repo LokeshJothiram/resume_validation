@@ -299,8 +299,8 @@
                     <div>
                         <select id="add-user-role" class="w-full p-2 border border-gray-300 rounded" required>
                             <option value="">Select Role</option>
-                            <option value="hr">HR</option>
                             <option value="admin">Admin</option>
+                            <option value="TA_TEAM">TA_TEAM</option>
                         </select>
                     </div>
                     <div id="add-user-error" class="text-red-600 text-sm hidden"></div>
@@ -322,8 +322,8 @@
                     </div>
                     <div>
                         <select id="edit-user-role" class="w-full p-2 border border-gray-300 rounded" required>
-                            <option value="hr">HR</option>
                             <option value="admin">Admin</option>
+                            <option value="TA_TEAM">TA_TEAM</option>
                         </select>
                     </div>
                     <div id="edit-user-error" class="text-red-600 text-sm hidden"></div>
@@ -2125,7 +2125,7 @@
                 const isAdmin = u.role.toLowerCase() === 'admin';
                 const rolePill = isAdmin
                   ? '<span class="bg-red-100 text-red-500 px-3 py-1 rounded-full text-xs font-semibold">admin</span>'
-                  : '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">hr</span>';
+                  : '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">TA_TEAM</span>';
                 const perf = (u.shortlisted + u.analyses) > 0 ? Math.round((u.shortlisted / (u.shortlisted + u.analyses)) * 100) : 0;
                 const barColor = perf > 70 ? 'bg-green-400' : perf > 40 ? 'bg-blue-400' : 'bg-gray-300';
                 html += `<tr class="${idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition">

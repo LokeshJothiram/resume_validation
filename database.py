@@ -8,8 +8,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
-    # Only 'hr' and 'admin' are valid roles
-    role = db.Column(db.String(20), nullable=False)  # valid: 'hr', 'admin'
+    # Only 'TA_TEAM' and 'admin' are valid roles
+    role = db.Column(db.String(20), nullable=False)  # valid: 'TA_TEAM', 'admin'
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow, nullable=False)
     # Add more fields as needed

@@ -137,6 +137,11 @@ def transcribe_audio_with_sarvam(audio_path, model="saarika:v2.5", language_code
         return f"Error contacting Sarvam API: {e}"
 
 def separate_hr_candidate_with_gemini(transcript):
+    """
+    The following is a transcript of a job interview between an HR interviewer and a candidate.
+    Please separate the transcript into a conversation history, labeling each line as either 'HR:' or 'Candidate:'.
+    Do not use a table or columns. Just alternate lines starting with 'HR:' or 'Candidate:' as appropriate.
+    """
     prompt = f"""
     The following is a transcript of a job interview between an HR interviewer and a candidate.
     Please separate the transcript into a conversation history, labeling each line as either 'HR:' or 'Candidate:'.
