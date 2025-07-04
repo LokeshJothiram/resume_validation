@@ -175,32 +175,77 @@
     {% endif %}
     {% if session.role == 'admin' %}
     <div class="text-lg text-gray-500 mb-6">Welcome to the Admin Dashboard.</div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-        <div class="text-xs text-gray-500">Total Users</div>
-        <div id="admin-summary-users" class="font-bold text-2xl text-blue-700">-</div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Stat Cards -->
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        <div class="flex items-center gap-4 mb-2">
+          <div class="bg-blue-100 p-3 rounded-xl"><i data-lucide='users' class='w-7 h-7 text-blue-600'></i></div>
+          <div>
+            <div class="text-xs text-gray-500 font-semibold">Total Users</div>
+            <div id="admin-summary-users" class="font-bold text-3xl text-blue-700">-</div>
+            <div id="admin-summary-users-delta" class="text-green-600 text-xs font-semibold mt-1">+12% from last month</div>
+          </div>
+        </div>
       </div>
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-        <div class="text-xs text-gray-500">Shortlisted Resumes</div>
-        <div id="admin-summary-shortlisted" class="font-bold text-2xl text-green-600">-</div>
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        <div class="flex items-center gap-4 mb-2">
+          <div class="bg-green-100 p-3 rounded-xl"><i data-lucide='file-text' class='w-7 h-7 text-green-600'></i></div>
+          <div>
+            <div class="text-xs text-gray-500 font-semibold">Shortlisted Resumes</div>
+            <div id="admin-summary-shortlisted" class="font-bold text-3xl text-green-700">-</div>
+            <div id="admin-summary-shortlisted-delta" class="text-green-600 text-xs font-semibold mt-1">+8% from last month</div>
+          </div>
+        </div>
       </div>
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
-        <div class="text-xs text-gray-500">Analyses Saved</div>
-        <div id="admin-summary-analyses" class="font-bold text-2xl text-purple-600">-</div>
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        <div class="flex items-center gap-4 mb-2">
+          <div class="bg-purple-100 p-3 rounded-xl"><i data-lucide='bar-chart-3' class='w-7 h-7 text-purple-600'></i></div>
+          <div>
+            <div class="text-xs text-gray-500 font-semibold">Analyses Saved</div>
+            <div id="admin-summary-analyses" class="font-bold text-3xl text-purple-700">-</div>
+            <div id="admin-summary-analyses-delta" class="text-red-500 text-xs font-semibold mt-1">3% from last month</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="flex flex-wrap gap-4 mb-8">
-      <a href="#" onclick="document.getElementById('tab-analytics').click(); return false;" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-5 py-3 rounded-lg font-semibold shadow text-sm flex items-center gap-2"><i data-lucide='bar-chart-3' class='w-5 h-5'></i> Analytics</a>
-      <a href="#" onclick="document.getElementById('tab-user-management').click(); return false;" class="bg-green-100 hover:bg-green-200 text-green-700 px-5 py-3 rounded-lg font-semibold shadow text-sm flex items-center gap-2"><i data-lucide='users' class='w-5 h-5'></i> User Management</a>
-      <a href="#" onclick="document.getElementById('tab-activity-logs').click(); return false;" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-5 py-3 rounded-lg font-semibold shadow text-sm flex items-center gap-2"><i data-lucide='clipboard-list' class='w-5 h-5'></i> Activity Logs</a>
-    </div>
-    <div class="bg-white rounded-xl shadow p-6 mb-8">
-      <div class="text-base font-semibold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide='activity' class='w-5 h-5 text-blue-400'></i> Recent Admin Activity</div>
-      <div id="admin-recent-activity" class="flex flex-col gap-2 text-sm text-gray-700"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Quick Actions -->
+      <div class="col-span-2 flex flex-col gap-4">
+        <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-blue-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-blue-100 transition" onclick="document.getElementById('tab-analytics').click();">
+            <i data-lucide='bar-chart-3' class='w-8 h-8 text-blue-600'></i>
+            <div>
+              <div class="text-gray-800 text-base font-semibold">Analytics</div>
+              <div class="text-xs text-gray-500">View detailed analytics and insights</div>
+            </div>
+          </div>
+          <div class="bg-green-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-green-100 transition" onclick="document.getElementById('tab-user-management').click();">
+            <i data-lucide='users' class='w-8 h-8 text-green-600'></i>
+            <div>
+              <div class="text-gray-800 text-base font-semibold">User Management</div>
+              <div class="text-xs text-gray-500">Manage users and their permissions</div>
+            </div>
+          </div>
+          <div class="bg-orange-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-orange-100 transition" onclick="document.getElementById('tab-activity-logs').click();">
+            <i data-lucide='clipboard-list' class='w-8 h-8 text-orange-500'></i>
+            <div>
+              <div class="text-gray-800 text-base font-semibold">Activity Logs</div>
+              <div class="text-xs text-gray-500">Monitor system activity and logs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Recent Admin Activity -->
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col h-full">
+        <div class="text-base font-semibold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide='activity' class='w-5 h-5 text-blue-400'></i> Recent Admin Activity</div>
+        <div id="admin-recent-activity" class="flex flex-col gap-2 text-sm text-gray-700"></div>
+        <a href="#" onclick="document.getElementById('tab-activity-logs').click(); return false;" class="mt-4 text-blue-600 text-sm flex items-center gap-1 hover:underline"><span>View all activity</span> <i data-lucide='arrow-right' class='w-4 h-4'></i></a>
+      </div>
     </div>
     <script>
-    // Fetch admin summary stats
-    document.addEventListener('DOMContentLoaded', function() {
+    // Refactored: Expose dashboard refresh functions globally
+    window.refreshAdminDashboardSummary = function() {
       fetch('/admin_analytics').then(resp => resp.json()).then(data => {
         let totalUsers = 0, totalShortlisted = 0, totalAnalyses = 0;
         data.forEach(row => {
@@ -211,8 +256,13 @@
         document.getElementById('admin-summary-users').textContent = totalUsers;
         document.getElementById('admin-summary-shortlisted').textContent = totalShortlisted;
         document.getElementById('admin-summary-analyses').textContent = totalAnalyses;
+        // Example deltas (replace with real data if available)
+        document.getElementById('admin-summary-users-delta').textContent = '+12% from last month';
+        document.getElementById('admin-summary-shortlisted-delta').textContent = '+8% from last month';
+        document.getElementById('admin-summary-analyses-delta').textContent = '3% from last month';
       });
-      // Fetch recent admin activity
+    };
+    window.refreshAdminRecentActivity = function() {
       fetch('/activity_logs?limit=3').then(resp => resp.json()).then(logs => {
         let html = '';
         if (!logs.length) html = '<div class="text-gray-400">No recent activity.</div>';
@@ -226,11 +276,19 @@
             if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
             return Math.floor(diff / 86400) + ' days ago';
           })(log.timestamp);
-          html += `<div class="flex items-center gap-2"><span class="text-blue-500"><i data-lucide='activity' class='w-4 h-4'></i></span> <span>${log.action_type.replace(/_/g,' ')}</span> <span class="ml-auto text-xs text-gray-400">${timeAgo}</span></div>`;
+          let icon = "<i data-lucide='activity' class='w-5 h-5 text-green-500'></i>";
+          if (log.action_type === 'login') icon = "<i data-lucide='log-in' class='w-5 h-5 text-green-500'></i>";
+          else if (log.action_type === 'logout') icon = "<i data-lucide='log-out' class='w-5 h-5 text-red-500'></i>";
+          else if (log.action_type === 'admin_delete_user') icon = "<i data-lucide='user-x' class='w-5 h-5 text-red-400'></i>";
+          html += `<div class="flex items-center gap-2"><span>${icon}</span> <span>${log.action_type.replace(/_/g,' ')}</span> <span class="ml-auto text-xs text-gray-400">${timeAgo}</span></div>`;
         });
         document.getElementById('admin-recent-activity').innerHTML = html;
         if (window.lucide && window.lucide.createIcons) lucide.createIcons();
       });
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      window.refreshAdminDashboardSummary();
+      window.refreshAdminRecentActivity();
     });
     </script>
     {% endif %}

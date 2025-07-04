@@ -866,14 +866,14 @@ def admin_edit_user(user_id):
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/<int:user_id>', methods=['DELETE'])
-def admin_deactivate_user(user_id):
+def admin_delete_user(user_id):
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
     # Log the activity BEFORE deleting the user and their logs
-    log_activity(user, 'admin_deactivate_user')
+    log_activity(get_current_user(), 'admin_delete_user', {'deleted_user': user.username, 'deleted_user_id': user.id})
     # Delete all related records
     SavedAnalysis.query.filter_by(user_id=user.id).delete()
     ShortlistedResume.query.filter_by(user_id=user.id).delete()
