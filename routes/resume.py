@@ -8,7 +8,8 @@ resume_bp = Blueprint('resume', __name__)
 def index():
     if 'user' not in session:
         return redirect(url_for('auth.login'))
-    return render_template('index.html')
+    username = session.get('user')
+    return render_template('index.html', username=username)
 
 @resume_bp.route('/process', methods=['POST'])
 def process():

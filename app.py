@@ -480,7 +480,8 @@ def logout():
 def index():
     if 'user' not in session:
         return redirect(url_for('login'))
-    return render_template('index.html')
+    username = session.get('user')
+    return render_template('index.html', username=username)
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -780,6 +781,29 @@ def get_activity_logs():
         q = q.filter_by(role=role)
     if action_type:
         q = q.filter_by(action_type=action_type)
+    logs = q.order_by(ActivityLog.timestamp.desc()).limit(limit).all()
+    return jsonify([
+        {
+            'id': log.id,
+            'user_id': log.user_id,
+            'username': log.username,
+            'role': log.role,
+            'action_type': log.action_type,
+            'details': log.details,
+            'timestamp': log.timestamp.isoformat()
+        }
+        for log in logs
+    ])
+
+@app.route('/user_activity_logs', methods=['GET'])
+def get_user_activity_logs():
+    if 'user' not in session:
+        return jsonify({'error': 'Unauthorized'}), 403
+    user = get_current_user()
+    if not user:
+        return jsonify({'error': 'Unauthorized'}), 403
+    limit = int(request.args.get('limit', 10))
+    q = ActivityLog.query.filter_by(user_id=user.id)
     logs = q.order_by(ActivityLog.timestamp.desc()).limit(limit).all()
     return jsonify([
         {

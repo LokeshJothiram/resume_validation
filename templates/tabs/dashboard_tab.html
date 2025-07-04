@@ -1,7 +1,18 @@
 <div class="space-y-8 w-full">
   <div>
-    <h1 class="text-4xl font-bold text-gray-900 mb-2">Welcome to AI Talent Assistant</h1>
+    <h1 id="greeting" class="text-4xl font-bold text-gray-900 mb-2"></h1>
     <p class="text-lg text-gray-500 mb-6">Streamline your hiring process with AI-powered tools</p>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var username = "{{ username|e }}";
+        var now = new Date();
+        var hour = now.getHours();
+        var greeting = "Good morning";
+        if (hour >= 12 && hour < 17) greeting = "Good afternoon";
+        else if (hour >= 17 || hour < 4) greeting = "Good evening";
+        document.getElementById('greeting').textContent = greeting + ", " + username + ".";
+      });
+    </script>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
       <div class="bg-blue-100 bg-opacity-40 border border-blue-200 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
         <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i>Resumes Analyzed</div>
@@ -28,43 +39,84 @@
       <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
         <div class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</div>
         <div class="text-gray-400 text-sm mb-4">Latest actions in your talent pipeline</div>
-        <div class="space-y-3">
-          <div class="bg-blue-50 rounded-lg p-3 flex items-center gap-3">
-            <i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>
-            <span class="text-gray-700 text-sm">Resume analyzed for Frontend Developer</span>
-            <span class="ml-auto text-xs text-gray-400">2 minutes ago</span>
-          </div>
-          <div class="bg-purple-50 rounded-lg p-3 flex items-center gap-3">
-            <i data-lucide="help-circle" class="w-5 h-5 text-purple-400"></i>
-            <span class="text-gray-700 text-sm">Interview questions generated</span>
-            <span class="ml-auto text-xs text-gray-400">15 minutes ago</span>
-          </div>
-          <div class="bg-green-50 rounded-lg p-3 flex items-center gap-3">
-            <i data-lucide="users" class="w-5 h-5 text-green-400"></i>
-            <span class="text-gray-700 text-sm">Candidate shortlisted</span>
-            <span class="ml-auto text-xs text-gray-400">30 minutes ago</span>
-          </div>
-        </div>
+        <div id="recentActivityContainer" class="space-y-3"></div>
+        <script>
+        async function renderUserRecentActivity() {
+          const container = document.getElementById('recentActivityContainer');
+          container.innerHTML = '<div class="text-gray-400">Loading...</div>';
+          let logs = [];
+          try {
+            const resp = await fetch('/user_activity_logs?limit=3');
+            logs = await resp.json();
+            if (logs.error) throw new Error(logs.error);
+          } catch (e) {
+            container.innerHTML = '<div class="text-red-500">Failed to load activity.</div>';
+            return;
+          }
+          if (!logs.length) {
+            container.innerHTML = '<div class="text-gray-400">No recent activity found.</div>';
+            return;
+          }
+          let html = '';
+          logs.forEach(log => {
+            let icon = '<i data-lucide="activity" class="w-5 h-5 text-gray-400"></i>';
+            let color = 'bg-gray-50';
+            let label = log.action_type.replace(/_/g, ' ');
+            if (log.action_type === 'save_analysis') {
+              icon = '<i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>';
+              color = 'bg-blue-50';
+              label = 'Resume analyzed';
+            } else if (log.action_type === 'shortlist_resume') {
+              icon = '<i data-lucide="users" class="w-5 h-5 text-green-400"></i>';
+              color = 'bg-green-50';
+              label = 'Candidate shortlisted';
+            } else if (log.action_type === 'interview_questions_generated') {
+              icon = '<i data-lucide="help-circle" class="w-5 h-5 text-purple-400"></i>';
+              color = 'bg-purple-50';
+              label = 'Interview questions generated';
+            }
+            // Time ago
+            const timeAgo = timeAgoString(log.timestamp);
+            html += `<div class="${color} rounded-lg p-3 flex items-center gap-3">
+              ${icon}
+              <span class="text-gray-700 text-sm">${label}</span>
+              <span class="ml-auto text-xs text-gray-400">${timeAgo}</span>
+            </div>`;
+          });
+          container.innerHTML = html;
+          if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+        }
+        function timeAgoString(isoDate) {
+          const now = new Date();
+          const then = new Date(isoDate);
+          const diff = Math.floor((now - then) / 1000);
+          if (diff < 60) return diff + ' seconds ago';
+          if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
+          if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+          return Math.floor(diff / 86400) + ' days ago';
+        }
+        document.addEventListener('DOMContentLoaded', renderUserRecentActivity);
+        </script>
       </div>
       <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
         <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
         <div class="text-gray-400 text-sm mb-4">Get started with these common tasks</div>
         <div class="space-y-3">
-          <div class="bg-blue-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition">
+          <div id="quick-upload-resume" class="bg-blue-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition">
             <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i>
             <div>
               <div class="text-gray-700 text-sm font-semibold">Upload New Resume</div>
               <div class="text-xs text-gray-400">Start matching candidates</div>
             </div>
           </div>
-          <div class="bg-purple-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition">
+          <div id="quick-skill-assessment" class="bg-purple-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition">
             <i data-lucide="mic" class="w-5 h-5 text-purple-400"></i>
             <div>
               <div class="text-gray-700 text-sm font-semibold">Create Skill Assessment</div>
               <div class="text-xs text-gray-400">Test technical abilities</div>
             </div>
           </div>
-          <div class="bg-green-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-green-100 transition">
+          <div id="quick-generate-questions" class="bg-green-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-green-100 transition">
             <i data-lucide="help-circle" class="w-5 h-5 text-green-400"></i>
             <div>
               <div class="text-gray-700 text-sm font-semibold">Generate Interview Questions</div>
@@ -72,6 +124,23 @@
             </div>
           </div>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Quick Actions functionality
+          const uploadBtn = document.getElementById('quick-upload-resume');
+          const skillBtn = document.getElementById('quick-skill-assessment');
+          const questionsBtn = document.getElementById('quick-generate-questions');
+          if (uploadBtn) uploadBtn.onclick = function() {
+            if (window.showTab) showTab('tab-resume', 'resume-tab-content');
+          };
+          if (skillBtn) skillBtn.onclick = function() {
+            if (window.showTab) showTab('tab-audio', 'audio-tab-content');
+          };
+          if (questionsBtn) questionsBtn.onclick = function() {
+            if (window.showTab) showTab('tab-question-gen', 'question-gen-tab-content');
+          };
+        });
+        </script>
       </div>
     </div>
   </div>
