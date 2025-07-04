@@ -838,10 +838,10 @@ def admin_add_user():
     user = User(username=data['username'], password=data['password'], role=data['role'])
     db.session.add(user)
     db.session.commit()
-    log_activity(user, 'admin_add_user', {
-        'admin_username': session.get('user'),
-        'new_username': user.username,
-        'new_user_role': user.role
+    log_activity(get_current_user(), 'admin_add_user', {
+        'added_user': user.username,
+        'added_user_id': user.id,
+        'added_user_role': user.role
     })
     return jsonify({'status': 'success', 'id': user.id})
 
@@ -862,7 +862,11 @@ def admin_edit_user(user_id):
     except IntegrityError:
         db.session.rollback()
         return jsonify({'status': 'error', 'error': 'Username already exists.'}), 400
-    log_activity(user, 'admin_edit_user')
+    log_activity(get_current_user(), 'admin_edit_user', {
+        'edited_user': user.username,
+        'edited_user_id': user.id,
+        'edited_user_role': user.role
+    })
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/<int:user_id>', methods=['DELETE'])
@@ -893,7 +897,10 @@ def admin_reset_password():
         return jsonify({'error': 'User not found'}), 404
     user.password = data.get('new_password')
     db.session.commit()
-    log_activity(user, 'admin_reset_password')
+    log_activity(get_current_user(), 'admin_reset_password', {
+        'reset_user': user.username,
+        'reset_user_id': user.id
+    })
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/import', methods=['POST'])
@@ -910,7 +917,11 @@ def admin_import_users():
         user = User(username=u['username'], password=u['password'], role=u['role'])
         db.session.add(user)
         db.session.commit()
-        log_activity(user, 'admin_import_user')
+        log_activity(get_current_user(), 'admin_import_user', {
+            'imported_user': user.username,
+            'imported_user_id': user.id,
+            'imported_user_role': user.role
+        })
         added += 1
     return jsonify({'status': 'success', 'added': added})
 

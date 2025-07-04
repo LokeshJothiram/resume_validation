@@ -286,10 +286,11 @@ Answers:
         }
 
 def log_activity(user, action_type, details=None):
+    from flask import session
     log = ActivityLog(
         user_id=getattr(user, 'id', None),
-        username=getattr(user, 'username', None),
-        role=getattr(user, 'role', None),
+        username=getattr(user, 'username', None) or session.get('user'),
+        role=getattr(user, 'role', None) or session.get('role'),
         action_type=action_type,
         details=details or {},
         timestamp=get_ist_now()
