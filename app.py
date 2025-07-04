@@ -22,9 +22,10 @@ import glob
 from routes import register_blueprints
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from database import db, User, SavedAnalysis, ShortlistedResume, ActivityLog
+from database import db, User, SavedAnalysis, ShortlistedResume, ActivityLog, QuestionGeneration
 from werkzeug.utils import secure_filename
 from utils import log_activity, get_current_user
+from sqlalchemy.exc import IntegrityError
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -851,7 +852,11 @@ def admin_edit_user(user_id):
         user.username = data['username']
     if 'role' in data:
         user.role = data['role']
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'error': 'Username already exists.'}), 400
     log_activity(user, 'admin_edit_user')
     return jsonify({'status': 'success'})
 
@@ -862,10 +867,15 @@ def admin_deactivate_user(user_id):
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
-    # For now, just delete. For real deactivation, add an 'active' field.
+    # Log the activity BEFORE deleting the user and their logs
+    log_activity(user, 'admin_deactivate_user')
+    # Delete all related records
+    SavedAnalysis.query.filter_by(user_id=user.id).delete()
+    ShortlistedResume.query.filter_by(user_id=user.id).delete()
+    ActivityLog.query.filter_by(user_id=user.id).delete()
+    QuestionGeneration.query.filter_by(user_id=user.id).delete()
     db.session.delete(user)
     db.session.commit()
-    log_activity(user, 'admin_deactivate_user')
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/reset_password', methods=['POST'])

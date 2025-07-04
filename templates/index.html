@@ -2311,80 +2311,124 @@
             updateUserSummaryCards(0, 0, 0, 0);
             return;
           }
-          // Update summary cards
-          updateUserSummaryCards(
-            users.length,
-            users.length, // all active for now
-            0,            // inactive
-            0             // pending
-          );
-          let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white"><thead><tr class="bg-gray-100">
-            <th class="px-2 py-1 border-b text-left">Username</th>
-            <th class="px-2 py-1 border-b text-left">Role</th>
-            <th class="px-2 py-1 border-b text-left">Created</th>
-            <th class="px-2 py-1 border-b text-left">Actions</th>
-          </tr></thead><tbody>`;
-          users.forEach(u => {
-            const initial = u.username.charAt(0).toUpperCase();
-            const usernameCell = `<div class=\"flex items-center gap-3\"><span class=\"w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-400 to-purple-400 text-white font-bold text-base\">${initial}</span><span>${u.username}</span></div>`;
-            html += `<tr>
-              <td class=\"px-2 py-1 border-b align-top\">${usernameCell}</td>
-              <td class=\"px-2 py-1 border-b align-top\">${u.role}</td>
-              <td class=\"px-2 py-1 border-b align-top\">${new Date(u.created_at).toLocaleDateString()}</td>
-              <td class=\"px-2 py-1 border-b align-top\">
-                <button class=\"edit-user-btn text-blue-600 mr-2\" data-id=\"${u.id}\">Edit</button>
-                <button class=\"reset-pw-btn text-yellow-600 mr-2\" data-id=\"${u.id}\">Reset PW</button>
-                <button class=\"deactivate-user-btn text-red-600\" data-id=\"${u.id}\">Deactivate</button>
-              </td>
-            </tr>`;
-          });
-          html += '</tbody></table>';
-          container.innerHTML = html;
-          // TODO: Add event listeners for edit, reset, deactivate
-          // Add event listeners for edit
-          container.querySelectorAll('.edit-user-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const userId = btn.getAttribute('data-id');
-              const user = users.find(u => u.id == userId);
-              if (!user) return;
-              document.getElementById('edit-user-username').value = user.username;
-              document.getElementById('edit-user-role').value = user.role;
-              document.getElementById('edit-user-error').classList.add('hidden');
-              document.getElementById('edit-user-modal').classList.remove('hidden');
-              document.getElementById('edit-user-form').onsubmit = async function(e) {
-                e.preventDefault();
-                const newUsername = document.getElementById('edit-user-username').value.trim();
-                const newRole = document.getElementById('edit-user-role').value;
-                if (!newUsername || !newRole) {
-                  document.getElementById('edit-user-error').textContent = 'All fields are required.';
-                  document.getElementById('edit-user-error').classList.remove('hidden');
-                  return;
+          // Store users globally for search
+          window._allUsers = users;
+          // Calculate summary counts
+          const total = users.length;
+          // If you have an 'active' field, use it. For now, all are active.
+          const active = users.filter(u => u.active !== false && u.active !== 0).length;
+          const inactive = users.filter(u => u.active === false || u.active === 0).length;
+          // If you have a 'pending' field, use it. For now, set to 0.
+          const pending = users.filter(u => u.status === 'pending').length || 0;
+          updateUserSummaryCards(total, active, inactive, pending);
+          function renderTable(filteredUsers) {
+            let html = `<table class="min-w-full text-xs border border-gray-200 rounded bg-white"><thead><tr class="bg-gray-100">
+              <th class="px-2 py-1 border-b text-left">Username</th>
+              <th class="px-2 py-1 border-b text-left">Role</th>
+              <th class="px-2 py-1 border-b text-left">Created</th>
+              <th class="px-2 py-1 border-b text-left">Actions</th>
+            </tr></thead><tbody>`;
+            filteredUsers.forEach(u => {
+              const initial = u.username.charAt(0).toUpperCase();
+              const usernameCell = `<div class=\"flex items-center gap-3\"><span class=\"w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-400 to-purple-400 text-white font-bold text-base\">${initial}</span><span>${u.username}</span></div>`;
+              html += `<tr>
+                <td class=\"px-2 py-1 border-b align-top\">${usernameCell}</td>
+                <td class=\"px-2 py-1 border-b align-top\">${u.role}</td>
+                <td class=\"px-2 py-1 border-b align-top\">${new Date(u.created_at).toLocaleDateString()}</td>
+                <td class=\"px-2 py-1 border-b align-top\">
+                  <button class=\"edit-user-btn text-blue-600 mr-2\" data-id=\"${u.id}\">Edit</button>
+                  <button class=\"reset-pw-btn text-yellow-600 mr-2\" data-id=\"${u.id}\">Reset PW</button>
+                  <button class=\"delete-user-btn text-red-600\" data-id=\"${u.id}\">Delete</button>
+                </td>
+              </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+            // Add event listeners for delete
+            container.querySelectorAll('.delete-user-btn').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const userId = btn.getAttribute('data-id');
+                const user = filteredUsers.find(u => u.id == userId);
+                if (!user) return;
+                if (confirm(`Are you sure you want to delete user '${user.username}'? This cannot be undone.`)) {
+                  fetch(`/admin_users/${userId}`, { method: 'DELETE' })
+                    .then(resp => resp.json())
+                    .then(data => {
+                      if (data.status === 'success') {
+                        showToast('User deleted!', 'success');
+                        // Remove user from global and re-render
+                        window._allUsers = window._allUsers.filter(u => u.id != userId);
+                        renderTable(window._allUsers.filter(filterFn));
+                        updateUserSummaryCards(window._allUsers.length, window._allUsers.length, 0, 0);
+                      } else {
+                        showToast(data.error || 'Failed to delete user.', 'error');
+                      }
+                    })
+                    .catch(() => showToast('Error deleting user.', 'error'));
                 }
-                try {
-                  const resp = await fetch(`/admin_users/${userId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: newUsername, role: newRole })
-                  });
-                  const data = await resp.json();
-                  if (resp.ok && data.status === 'success') {
-                    document.getElementById('edit-user-modal').classList.add('hidden');
-                    showToast('User updated!', 'success');
-                    renderUserManagement();
-                  } else {
-                    document.getElementById('edit-user-error').textContent = data.error || 'Failed to update user.';
+              });
+            });
+            // Add event listeners for edit (existing logic)
+            container.querySelectorAll('.edit-user-btn').forEach(btn => {
+              btn.addEventListener('click', function() {
+                const userId = btn.getAttribute('data-id');
+                const user = filteredUsers.find(u => u.id == userId);
+                if (!user) return;
+                document.getElementById('edit-user-username').value = user.username;
+                document.getElementById('edit-user-role').value = user.role;
+                document.getElementById('edit-user-error').classList.add('hidden');
+                document.getElementById('edit-user-modal').classList.remove('hidden');
+                document.getElementById('edit-user-form').onsubmit = async function(e) {
+                  e.preventDefault();
+                  const newUsername = document.getElementById('edit-user-username').value.trim();
+                  const newRole = document.getElementById('edit-user-role').value;
+                  if (!newUsername || !newRole) {
+                    document.getElementById('edit-user-error').textContent = 'All fields are required.';
+                    document.getElementById('edit-user-error').classList.remove('hidden');
+                    return;
+                  }
+                  try {
+                    const resp = await fetch(`/admin_users/${userId}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ username: newUsername, role: newRole })
+                    });
+                    const data = await resp.json();
+                    if (resp.ok && data.status === 'success') {
+                      document.getElementById('edit-user-modal').classList.add('hidden');
+                      showToast('User updated!', 'success');
+                      renderUserManagement();
+                    } else {
+                      document.getElementById('edit-user-error').textContent = data.error || 'Failed to update user.';
+                      document.getElementById('edit-user-error').classList.remove('hidden');
+                    }
+                  } catch (err) {
+                    document.getElementById('edit-user-error').textContent = 'Error updating user.';
                     document.getElementById('edit-user-error').classList.remove('hidden');
                   }
-                } catch (err) {
-                  document.getElementById('edit-user-error').textContent = 'Error updating user.';
-                  document.getElementById('edit-user-error').classList.remove('hidden');
-                }
-              };
-              document.getElementById('edit-user-cancel').onclick = function() {
-                document.getElementById('edit-user-modal').classList.add('hidden');
-              };
+                };
+                document.getElementById('edit-user-cancel').onclick = function() {
+                  document.getElementById('edit-user-modal').classList.add('hidden');
+                };
+              });
             });
-          });
+          }
+          // Filtering logic
+          function filterFn(u) {
+            const q = (document.getElementById('user-search').value || '').toLowerCase();
+            return (
+              u.username.toLowerCase().includes(q) ||
+              u.role.toLowerCase().includes(q)
+            );
+          }
+          renderTable(users.filter(filterFn));
+          // Search event
+          const searchInput = document.getElementById('user-search');
+          if (searchInput) {
+            searchInput.oninput = function() {
+              renderTable(window._allUsers.filter(filterFn));
+            };
+          }
         }
         // Add this function for summary cards
         function updateUserSummaryCards(total, active, inactive, pending) {
@@ -2429,6 +2473,7 @@
               addUserModal.classList.add('hidden');
               showToast('User added!', 'success');
               renderUserManagement();
+              refreshAdminDashboardSummary(); // <-- Add this line
             } else {
               addUserError.textContent = data.error || 'Failed to add user.';
               addUserError.classList.remove('hidden');
@@ -2753,6 +2798,21 @@
           if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
           if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
           return Math.floor(diff / 86400) + ' days ago';
+        }
+
+        // Add this function to refresh admin dashboard summary
+        function refreshAdminDashboardSummary() {
+          fetch('/admin_analytics').then(resp => resp.json()).then(data => {
+            let totalUsers = 0, totalShortlisted = 0, totalAnalyses = 0;
+            data.forEach(row => {
+              totalUsers += row.users;
+              totalShortlisted += row.shortlisted;
+              totalAnalyses += row.analyses;
+            });
+            document.getElementById('admin-summary-users').textContent = totalUsers;
+            document.getElementById('admin-summary-shortlisted').textContent = totalShortlisted;
+            document.getElementById('admin-summary-analyses').textContent = totalAnalyses;
+          });
         }
     </script>
     <script>
