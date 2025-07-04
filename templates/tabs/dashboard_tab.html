@@ -1,7 +1,6 @@
 <div class="space-y-8 w-full">
   <div>
-    <h1 id="greeting" class="text-4xl font-bold text-gray-900 mb-2"></h1>
-    <p class="text-lg text-gray-500 mb-6">Streamline your hiring process with AI-powered tools</p>
+    <h1 id="greeting" class="text-4xl font-bold bg-gradient-to-r from-blue-600 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-2"></h1>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         var username = "{{ username|e }}";
@@ -13,6 +12,8 @@
         document.getElementById('greeting').textContent = greeting + ", " + username + ".";
       });
     </script>
+    {% if session.role != 'admin' %}
+    <p class="text-lg text-gray-500 mb-6">Streamline your hiring process with AI-powered tools</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
       <div class="bg-blue-100 bg-opacity-40 border border-blue-200 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
         <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i>Resumes Analyzed</div>
@@ -171,5 +172,67 @@
         </script>
       </div>
     </div>
+    {% endif %}
+    {% if session.role == 'admin' %}
+    <div class="text-lg text-gray-500 mb-6">Welcome to the Admin Dashboard.</div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
+        <div class="text-xs text-gray-500">Total Users</div>
+        <div id="admin-summary-users" class="font-bold text-2xl text-blue-700">-</div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
+        <div class="text-xs text-gray-500">Shortlisted Resumes</div>
+        <div id="admin-summary-shortlisted" class="font-bold text-2xl text-green-600">-</div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center justify-center">
+        <div class="text-xs text-gray-500">Analyses Saved</div>
+        <div id="admin-summary-analyses" class="font-bold text-2xl text-purple-600">-</div>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-4 mb-8">
+      <a href="#" onclick="document.getElementById('tab-analytics').click(); return false;" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-5 py-3 rounded-lg font-semibold shadow text-sm flex items-center gap-2"><i data-lucide='bar-chart-3' class='w-5 h-5'></i> Analytics</a>
+      <a href="#" onclick="document.getElementById('tab-user-management').click(); return false;" class="bg-green-100 hover:bg-green-200 text-green-700 px-5 py-3 rounded-lg font-semibold shadow text-sm flex items-center gap-2"><i data-lucide='users' class='w-5 h-5'></i> User Management</a>
+      <a href="#" onclick="document.getElementById('tab-activity-logs').click(); return false;" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-5 py-3 rounded-lg font-semibold shadow text-sm flex items-center gap-2"><i data-lucide='clipboard-list' class='w-5 h-5'></i> Activity Logs</a>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 mb-8">
+      <div class="text-base font-semibold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide='activity' class='w-5 h-5 text-blue-400'></i> Recent Admin Activity</div>
+      <div id="admin-recent-activity" class="flex flex-col gap-2 text-sm text-gray-700"></div>
+    </div>
+    <script>
+    // Fetch admin summary stats
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/admin_analytics').then(resp => resp.json()).then(data => {
+        let totalUsers = 0, totalShortlisted = 0, totalAnalyses = 0;
+        data.forEach(row => {
+          totalUsers += row.users;
+          totalShortlisted += row.shortlisted;
+          totalAnalyses += row.analyses;
+        });
+        document.getElementById('admin-summary-users').textContent = totalUsers;
+        document.getElementById('admin-summary-shortlisted').textContent = totalShortlisted;
+        document.getElementById('admin-summary-analyses').textContent = totalAnalyses;
+      });
+      // Fetch recent admin activity
+      fetch('/activity_logs?limit=3').then(resp => resp.json()).then(logs => {
+        let html = '';
+        if (!logs.length) html = '<div class="text-gray-400">No recent activity.</div>';
+        else logs.forEach(log => {
+          const timeAgo = (ts => {
+            const now = new Date();
+            const then = new Date(ts);
+            const diff = Math.floor((now - then) / 1000);
+            if (diff < 60) return diff + ' seconds ago';
+            if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+            return Math.floor(diff / 86400) + ' days ago';
+          })(log.timestamp);
+          html += `<div class="flex items-center gap-2"><span class="text-blue-500"><i data-lucide='activity' class='w-4 h-4'></i></span> <span>${log.action_type.replace(/_/g,' ')}</span> <span class="ml-auto text-xs text-gray-400">${timeAgo}</span></div>`;
+        });
+        document.getElementById('admin-recent-activity').innerHTML = html;
+        if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+      });
+    });
+    </script>
+    {% endif %}
   </div>
 </div> 
