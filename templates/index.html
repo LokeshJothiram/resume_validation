@@ -2810,6 +2810,57 @@
             document.getElementById('admin-summary-analyses').textContent = totalAnalyses;
           });
         }
+
+        // --- User Dashboard Stats Refresh Function ---
+        function refreshUserDashboardStats() {
+          fetch('/user_dashboard_stats').then(resp => resp.json()).then(stats => {
+            document.getElementById('dashboard-resumes-analyzed').textContent = stats.resumes_analyzed ?? '0';
+            document.getElementById('dashboard-resumes-analyzed-delta').textContent = stats.resumes_analyzed_delta || '+10% from last month';
+            document.getElementById('dashboard-skills-assessed').textContent = stats.skills_assessed ?? '0';
+            document.getElementById('dashboard-skills-assessed-delta').textContent = stats.skills_assessed_delta || '+7% from last month';
+            document.getElementById('dashboard-questions-generated').textContent = stats.questions_generated ?? '0';
+            document.getElementById('dashboard-questions-generated-delta').textContent = stats.questions_generated_delta || '+5% from last month';
+            document.getElementById('dashboard-shortlisted-candidates').textContent = stats.shortlisted_candidates ?? '0';
+            document.getElementById('dashboard-shortlisted-candidates-delta').textContent = stats.shortlisted_candidates_delta || '+6% from last month';
+          }).catch(() => {
+            [
+              'dashboard-resumes-analyzed',
+              'dashboard-skills-assessed',
+              'dashboard-questions-generated',
+              'dashboard-shortlisted-candidates',
+            ].forEach(id => document.getElementById(id).textContent = '-');
+            [
+              'dashboard-resumes-analyzed-delta',
+              'dashboard-skills-assessed-delta',
+              'dashboard-questions-generated-delta',
+              'dashboard-shortlisted-candidates-delta',
+            ].forEach((id, idx) => {
+              const staticVals = ['+10% from last month', '+7% from last month', '+5% from last month', '+6% from last month'];
+              document.getElementById(id).textContent = staticVals[idx];
+            });
+          });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+          refreshUserDashboardStats();
+        });
+        </script>
+        <script>
+        // Patch: Refresh user dashboard stats every time dashboard tab is shown
+        if (typeof refreshUserDashboardStats === 'function') {
+          const tabDashboard = document.getElementById('tab-dashboard');
+          if (tabDashboard) {
+            tabDashboard.addEventListener('click', function() {
+              refreshUserDashboardStats();
+            });
+          }
+          const tabDashboardM = document.getElementById('tab-dashboard-m');
+          if (tabDashboardM) {
+            tabDashboardM.addEventListener('click', function() {
+              refreshUserDashboardStats();
+            });
+          }
+        }
+        </script>
     </script>
     <script>
       // Dynamically adjust main content margin-top to match header height
