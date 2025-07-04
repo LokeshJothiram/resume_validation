@@ -13,6 +13,15 @@ def index():
 
 @resume_bp.route('/process', methods=['POST'])
 def process():
+    from database import SkillAssessment, db
+    from utils import get_current_user
+    user = get_current_user()
+    if user:
+        assessment = SkillAssessment(user_id=user.id)
+        db.session.add(assessment)
+        db.session.commit()
+        from utils import log_activity
+        log_activity(user, 'skills_assessed', {'assessment_id': assessment.id})
     job_description = request.form.get('job_description', '')
     resume_files = request.files.getlist('resume')
     resumes_result = []

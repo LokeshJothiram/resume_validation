@@ -51,3 +51,10 @@ class QuestionGeneration(db.Model):
     num_questions = db.Column(db.Integer, nullable=False, default=5)
     level = db.Column(db.String(20), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False) 
+
+class SkillAssessment(db.Model):
+    __tablename__ = 'skill_assessments'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    # Add more fields as needed (e.g., resume filename, result, etc.) 

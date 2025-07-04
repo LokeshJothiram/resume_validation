@@ -6,6 +6,15 @@ audio_bp = Blueprint('audio', __name__)
 
 @audio_bp.route('/process_audio', methods=['POST'])
 def process_audio():
+    from database import SkillAssessment, db
+    from utils import get_current_user
+    user = get_current_user()
+    if user:
+        assessment = SkillAssessment(user_id=user.id)
+        db.session.add(assessment)
+        db.session.commit()
+        from utils import log_activity
+        log_activity(user, 'skills_assessed', {'assessment_id': assessment.id})
     audio_file = request.files.get('audio')
     technology = request.form.get('technology', 'General')
     tech_questions = request.form.get('tech_questions', '').strip()

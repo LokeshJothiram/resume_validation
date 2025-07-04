@@ -576,6 +576,14 @@ def process():
             response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
 
+    # After processing resumes (if any were analyzed), log a SkillAssessment event
+    from database import SkillAssessment, db
+    user = get_current_user()
+    if user:
+        assessment = SkillAssessment(user_id=user.id)
+        db.session.add(assessment)
+        db.session.commit()
+
     return jsonify(response)
 
 # Save analysis endpoint
@@ -949,7 +957,7 @@ def user_dashboard_stats():
             'shortlisted_candidates': 0,
             'shortlisted_candidates_delta': ''
         })
-    from database import ShortlistedResume, SavedAnalysis
+    from database import ShortlistedResume, SavedAnalysis, SkillAssessment
     # Resumes analyzed = SavedAnalysis by user
     from datetime import datetime, timedelta
     now = datetime.now()
@@ -967,10 +975,18 @@ def user_dashboard_stats():
         delta = resumes_analyzed - resumes_analyzed_last_month
         percent = int((delta / resumes_analyzed_last_month) * 100)
         resumes_analyzed_delta = f"{percent:+d}% from last month"
-    # Skills assessed (placeholder: same as resumes analyzed)
-    skills_assessed = resumes_analyzed
-    skills_assessed_last_month = resumes_analyzed_last_month
-    skills_assessed_delta = resumes_analyzed_delta
+    # Skills assessed = SkillAssessment by user
+    skills_assessed = SkillAssessment.query.filter_by(user_id=user.id).count()
+    skills_assessed_last_month = SkillAssessment.query.filter(
+        SkillAssessment.user_id==user.id,
+        SkillAssessment.timestamp >= last_month,
+        SkillAssessment.timestamp < now.replace(day=1)
+    ).count()
+    skills_assessed_delta = ''
+    if skills_assessed_last_month > 0:
+        delta = skills_assessed - skills_assessed_last_month
+        percent = int((delta / skills_assessed_last_month) * 100)
+        skills_assessed_delta = f"{percent:+d}% from last month"
     # Interview questions generated (if model exists)
     try:
         from database import QuestionGeneration
