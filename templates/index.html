@@ -2056,34 +2056,26 @@
           });
         }
 
-        function renderAnalyticsCharts(selectedRole = 'all') {
+        function renderAnalyticsCharts() {
           fetch('/admin_analytics')
             .then(response => response.json())
             .then(data => {
-              analyticsData = data;
-              // Populate role filter
-              const roleFilter = document.getElementById('roleFilter');
-              roleFilter.innerHTML = '<option value="all">All Roles</option>' + data.map(r => `<option value="${r.role}">${r.role}</option>`).join('');
-              // Filter data
-              let filtered = data;
-              if (selectedRole !== 'all') filtered = data.filter(row => row.role === selectedRole);
-              updateSummaryAndCharts(filtered);
-              renderUserListByRole(selectedRole);
-              renderTopUsers(selectedRole);
-              renderRecentActivity(); // <-- Add this line
+              analyticsData = data.filter(row => row.role === 'TA_TEAM');
+              updateSummaryAndCharts(analyticsData);
+              renderUserListByRole();
+              renderTopUsers();
+              renderRecentActivity && renderRecentActivity();
             })
             .catch(() => {
               document.getElementById('userListContainer').innerHTML = '<div class="text-red-500">Failed to load analytics data.</div>';
             });
         }
 
-        function renderTopUsers(selectedRole = 'all') {
+        function renderTopUsers() {
           fetch('/admin_analytics_users')
             .then(response => response.json())
             .then(users => {
-              let filtered = users;
-              if (selectedRole !== 'all') filtered = users.filter(u => u.role === selectedRole);
-              // Sort by total activity (shortlisted + analyses)
+              let filtered = users.filter(u => u.role === 'TA_TEAM');
               filtered.sort((a, b) => (b.shortlisted + b.analyses) - (a.shortlisted + a.analyses));
               const top = filtered.slice(0, 5);
               let html = '';
@@ -2096,7 +2088,7 @@
                       <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-400 to-purple-400 text-white font-bold text-lg">${i+1}</div>
                       <div>
                         <div class="font-semibold text-gray-800 text-base">${u.username}</div>
-                        <div class="text-gray-400 text-sm">${u.role.charAt(0).toUpperCase() + u.role.slice(1)}</div>
+                        <div class="text-gray-400 text-sm">TA_TEAM</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -2110,12 +2102,11 @@
             });
         }
 
-        function renderUserListByRole(role) {
+        function renderUserListByRole() {
           fetch('/admin_analytics_users')
             .then(response => response.json())
             .then(users => {
-              let filtered = users;
-              if (role !== 'all') filtered = users.filter(u => u.role === role);
+              let filtered = users.filter(u => u.role === 'TA_TEAM');
               if (!filtered.length) {
                 document.getElementById('userListContainer').innerHTML = '<div class="text-gray-500">No users found for this role.</div>';
                 return;
@@ -2133,10 +2124,7 @@
                 <tbody>`;
               filtered.forEach((u, idx) => {
                 const initial = u.username.charAt(0).toUpperCase();
-                const isAdmin = u.role.toLowerCase() === 'admin';
-                const rolePill = isAdmin
-                  ? '<span class="bg-red-100 text-red-500 px-3 py-1 rounded-full text-xs font-semibold">admin</span>'
-                  : '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">TA_TEAM</span>';
+                const rolePill = '<span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-semibold">TA_TEAM</span>';
                 const perf = (u.shortlisted + u.analyses) > 0 ? Math.round((u.shortlisted / (u.shortlisted + u.analyses)) * 100) : 0;
                 const barColor = perf > 70 ? 'bg-green-400' : perf > 40 ? 'bg-blue-400' : 'bg-gray-300';
                 html += `<tr class="${idx % 2 === 1 ? 'bg-gray-50' : 'bg-white'} hover:bg-blue-50 transition">
@@ -2165,12 +2153,13 @@
             });
         }
 
+        // When analytics tab is clicked, always show TA_TEAM analytics
         const tabAnalytics = document.getElementById('tab-analytics');
         const tabAnalyticsM = document.getElementById('tab-analytics-m');
         const analyticsTabContent = document.getElementById('analytics-tab-content');
         if (tabAnalytics) {
           tabAnalytics.addEventListener('click', () => {
-            renderAnalyticsCharts('all');
+            renderAnalyticsCharts();
             document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
             analyticsTabContent.classList.remove('hidden');
             setActiveTab('analytics');
@@ -2178,7 +2167,7 @@
         }
         if (tabAnalyticsM) {
           tabAnalyticsM.addEventListener('click', () => {
-            renderAnalyticsCharts('all');
+            renderAnalyticsCharts();
             document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
             analyticsTabContent.classList.remove('hidden');
             setActiveTab('analytics');
@@ -2215,7 +2204,7 @@
         if (tabAnalytics) {
           tabAnalytics.addEventListener('click', () => {
             setAdminActiveTab('analytics');
-            renderAnalyticsCharts('all');
+            renderAnalyticsCharts();
             document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
             analyticsTabContent.classList.remove('hidden');
             setActiveTab('analytics');
