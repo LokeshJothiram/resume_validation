@@ -121,7 +121,7 @@
     <div class="flex w-full">
       <!-- Sidebar removed -->
       <!-- Main Content: scrollable -->
-      <div class="mt-20 h-[calc(100vh-80px)] overflow-y-auto w-full">
+      <div id="main-content" class="h-[calc(100vh-80px)] overflow-y-auto w-full">
         <!-- Main Content: full width, no centering, no top margin -->
         <div class="w-full p-0">
             <div id="form-card" class="p-6 sm:p-8 rounded-lg transition-all duration-300 w-full">
@@ -794,7 +794,7 @@
                             const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
                             return `<div class='mb-4 p-4 border border-blue-100 rounded'>
                                 <p><strong>${r.filename}</strong></p>
-                                <div class="flex flex-row gap-6 my-4 items-center justify-center">
+                                <div class="grid grid-cols-2 sm:flex sm:flex-row gap-4 sm:gap-6 my-4 items-center justify-center">
                                     <div class="flex flex-col items-center">
                                         <canvas id="donutMatch${idx}" width="80" height="80"></canvas>
                                         <div class="mt-2 text-center text-xs font-semibold">Match %</div>
@@ -1327,7 +1327,7 @@
                     data = { metaInfo: '', resumeHTML: '<div class="text-red-500">Failed to load file.</div>', audioHTML: '' };
                 }
                 const div = document.createElement('div');
-                div.className = 'bg-white p-6 rounded-lg shadow-md mb-4';
+                div.className = 'bg-white p-4 sm:p-6 rounded-lg shadow-md mb-4 flex flex-col gap-4';
                 div.setAttribute('data-card-id', file.id);
                 // Resume summary extraction for saved analyses
                 let resumeSummary = (data.resumeHTML || (file.data && file.data.resumeHTML)) || '';
@@ -1366,7 +1366,16 @@
                     metaInfoBlock += '</div>';
                 }
                 div.innerHTML = `
-                    <div class=\"flex justify-between items-center mb-2\">\n                        <div class=\"text-xs text-gray-400\">Saved: ${file.timestamp}</div>\n                        <button type=\"button\" class=\"text-red-500 text-xs font-semibold\" onclick=\"event.stopPropagation(); deleteSavedAnalysis('${file.id}')\">Delete</button>\n                    </div>\n                    ${metaInfoBlock}\n                    ${resumeSummary}\n                    ${audioSummary}\n                `;
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2 sm:gap-0">
+    <div class="text-xs text-gray-400">Saved: ${file.timestamp}</div>
+    <button type="button" class="text-red-500 text-xs font-semibold" onclick="event.stopPropagation(); deleteSavedAnalysis('${file.id}')">Delete</button>
+  </div>
+  ${metaInfoBlock}
+  <div class="flex flex-col gap-4">
+    ${resumeSummary}
+    ${audioSummary}
+  </div>
+`;
                 list.appendChild(div);
                 if (meta.rawData) {
                     reRenderDonuts(div, meta.rawData, file.id);
@@ -1815,44 +1824,44 @@
                 const matchPercent = data.match_percentage || 0;
                 const resumeUrl = data.stored_filename ? `/shortlist/${data.stored_filename}` : '#';
                 const card = document.createElement('div');
-                card.className = "flex items-center bg-white rounded-xl shadow p-6 justify-between";
+                card.className = "bg-white rounded-xl shadow p-4 sm:p-6 mb-4 flex flex-col gap-4";
                 card.setAttribute('data-card-id', file.id);
                 card.innerHTML = `
-      <div class="flex items-center gap-6">
-        <div class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl" style="background: linear-gradient(135deg, #7f5af0 0%, #00c6fb 100%);">
-          ${initials}
-        </div>
-        <div>
-          <div class="font-bold text-lg text-gray-900">${name}</div>
-          <div class="text-gray-500 text-sm mb-2">${title}</div>
-          <div class="flex items-center text-gray-500 text-sm gap-4">
-            <span><i data-lucide="mail" class="inline w-4 h-4 mr-1"></i> ${email}</span>
-            <span><i data-lucide="phone" class="inline w-4 h-4 mr-1"></i> ${phone}</span>
-            <span><i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i> ${location}</span>
-          </div>
-        </div>
+  <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+    <div class="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto sm:mx-0" style="background: linear-gradient(135deg, #7f5af0 0%, #00c6fb 100%);">
+      ${initials}
+    </div>
+    <div class="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left">
+      <div class="font-bold text-lg text-gray-900">${name}</div>
+      <div class="text-gray-500 text-sm mb-2">${title}</div>
+      <div class="flex flex-col gap-1 text-gray-500 text-sm">
+        <span><i data-lucide=\"mail\" class=\"inline w-4 h-4 mr-1\"></i> ${email}</span>
+        <span><i data-lucide=\"phone\" class=\"inline w-4 h-4 mr-1\"></i> ${phone}</span>
+        <span><i data-lucide=\"map-pin\" class=\"inline w-4 h-4 mr-1\"></i> ${location}</span>
       </div>
-      <div class="flex flex-col items-start gap-2">
-        <div class="text-xs text-gray-500 font-semibold">Key Skills</div>
-        <div class="flex gap-2 flex-wrap">
-          ${skills.map(skill => `<span class=\"bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold\">${skill}</span>`).join('')}
-        </div>
-      </div>
-      <div class="flex flex-col items-end gap-2">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="flex items-center bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold text-sm">
-            <i data-lucide="star" class="inline w-4 h-4 mr-1"></i> ${matchPercent}%
-          </span>
-          <button class="delete-shortlist-btn ml-2" data-id="${file.id}" title="Delete">
-            <i data-lucide="trash-2" class="inline w-5 h-5 text-red-500"></i>
-          </button>
-        </div>
-        <div class="flex gap-2">
-          <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-semibold">Schedule Interview</button>
-          <a href="${resumeUrl}" target="_blank" class="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded font-semibold">View Full Resume</a>
-        </div>
-      </div>
-    `;
+    </div>
+  </div>
+  <div class="flex flex-col gap-2">
+    <div class="text-xs text-gray-500 font-semibold">Key Skills</div>
+    <div class="flex gap-2 flex-wrap justify-center sm:justify-start">
+      ${skills.map(skill => `<span class=\"bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold\">${skill}</span>`).join('')}
+    </div>
+  </div>
+  <div class="flex flex-col gap-2 items-center sm:items-end">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="flex items-center bg-yellow-50 text-yellow-600 px-3 py-1 rounded-full font-bold text-sm">
+        <i data-lucide=\"star\" class=\"inline w-4 h-4 mr-1\"></i> ${matchPercent}%
+      </span>
+      <button class="delete-shortlist-btn ml-2" data-id="${file.id}" title="Delete">
+        <i data-lucide=\"trash-2\" class=\"inline w-5 h-5 text-red-500\"></i>
+      </button>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2 w-full">
+      <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-semibold w-full sm:w-auto">Schedule Interview</button>
+      <a href="${resumeUrl}" target="_blank" class="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded font-semibold w-full sm:w-auto text-center">View Full Resume</a>
+    </div>
+  </div>
+`;
                 list.appendChild(card);
             }
             // Add delete icon event listeners
@@ -2745,6 +2754,18 @@
           if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
           return Math.floor(diff / 86400) + ' days ago';
         }
+    </script>
+    <script>
+      // Dynamically adjust main content margin-top to match header height
+      function adjustMainContentMargin() {
+        const header = document.getElementById('fixed-header');
+        const main = document.getElementById('main-content');
+        if (header && main) {
+          main.style.marginTop = header.offsetHeight + 'px';
+        }
+      }
+      window.addEventListener('DOMContentLoaded', adjustMainContentMargin);
+      window.addEventListener('resize', adjustMainContentMargin);
     </script>
 </body>
 </html>
