@@ -1,319 +1,321 @@
-<div class="space-y-8 w-full">
-  <div>
-    <h1 id="greeting" class="text-4xl font-bold text-blue-600 mb-2"></h1>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var username = "{{ username|e }}";
-        var now = new Date();
-        var hour = now.getHours();
-        var greeting = "Good morning";
-        if (hour >= 12 && hour < 17) greeting = "Good afternoon";
-        else if (hour >= 17 || hour < 4) greeting = "Good evening";
-        document.getElementById('greeting').textContent = greeting + ", " + username + ".";
-      });
-    </script>
-    {% if session.role != 'admin' %}
-    <p class="text-lg text-gray-500 mb-6">Streamline your hiring process with AI-powered tools</p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-      <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i>Resumes Analyzed</div>
-            <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-resumes-analyzed">...</span></div>
-            <div class="text-green-500 text-xs font-semibold" id="dashboard-resumes-analyzed-delta">+10% from last month</div>
-          </div>
-          <div class="bg-blue-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="file-text" class="w-7 h-7 text-blue-600"></i></div>
-        </div>
-      </div>
-      <div class="bg-green-50 border border-green-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i>Skills Assessed</div>
-            <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-skills-assessed">...</span></div>
-            <div class="text-green-500 text-xs font-semibold" id="dashboard-skills-assessed-delta">+7% from last month</div>
-          </div>
-          <div class="bg-green-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="check-circle" class="w-7 h-7 text-green-600"></i></div>
-        </div>
-      </div>
-      <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i>Interview Qs Generated</div>
-            <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-questions-generated">...</span></div>
-            <div class="text-green-500 text-xs font-semibold" id="dashboard-questions-generated-delta">+5% from last month</div>
-          </div>
-          <div class="bg-purple-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="message-circle" class="w-7 h-7 text-purple-600"></i></div>
-        </div>
-      </div>
-      <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i>Shortlisted Candidates</div>
-            <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-shortlisted-candidates">...</span></div>
-            <div class="text-green-500 text-xs font-semibold" id="dashboard-shortlisted-candidates-delta">+6% from last month</div>
-          </div>
-          <div class="bg-yellow-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="users" class="w-7 h-7 text-yellow-500"></i></div>
-        </div>
-      </div>
-    </div>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      fetch('/user_dashboard_stats').then(resp => resp.json()).then(stats => {
-        document.getElementById('dashboard-resumes-analyzed').textContent = stats.resumes_analyzed ?? '0';
-        document.getElementById('dashboard-resumes-analyzed-delta').textContent = stats.resumes_analyzed_delta || '+10% from last month';
-        document.getElementById('dashboard-skills-assessed').textContent = stats.skills_assessed ?? '0';
-        document.getElementById('dashboard-skills-assessed-delta').textContent = stats.skills_assessed_delta || '+7% from last month';
-        document.getElementById('dashboard-questions-generated').textContent = stats.questions_generated ?? '0';
-        document.getElementById('dashboard-questions-generated-delta').textContent = stats.questions_generated_delta || '+5% from last month';
-        document.getElementById('dashboard-shortlisted-candidates').textContent = stats.shortlisted_candidates ?? '0';
-        document.getElementById('dashboard-shortlisted-candidates-delta').textContent = stats.shortlisted_candidates_delta || '+6% from last month';
-      }).catch(() => {
-        // fallback: show dashes if error
-        [
-          'dashboard-resumes-analyzed',
-          'dashboard-skills-assessed',
-          'dashboard-questions-generated',
-          'dashboard-shortlisted-candidates',
-        ].forEach(id => document.getElementById(id).textContent = '-');
-        [
-          'dashboard-resumes-analyzed-delta',
-          'dashboard-skills-assessed-delta',
-          'dashboard-questions-generated-delta',
-          'dashboard-shortlisted-candidates-delta',
-        ].forEach((id, idx) => {
-          const staticVals = ['+10% from last month', '+7% from last month', '+5% from last month', '+6% from last month'];
-          document.getElementById(id).textContent = staticVals[idx];
-        });
-      });
-    });
-    </script>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
-        <div class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</div>
-        <div class="text-gray-400 text-sm mb-4">Latest actions in your talent pipeline</div>
-        <div id="recentActivityContainer" class="space-y-3"></div>
-        <script>
-        async function renderUserRecentActivity() {
-          const container = document.getElementById('recentActivityContainer');
-          container.innerHTML = '<div class="text-gray-400">Loading...</div>';
-          let logs = [];
-          try {
-            const resp = await fetch('/user_activity_logs?limit=3');
-            logs = await resp.json();
-            if (logs.error) throw new Error(logs.error);
-          } catch (e) {
-            container.innerHTML = '<div class="text-red-500">Failed to load activity.</div>';
-            return;
-          }
-          if (!logs.length) {
-            container.innerHTML = '<div class="text-gray-400">No recent activity found.</div>';
-            return;
-          }
-          let html = '';
-          logs.forEach(log => {
-            let icon = '<i data-lucide="activity" class="w-5 h-5 text-gray-400"></i>';
-            let color = 'bg-gray-50';
-            let label = log.action_type.replace(/_/g, ' ');
-            if (log.action_type === 'save_analysis') {
-              icon = '<i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>';
-              color = 'bg-blue-50';
-              label = 'Resume analyzed';
-            } else if (log.action_type === 'shortlist_resume') {
-              icon = '<i data-lucide="users" class="w-5 h-5 text-green-400"></i>';
-              color = 'bg-green-50';
-              label = 'Candidate shortlisted';
-            } else if (log.action_type === 'interview_questions_generated') {
-              icon = '<i data-lucide="help-circle" class="w-5 h-5 text-purple-400"></i>';
-              color = 'bg-purple-50';
-              label = 'Interview questions generated';
-            }
-            // Time ago
-            const timeAgo = timeAgoString(log.timestamp);
-            html += `<div class="${color} rounded-lg p-3 flex items-center gap-3">
-              ${icon}
-              <span class="text-gray-700 text-sm">${label}</span>
-              <span class="ml-auto text-xs text-gray-400">${timeAgo}</span>
-            </div>`;
-          });
-          container.innerHTML = html;
-          if (window.lucide && window.lucide.createIcons) lucide.createIcons();
-        }
-        function timeAgoString(isoDate) {
-          const now = new Date();
-          const then = new Date(isoDate);
-          const diff = Math.floor((now - then) / 1000);
-          if (diff < 60) return diff + ' seconds ago';
-          if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
-          if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
-          return Math.floor(diff / 86400) + ' days ago';
-        }
-        document.addEventListener('DOMContentLoaded', renderUserRecentActivity);
-        </script>
-      </div>
-      <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
-        <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
-        <div class="text-gray-400 text-sm mb-4">Get started with these common tasks</div>
-        <div class="space-y-3">
-          <div id="quick-upload-resume" class="bg-blue-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition">
-            <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i>
-            <div>
-              <div class="text-gray-700 text-sm font-semibold">Upload New Resume</div>
-              <div class="text-xs text-gray-400">Start matching candidates</div>
-            </div>
-          </div>
-          <div id="quick-skill-assessment" class="bg-purple-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition">
-            <i data-lucide="mic" class="w-5 h-5 text-purple-400"></i>
-            <div>
-              <div class="text-gray-700 text-sm font-semibold">Create Skill Assessment</div>
-              <div class="text-xs text-gray-400">Test technical abilities</div>
-            </div>
-          </div>
-          <div id="quick-generate-questions" class="bg-green-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-green-100 transition">
-            <i data-lucide="help-circle" class="w-5 h-5 text-green-400"></i>
-            <div>
-              <div class="text-gray-700 text-sm font-semibold">Generate Interview Questions</div>
-              <div class="text-xs text-gray-400">Generate common tasks</div>
-            </div>
-          </div>
-        </div>
-        <script>
+<div class="max-w-7xl mx-auto px-4 mt-8">
+  <div class="space-y-8">
+    <div>
+      <h1 id="greeting" class="text-4xl font-bold text-blue-600 mb-2"></h1>
+      <script>
         document.addEventListener('DOMContentLoaded', function() {
-          // Quick Actions functionality
-          const uploadBtn = document.getElementById('quick-upload-resume');
-          const skillBtn = document.getElementById('quick-skill-assessment');
-          const questionsBtn = document.getElementById('quick-generate-questions');
-          if (uploadBtn) uploadBtn.onclick = function() {
-            if (window.showTab) showTab('tab-resume', 'resume-tab-content');
-          };
-          if (skillBtn) skillBtn.onclick = function() {
-            if (window.showTab) showTab('tab-audio', 'audio-tab-content');
-          };
-          if (questionsBtn) questionsBtn.onclick = function() {
-            if (window.showTab) showTab('tab-question-gen', 'question-gen-tab-content');
-          };
+          var username = "{{ username|e }}";
+          var now = new Date();
+          var hour = now.getHours();
+          var greeting = "Good morning";
+          if (hour >= 12 && hour < 17) greeting = "Good afternoon";
+          else if (hour >= 17 || hour < 4) greeting = "Good evening";
+          document.getElementById('greeting').textContent = greeting + ", " + username + ".";
         });
-        </script>
-      </div>
-    </div>
-    {% endif %}
-    {% if session.role == 'admin' %}
-    <div class="text-lg text-gray-500 mb-6">Welcome to the Admin Dashboard.</div>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- Stat Cards -->
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-xs text-gray-500 font-semibold">Total Users</div>
-            <div id="admin-summary-users" class="font-bold text-3xl text-blue-700">-</div>
-            <div id="admin-summary-users-delta" class="text-green-600 text-xs font-semibold mt-1">+12% from last month</div>
-          </div>
-          <div class="bg-blue-100 p-3 rounded-xl flex-shrink-0"><i data-lucide='users' class='w-7 h-7 text-blue-600'></i></div>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-xs text-gray-500 font-semibold">Shortlisted Resumes</div>
-            <div id="admin-summary-shortlisted" class="font-bold text-3xl text-green-700">-</div>
-            <div id="admin-summary-shortlisted-delta" class="text-green-600 text-xs font-semibold mt-1">+8% from last month</div>
-          </div>
-          <div class="bg-green-100 p-3 rounded-xl flex-shrink-0"><i data-lucide='file-text' class='w-7 h-7 text-green-600'></i></div>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-4 mb-2">
-          <div>
-            <div class="text-xs text-gray-500 font-semibold">Analyses Saved</div>
-            <div id="admin-summary-analyses" class="font-bold text-3xl text-purple-700">-</div>
-            <div id="admin-summary-analyses-delta" class="text-red-500 text-xs font-semibold mt-1">3% from last month</div>
-          </div>
-          <div class="bg-purple-100 p-3 rounded-xl flex-shrink-0"><i data-lucide='bar-chart-3' class='w-7 h-7 text-purple-600'></i></div>
-        </div>
-      </div>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <!-- Quick Actions -->
-      <div class="col-span-2 flex flex-col gap-4">
-        <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-blue-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-blue-100 transition" onclick="document.getElementById('tab-analytics').click();">
-            <i data-lucide='bar-chart-3' class='w-8 h-8 text-blue-600'></i>
+      </script>
+      {% if session.role != 'admin' %}
+      <p class="text-lg text-gray-500 mb-6">Streamline your hiring process with AI-powered tools</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
             <div>
-              <div class="text-gray-800 text-base font-semibold">Analytics</div>
-              <div class="text-xs text-gray-500">View detailed analytics and insights</div>
+              <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i>Resumes Analyzed</div>
+              <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-resumes-analyzed">...</span></div>
+              <div class="text-green-500 text-xs font-semibold" id="dashboard-resumes-analyzed-delta">+10% from last month</div>
             </div>
+            <div class="bg-blue-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="file-text" class="w-7 h-7 text-blue-600"></i></div>
           </div>
-          <div class="bg-green-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-green-100 transition" onclick="document.getElementById('tab-user-management').click();">
-            <i data-lucide='users' class='w-8 h-8 text-green-600'></i>
+        </div>
+        <div class="bg-green-50 border border-green-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
             <div>
-              <div class="text-gray-800 text-base font-semibold">User Management</div>
-              <div class="text-xs text-gray-500">Manage users and their permissions</div>
+              <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i>Skills Assessed</div>
+              <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-skills-assessed">...</span></div>
+              <div class="text-green-500 text-xs font-semibold" id="dashboard-skills-assessed-delta">+7% from last month</div>
             </div>
+            <div class="bg-green-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="check-circle" class="w-7 h-7 text-green-600"></i></div>
           </div>
-          <div class="bg-orange-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-orange-100 transition" onclick="document.getElementById('tab-activity-logs').click();">
-            <i data-lucide='clipboard-list' class='w-8 h-8 text-orange-500'></i>
+        </div>
+        <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
             <div>
-              <div class="text-gray-800 text-base font-semibold">Activity Logs</div>
-              <div class="text-xs text-gray-500">Monitor system activity and logs</div>
+              <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i>Interview Qs Generated</div>
+              <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-questions-generated">...</span></div>
+              <div class="text-green-500 text-xs font-semibold" id="dashboard-questions-generated-delta">+5% from last month</div>
             </div>
+            <div class="bg-purple-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="message-circle" class="w-7 h-7 text-purple-600"></i></div>
+          </div>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
+            <div>
+              <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i>Shortlisted Candidates</div>
+              <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-shortlisted-candidates">...</span></div>
+              <div class="text-green-500 text-xs font-semibold" id="dashboard-shortlisted-candidates-delta">+6% from last month</div>
+            </div>
+            <div class="bg-yellow-100 p-3 rounded-xl flex-shrink-0"><i data-lucide="users" class="w-7 h-7 text-yellow-500"></i></div>
           </div>
         </div>
       </div>
-      <!-- Recent Admin Activity -->
-      <div class="bg-white rounded-xl shadow p-6 flex flex-col h-full">
-        <div class="text-base font-semibold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide='activity' class='w-5 h-5 text-blue-400'></i> Recent Admin Activity</div>
-        <div id="admin-recent-activity" class="flex flex-col gap-2 text-sm text-gray-700"></div>
-        <a href="#" onclick="document.getElementById('tab-activity-logs').click(); return false;" class="mt-4 text-blue-600 text-sm flex items-center gap-1 hover:underline"><span>View all activity</span> <i data-lucide='arrow-right' class='w-4 h-4'></i></a>
-      </div>
-    </div>
-    <script>
-    // Refactored: Expose dashboard refresh functions globally
-    window.refreshAdminDashboardSummary = function() {
-      fetch('/admin_analytics').then(resp => resp.json()).then(data => {
-        let totalUsers = 0, totalShortlisted = 0, totalAnalyses = 0;
-        data.forEach(row => {
-          totalUsers += row.users;
-          totalShortlisted += row.shortlisted;
-          totalAnalyses += row.analyses;
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        fetch('/user_dashboard_stats').then(resp => resp.json()).then(stats => {
+          document.getElementById('dashboard-resumes-analyzed').textContent = stats.resumes_analyzed ?? '0';
+          document.getElementById('dashboard-resumes-analyzed-delta').textContent = stats.resumes_analyzed_delta || '+10% from last month';
+          document.getElementById('dashboard-skills-assessed').textContent = stats.skills_assessed ?? '0';
+          document.getElementById('dashboard-skills-assessed-delta').textContent = stats.skills_assessed_delta || '+7% from last month';
+          document.getElementById('dashboard-questions-generated').textContent = stats.questions_generated ?? '0';
+          document.getElementById('dashboard-questions-generated-delta').textContent = stats.questions_generated_delta || '+5% from last month';
+          document.getElementById('dashboard-shortlisted-candidates').textContent = stats.shortlisted_candidates ?? '0';
+          document.getElementById('dashboard-shortlisted-candidates-delta').textContent = stats.shortlisted_candidates_delta || '+6% from last month';
+        }).catch(() => {
+          // fallback: show dashes if error
+          [
+            'dashboard-resumes-analyzed',
+            'dashboard-skills-assessed',
+            'dashboard-questions-generated',
+            'dashboard-shortlisted-candidates',
+          ].forEach(id => document.getElementById(id).textContent = '-');
+          [
+            'dashboard-resumes-analyzed-delta',
+            'dashboard-skills-assessed-delta',
+            'dashboard-questions-generated-delta',
+            'dashboard-shortlisted-candidates-delta',
+          ].forEach((id, idx) => {
+            const staticVals = ['+10% from last month', '+7% from last month', '+5% from last month', '+6% from last month'];
+            document.getElementById(id).textContent = staticVals[idx];
+          });
         });
-        document.getElementById('admin-summary-users').textContent = totalUsers;
-        document.getElementById('admin-summary-shortlisted').textContent = totalShortlisted;
-        document.getElementById('admin-summary-analyses').textContent = totalAnalyses;
-        // Example deltas (replace with real data if available)
-        document.getElementById('admin-summary-users-delta').textContent = '+12% from last month';
-        document.getElementById('admin-summary-shortlisted-delta').textContent = '+8% from last month';
-        document.getElementById('admin-summary-analyses-delta').textContent = '3% from last month';
       });
-    };
-    window.refreshAdminRecentActivity = function() {
-      fetch('/activity_logs?limit=3').then(resp => resp.json()).then(logs => {
-        let html = '';
-        if (!logs.length) html = '<div class="text-gray-400">No recent activity.</div>';
-        else logs.forEach(log => {
-          const timeAgo = (ts => {
+      </script>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
+          <div class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</div>
+          <div class="text-gray-400 text-sm mb-4">Latest actions in your talent pipeline</div>
+          <div id="recentActivityContainer" class="space-y-3"></div>
+          <script>
+          async function renderUserRecentActivity() {
+            const container = document.getElementById('recentActivityContainer');
+            container.innerHTML = '<div class="text-gray-400">Loading...</div>';
+            let logs = [];
+            try {
+              const resp = await fetch('/user_activity_logs?limit=3');
+              logs = await resp.json();
+              if (logs.error) throw new Error(logs.error);
+            } catch (e) {
+              container.innerHTML = '<div class="text-red-500">Failed to load activity.</div>';
+              return;
+            }
+            if (!logs.length) {
+              container.innerHTML = '<div class="text-gray-400">No recent activity found.</div>';
+              return;
+            }
+            let html = '';
+            logs.forEach(log => {
+              let icon = '<i data-lucide="activity" class="w-5 h-5 text-gray-400"></i>';
+              let color = 'bg-gray-50';
+              let label = log.action_type.replace(/_/g, ' ');
+              if (log.action_type === 'save_analysis') {
+                icon = '<i data-lucide="file-text" class="w-5 h-5 text-blue-400"></i>';
+                color = 'bg-blue-50';
+                label = 'Resume analyzed';
+              } else if (log.action_type === 'shortlist_resume') {
+                icon = '<i data-lucide="users" class="w-5 h-5 text-green-400"></i>';
+                color = 'bg-green-50';
+                label = 'Candidate shortlisted';
+              } else if (log.action_type === 'interview_questions_generated') {
+                icon = '<i data-lucide="help-circle" class="w-5 h-5 text-purple-400"></i>';
+                color = 'bg-purple-50';
+                label = 'Interview questions generated';
+              }
+              // Time ago
+              const timeAgo = timeAgoString(log.timestamp);
+              html += `<div class="${color} rounded-lg p-3 flex items-center gap-3">
+                ${icon}
+                <span class="text-gray-700 text-sm">${label}</span>
+                <span class="ml-auto text-xs text-gray-400">${timeAgo}</span>
+              </div>`;
+            });
+            container.innerHTML = html;
+            if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+          }
+          function timeAgoString(isoDate) {
             const now = new Date();
-            const then = new Date(ts);
+            const then = new Date(isoDate);
             const diff = Math.floor((now - then) / 1000);
             if (diff < 60) return diff + ' seconds ago';
             if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
             if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
             return Math.floor(diff / 86400) + ' days ago';
-          })(log.timestamp);
-          let icon = "<i data-lucide='activity' class='w-5 h-5 text-green-500'></i>";
-          if (log.action_type === 'login') icon = "<i data-lucide='log-in' class='w-5 h-5 text-green-500'></i>";
-          else if (log.action_type === 'logout') icon = "<i data-lucide='log-out' class='w-5 h-5 text-red-500'></i>";
-          else if (log.action_type === 'admin_delete_user') icon = "<i data-lucide='user-x' class='w-5 h-5 text-red-400'></i>";
-          html += `<div class="flex items-center gap-2"><span>${icon}</span> <span>${log.action_type.replace(/_/g,' ')}</span> <span class="ml-auto text-xs text-gray-400">${timeAgo}</span></div>`;
+          }
+          document.addEventListener('DOMContentLoaded', renderUserRecentActivity);
+          </script>
+        </div>
+        <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
+          <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
+          <div class="text-gray-400 text-sm mb-4">Get started with these common tasks</div>
+          <div class="space-y-3">
+            <div id="quick-upload-resume" class="bg-blue-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-blue-100 transition">
+              <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i>
+              <div>
+                <div class="text-gray-700 text-sm font-semibold">Upload New Resume</div>
+                <div class="text-xs text-gray-400">Start matching candidates</div>
+              </div>
+            </div>
+            <div id="quick-skill-assessment" class="bg-purple-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-purple-100 transition">
+              <i data-lucide="mic" class="w-5 h-5 text-purple-400"></i>
+              <div>
+                <div class="text-gray-700 text-sm font-semibold">Create Skill Assessment</div>
+                <div class="text-xs text-gray-400">Test technical abilities</div>
+              </div>
+            </div>
+            <div id="quick-generate-questions" class="bg-green-50 rounded-lg p-3 flex items-center gap-3 cursor-pointer hover:bg-green-100 transition">
+              <i data-lucide="help-circle" class="w-5 h-5 text-green-400"></i>
+              <div>
+                <div class="text-gray-700 text-sm font-semibold">Generate Interview Questions</div>
+                <div class="text-xs text-gray-400">Generate common tasks</div>
+              </div>
+            </div>
+          </div>
+          <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            // Quick Actions functionality
+            const uploadBtn = document.getElementById('quick-upload-resume');
+            const skillBtn = document.getElementById('quick-skill-assessment');
+            const questionsBtn = document.getElementById('quick-generate-questions');
+            if (uploadBtn) uploadBtn.onclick = function() {
+              if (window.showTab) showTab('tab-resume', 'resume-tab-content');
+            };
+            if (skillBtn) skillBtn.onclick = function() {
+              if (window.showTab) showTab('tab-audio', 'audio-tab-content');
+            };
+            if (questionsBtn) questionsBtn.onclick = function() {
+              if (window.showTab) showTab('tab-question-gen', 'question-gen-tab-content');
+            };
+          });
+          </script>
+        </div>
+      </div>
+      {% endif %}
+      {% if session.role == 'admin' %}
+      <div class="text-lg text-gray-500 mb-6">Welcome to the Admin Dashboard.</div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Stat Cards -->
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
+            <div>
+              <div class="text-xs text-gray-500 font-semibold">Total Users</div>
+              <div id="admin-summary-users" class="font-bold text-3xl text-blue-700">-</div>
+              <div id="admin-summary-users-delta" class="text-green-600 text-xs font-semibold mt-1">+12% from last month</div>
+            </div>
+            <div class="bg-blue-100 p-3 rounded-xl flex-shrink-0"><i data-lucide='users' class='w-7 h-7 text-blue-600'></i></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
+            <div>
+              <div class="text-xs text-gray-500 font-semibold">Shortlisted Resumes</div>
+              <div id="admin-summary-shortlisted" class="font-bold text-3xl text-green-700">-</div>
+              <div id="admin-summary-shortlisted-delta" class="text-green-600 text-xs font-semibold mt-1">+8% from last month</div>
+            </div>
+            <div class="bg-green-100 p-3 rounded-xl flex-shrink-0"><i data-lucide='file-text' class='w-7 h-7 text-green-600'></i></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+          <div class="flex items-center justify-between gap-4 mb-2">
+            <div>
+              <div class="text-xs text-gray-500 font-semibold">Analyses Saved</div>
+              <div id="admin-summary-analyses" class="font-bold text-3xl text-purple-700">-</div>
+              <div id="admin-summary-analyses-delta" class="text-red-500 text-xs font-semibold mt-1">3% from last month</div>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-xl flex-shrink-0"><i data-lucide='bar-chart-3' class='w-7 h-7 text-purple-600'></i></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Quick Actions -->
+        <div class="col-span-2 flex flex-col gap-4">
+          <div class="text-lg font-semibold text-gray-800 mb-2">Quick Actions</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-blue-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-blue-100 transition" onclick="document.getElementById('tab-analytics').click();">
+              <i data-lucide='bar-chart-3' class='w-8 h-8 text-blue-600'></i>
+              <div>
+                <div class="text-gray-800 text-base font-semibold">Analytics</div>
+                <div class="text-xs text-gray-500">View detailed analytics and insights</div>
+              </div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-green-100 transition" onclick="document.getElementById('tab-user-management').click();">
+              <i data-lucide='users' class='w-8 h-8 text-green-600'></i>
+              <div>
+                <div class="text-gray-800 text-base font-semibold">User Management</div>
+                <div class="text-xs text-gray-500">Manage users and their permissions</div>
+              </div>
+            </div>
+            <div class="bg-orange-50 rounded-lg p-5 flex items-center gap-4 cursor-pointer hover:bg-orange-100 transition" onclick="document.getElementById('tab-activity-logs').click();">
+              <i data-lucide='clipboard-list' class='w-8 h-8 text-orange-500'></i>
+              <div>
+                <div class="text-gray-800 text-base font-semibold">Activity Logs</div>
+                <div class="text-xs text-gray-500">Monitor system activity and logs</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Recent Admin Activity -->
+        <div class="bg-white rounded-xl shadow p-6 flex flex-col h-full">
+          <div class="text-base font-semibold mb-4 text-gray-800 flex items-center gap-2"><i data-lucide='activity' class='w-5 h-5 text-blue-400'></i> Recent Admin Activity</div>
+          <div id="admin-recent-activity" class="flex flex-col gap-2 text-sm text-gray-700"></div>
+          <a href="#" onclick="document.getElementById('tab-activity-logs').click(); return false;" class="mt-4 text-blue-600 text-sm flex items-center gap-1 hover:underline"><span>View all activity</span> <i data-lucide='arrow-right' class='w-4 h-4'></i></a>
+        </div>
+      </div>
+      <script>
+      // Refactored: Expose dashboard refresh functions globally
+      window.refreshAdminDashboardSummary = function() {
+        fetch('/admin_analytics').then(resp => resp.json()).then(data => {
+          let totalUsers = 0, totalShortlisted = 0, totalAnalyses = 0;
+          data.forEach(row => {
+            totalUsers += row.users;
+            totalShortlisted += row.shortlisted;
+            totalAnalyses += row.analyses;
+          });
+          document.getElementById('admin-summary-users').textContent = totalUsers;
+          document.getElementById('admin-summary-shortlisted').textContent = totalShortlisted;
+          document.getElementById('admin-summary-analyses').textContent = totalAnalyses;
+          // Example deltas (replace with real data if available)
+          document.getElementById('admin-summary-users-delta').textContent = '+12% from last month';
+          document.getElementById('admin-summary-shortlisted-delta').textContent = '+8% from last month';
+          document.getElementById('admin-summary-analyses-delta').textContent = '3% from last month';
         });
-        document.getElementById('admin-recent-activity').innerHTML = html;
-        if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+      };
+      window.refreshAdminRecentActivity = function() {
+        fetch('/activity_logs?limit=3').then(resp => resp.json()).then(logs => {
+          let html = '';
+          if (!logs.length) html = '<div class="text-gray-400">No recent activity.</div>';
+          else logs.forEach(log => {
+            const timeAgo = (ts => {
+              const now = new Date();
+              const then = new Date(ts);
+              const diff = Math.floor((now - then) / 1000);
+              if (diff < 60) return diff + ' seconds ago';
+              if (diff < 3600) return Math.floor(diff / 60) + ' minutes ago';
+              if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+              return Math.floor(diff / 86400) + ' days ago';
+            })(log.timestamp);
+            let icon = "<i data-lucide='activity' class='w-5 h-5 text-green-500'></i>";
+            if (log.action_type === 'login') icon = "<i data-lucide='log-in' class='w-5 h-5 text-green-500'></i>";
+            else if (log.action_type === 'logout') icon = "<i data-lucide='log-out' class='w-5 h-5 text-red-500'></i>";
+            else if (log.action_type === 'admin_delete_user') icon = "<i data-lucide='user-x' class='w-5 h-5 text-red-400'></i>";
+            html += `<div class="flex items-center gap-2"><span>${icon}</span> <span>${log.action_type.replace(/_/g,' ')}</span> <span class="ml-auto text-xs text-gray-400">${timeAgo}</span></div>`;
+          });
+          document.getElementById('admin-recent-activity').innerHTML = html;
+          if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+        });
+      };
+      document.addEventListener('DOMContentLoaded', function() {
+        window.refreshAdminDashboardSummary();
+        window.refreshAdminRecentActivity();
       });
-    };
-    document.addEventListener('DOMContentLoaded', function() {
-      window.refreshAdminDashboardSummary();
-      window.refreshAdminRecentActivity();
-    });
-    </script>
-    {% endif %}
+      </script>
+      {% endif %}
+    </div>
   </div>
 </div> 
