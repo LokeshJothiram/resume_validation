@@ -51,6 +51,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    <pre>{{ session | safe }}</pre>
     <!-- Responsive Header -->
     <div id="fixed-header" class="fixed top-0 left-0 w-full z-50 bg-white shadow min-h-[55px] h-auto">
       <div class="flex items-center justify-between w-full py-2 px-2 sm:px-4 md:px-6 flex-wrap">
@@ -84,12 +85,22 @@
           {% endif %}
         </div>
         <!-- Profile & Logout Right -->
-        <div class="relative flex items-center gap-2 sm:gap-4">
+        <div class="relative flex items-center gap-2 sm:gap-2">
           <button id="notification-btn" type="button" class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 focus:outline-none border-none shadow-none">
-            <i data-lucide="bell" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700"></i>
+            <i data-lucide="bell" class="w-4 h-4 sm:w-5 h-5 text-gray-700"></i>
           </button>
+          <div class="flex flex-col items-end justify-center mr-2">
+            <span class="font-semibold text-base text-gray-900">{% if session.user %}{{ session.user }}{% else %}User{% endif %}</span>
+            <span class="text-xs text-gray-400">{% if session.role %}{{ session.role|capitalize }}{% else %}Role{% endif %}</span>
+          </div>
           <button id="profile-btn" type="button" class="focus:outline-none">
-            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200" />
+            <div id="profile-avatar" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-base" style="background: linear-gradient(135deg, #7f5af0 0%, #00c6fb 100%);">
+              {% if session.user %}
+                {{ session.user.split(' ')[0][0]|upper }}{% if session.user.split(' ')|length > 1 %}{{ session.user.split(' ')[1][0]|upper }}{% endif %}
+              {% else %}
+                U
+              {% endif %}
+            </div>
           </button>
           <!-- Profile Dropdown (hidden by default) -->
           <div id="profile-dropdown" class="absolute right-0 mt-24 w-36 sm:w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 hidden z-50">
