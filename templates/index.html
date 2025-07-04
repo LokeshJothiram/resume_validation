@@ -1975,85 +1975,93 @@
           }
           document.getElementById('summarySuccessRate').textContent = successRate + '%';
           document.getElementById('successRateNote').textContent = successRate >= 75 ? 'Above average' : (successRate >= 50 ? 'Average' : 'Below average');
-          // Prepare chart data
-          const roles = filteredData.map(row => row.role);
-          const shortlisted = filteredData.map(row => row.shortlisted);
-          const analyses = filteredData.map(row => row.analyses);
-          const users = filteredData.map(row => row.users);
-          // Bar Chart: Resumes Shortlisted
-          if (shortlistedBarChart) shortlistedBarChart.destroy();
-          shortlistedBarChart = new Chart(document.getElementById('shortlistedBarChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: roles,
-              datasets: [{
-                label: 'Resumes Shortlisted',
-                data: shortlisted,
-                backgroundColor: '#6366f1',
-                borderRadius: 8,
-              }]
-            },
-            options: {
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } }
-            }
-          });
-          // Bar Chart: Analyses Saved
-          if (analysesBarChart) analysesBarChart.destroy();
-          analysesBarChart = new Chart(document.getElementById('analysesBarChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: roles,
-              datasets: [{
-                label: 'Analyses Saved',
-                data: analyses,
-                backgroundColor: '#10b981',
-                borderRadius: 8,
-              }]
-            },
-            options: {
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } }
-            }
-          });
-          // Pie Chart: User Distribution
-          if (userPieChart) userPieChart.destroy();
-          userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-              labels: roles,
-              datasets: [{
-                data: users,
-                backgroundColor: ['#6366f1', '#10b981', '#f59e42', '#f43f5e', '#a855f7', '#0ea5e9'],
-                borderWidth: 0
-              }]
-            },
-            options: {
-              cutout: '60%',
-              plugins: { legend: { position: 'bottom' } }
-            }
-          });
-          // Trend Chart: (simulate with static data for now)
-          if (shortlistTrendChart) shortlistTrendChart.destroy();
-          shortlistTrendChart = new Chart(document.getElementById('shortlistTrendChart').getContext('2d'), {
-            type: 'line',
-            data: {
-              labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-              datasets: [{
-                label: 'Shortlisted',
-                data: shortlisted.map(val => val),
-                borderColor: '#6366f1',
-                backgroundColor: 'rgba(99,102,241,0.1)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 2
-              }]
-            },
-            options: {
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } }
-            }
-          });
+
+          // Fetch per-user data for TA_TEAM
+          fetch('/admin_analytics_users')
+            .then(response => response.json())
+            .then(users => {
+              const taUsers = users.filter(u => u.role === 'TA_TEAM');
+              const usernames = taUsers.map(u => u.username);
+              const shortlistedCounts = taUsers.map(u => u.shortlisted);
+              const analysesCounts = taUsers.map(u => u.analyses);
+              // Vertical Bar Chart: Shortlisted by User
+              if (shortlistedBarChart) shortlistedBarChart.destroy();
+              shortlistedBarChart = new Chart(document.getElementById('shortlistedBarChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                  labels: usernames,
+                  datasets: [{
+                    label: 'Resumes Shortlisted',
+                    data: shortlistedCounts,
+                    backgroundColor: '#6366f1',
+                    borderRadius: 8,
+                  }]
+                },
+                options: {
+                  plugins: { legend: { display: false } },
+                  scales: { y: { beginAtZero: true } }
+                }
+              });
+              // Vertical Bar Chart: Analyses by User
+              if (analysesBarChart) analysesBarChart.destroy();
+              analysesBarChart = new Chart(document.getElementById('analysesBarChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                  labels: usernames,
+                  datasets: [{
+                    label: 'Analyses Saved',
+                    data: analysesCounts,
+                    backgroundColor: '#10b981',
+                    borderRadius: 8,
+                  }]
+                },
+                options: {
+                  plugins: { legend: { display: false } },
+                  scales: { y: { beginAtZero: true } }
+                }
+              });
+              // Pie Chart: User Distribution (by total activity per user)
+              const activityCounts = taUsers.map(u => u.shortlisted + u.analyses);
+              if (userPieChart) userPieChart.destroy();
+              userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                  labels: usernames,
+                  datasets: [{
+                    data: activityCounts,
+                    backgroundColor: [
+                      '#6366f1', '#10b981', '#f59e42', '#f43f5e', '#a855f7', '#0ea5e9', '#f472b6', '#facc15', '#38bdf8', '#34d399', '#f87171', '#a3e635'
+                    ],
+                    borderWidth: 0
+                  }]
+                },
+                options: {
+                  cutout: '60%',
+                  plugins: { legend: { position: 'bottom' } }
+                }
+              });
+              // Trend Chart: (simulate with static data for now)
+              if (shortlistTrendChart) shortlistTrendChart.destroy();
+              shortlistTrendChart = new Chart(document.getElementById('shortlistTrendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                  labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                  datasets: [{
+                    label: 'Shortlisted',
+                    data: shortlistedCounts, // Could be improved for real trend
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99,102,241,0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 2
+                  }]
+                },
+                options: {
+                  plugins: { legend: { display: false } },
+                  scales: { y: { beginAtZero: true } }
+                }
+              });
+            });
         }
 
         function renderAnalyticsCharts() {
@@ -2118,7 +2126,7 @@
                     <th class="px-6 py-3 text-left font-semibold">Role</th>
                     <th class="px-6 py-3 text-left font-semibold">Resumes Shortlisted</th>
                     <th class="px-6 py-3 text-left font-semibold">Analyses Saved</th>
-                    <th class="px-6 py-3 text-left font-semibold">Performance</th>
+                    <th class="px-6 py-3 text-left font-semibold">Engagement</th>
                   </tr>
                 </thead>
                 <tbody>`;
@@ -2735,9 +2743,11 @@
 
         // --- Recent Activity for Analytics Tab ---
         function renderRecentActivity() {
-          fetch('/activity_logs?limit=3')
+          fetch('/activity_logs?limit=10')
             .then(response => response.json())
             .then(logs => {
+              // Only show TA_TEAM role activity, exclude login/logout
+              logs = logs.filter(log => log.role === 'TA_TEAM' && log.action_type !== 'login' && log.action_type !== 'logout');
               let html = '';
               if (!logs.length) {
                 html = '<div class="text-gray-500">No recent activity.</div>';
@@ -2766,6 +2776,7 @@
                   html += `<div class="${color} rounded-lg p-3 flex items-center gap-3">
                     ${icon}
                     <span class="text-gray-700 text-sm">${label}</span>
+                    <span class="ml-2 text-xs text-gray-500">(${log.username || ''})</span>
                     <span class="ml-auto text-xs text-gray-400">${timeAgo}</span>
                   </div>`;
                 });
@@ -2817,15 +2828,19 @@
               'dashboard-skills-assessed',
               'dashboard-questions-generated',
               'dashboard-shortlisted-candidates',
-            ].forEach(id => document.getElementById(id).textContent = '-');
+            ].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.textContent = '-';
+            });
             [
               'dashboard-resumes-analyzed-delta',
               'dashboard-skills-assessed-delta',
               'dashboard-questions-generated-delta',
               'dashboard-shortlisted-candidates-delta',
             ].forEach((id, idx) => {
+              const el = document.getElementById(id);
               const staticVals = ['+10% from last month', '+7% from last month', '+5% from last month', '+6% from last month'];
-              document.getElementById(id).textContent = staticVals[idx];
+              if (el) el.textContent = staticVals[idx];
             });
           });
         }
@@ -2862,6 +2877,50 @@
       }
       window.addEventListener('DOMContentLoaded', adjustMainContentMargin);
       window.addEventListener('resize', adjustMainContentMargin);
+    </script>
+    <script>
+      // Pie Chart: User Activity by Time of Day
+      fetch('/activity_logs?limit=1000')
+        .then(response => response.json())
+        .then(logs => {
+          // Only TA_TEAM users, only shortlist/analysis actions
+          const taLogs = logs.filter(l => l.role === 'TA_TEAM' && (l.action_type === 'shortlist_resume' || l.action_type === 'save_analysis'));
+          // Group by user and time of day
+          const timeBuckets = ['Morning', 'Afternoon', 'Evening', 'Night'];
+          function getTimeBucket(dateStr) {
+            const hour = new Date(dateStr).getHours();
+            if (hour >= 5 && hour < 12) return 'Morning';
+            if (hour >= 12 && hour < 17) return 'Afternoon';
+            if (hour >= 17 && hour < 21) return 'Evening';
+            return 'Night';
+          }
+          const userMap = {};
+          taLogs.forEach(log => {
+            if (!userMap[log.username]) userMap[log.username] = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+            const bucket = getTimeBucket(log.timestamp);
+            userMap[log.username][bucket]++;
+          });
+          const usernames = Object.keys(userMap);
+          const dataByBucket = timeBuckets.map(bucket => usernames.map(u => userMap[u][bucket]));
+          if (userPieChart) userPieChart.destroy();
+          userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+              labels: usernames,
+              datasets: timeBuckets.map((bucket, i) => ({
+                label: bucket,
+                data: dataByBucket[i],
+                backgroundColor: ['#6366f1', '#10b981', '#f59e42', '#f43f5e'][i],
+                stack: 'activity',
+              }))
+            },
+            options: {
+              plugins: { legend: { position: 'bottom' } },
+              responsive: true,
+              scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+            }
+          });
+        });
     </script>
 </body>
 </html>
