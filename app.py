@@ -24,7 +24,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from database import db, User, SavedAnalysis, ShortlistedResume, ActivityLog
 from werkzeug.utils import secure_filename
-from utils import log_activity
+from utils import log_activity, get_current_user
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -441,13 +441,6 @@ def separate_hr_candidate_with_gemini(transcript):
         return response.text
     except Exception as e:
         return f"Error contacting Gemini API: {e}"
-
-def get_current_user():
-    username = session.get('user')
-    if not username:
-        return None
-    from database import User
-    return User.query.filter_by(username=username).first()
 
 # Helper function to get current IST time
 def get_ist_now():
@@ -915,6 +908,82 @@ def admin_export_users():
         {'id': u.id, 'username': u.username, 'role': u.role, 'created_at': u.created_at.isoformat()} for u in users
     ]
     return jsonify({'users': data})
+
+@app.route('/user_dashboard_stats', methods=['GET'])
+def user_dashboard_stats():
+    user = get_current_user()
+    if not user:
+        return jsonify({
+            'resumes_analyzed': 0,
+            'resumes_analyzed_delta': '',
+            'skills_assessed': 0,
+            'skills_assessed_delta': '',
+            'questions_generated': 0,
+            'questions_generated_delta': '',
+            'shortlisted_candidates': 0,
+            'shortlisted_candidates_delta': ''
+        })
+    from database import ShortlistedResume, SavedAnalysis
+    # Resumes analyzed = SavedAnalysis by user
+    from datetime import datetime, timedelta
+    now = datetime.now()
+    last_month = (now.replace(day=1) - timedelta(days=1)).replace(day=1)
+    # This month
+    resumes_analyzed = SavedAnalysis.query.filter_by(user_id=user.id).count()
+    # Last month
+    resumes_analyzed_last_month = SavedAnalysis.query.filter(
+        SavedAnalysis.user_id==user.id,
+        SavedAnalysis.timestamp >= last_month,
+        SavedAnalysis.timestamp < now.replace(day=1)
+    ).count()
+    resumes_analyzed_delta = ''
+    if resumes_analyzed_last_month > 0:
+        delta = resumes_analyzed - resumes_analyzed_last_month
+        percent = int((delta / resumes_analyzed_last_month) * 100)
+        resumes_analyzed_delta = f"{percent:+d}% from last month"
+    # Skills assessed (placeholder: same as resumes analyzed)
+    skills_assessed = resumes_analyzed
+    skills_assessed_last_month = resumes_analyzed_last_month
+    skills_assessed_delta = resumes_analyzed_delta
+    # Interview questions generated (if model exists)
+    try:
+        from database import QuestionGeneration
+        questions_generated = QuestionGeneration.query.filter_by(user_id=user.id).count()
+        questions_generated_last_month = QuestionGeneration.query.filter(
+            QuestionGeneration.user_id==user.id,
+            QuestionGeneration.timestamp >= last_month,
+            QuestionGeneration.timestamp < now.replace(day=1)
+        ).count()
+        questions_generated_delta = ''
+        if questions_generated_last_month > 0:
+            delta = questions_generated - questions_generated_last_month
+            percent = int((delta / questions_generated_last_month) * 100)
+            questions_generated_delta = f"{percent:+d}% from last month"
+    except ImportError:
+        questions_generated = 0
+        questions_generated_delta = ''
+    # Shortlisted candidates
+    shortlisted_candidates = ShortlistedResume.query.filter_by(user_id=user.id).count()
+    shortlisted_candidates_last_month = ShortlistedResume.query.filter(
+        ShortlistedResume.user_id==user.id,
+        ShortlistedResume.timestamp >= last_month,
+        ShortlistedResume.timestamp < now.replace(day=1)
+    ).count()
+    shortlisted_candidates_delta = ''
+    if shortlisted_candidates_last_month > 0:
+        delta = shortlisted_candidates - shortlisted_candidates_last_month
+        percent = int((delta / shortlisted_candidates_last_month) * 100)
+        shortlisted_candidates_delta = f"{percent:+d}% from last month"
+    return jsonify({
+        'resumes_analyzed': resumes_analyzed,
+        'resumes_analyzed_delta': resumes_analyzed_delta,
+        'skills_assessed': skills_assessed,
+        'skills_assessed_delta': skills_assessed_delta,
+        'questions_generated': questions_generated,
+        'questions_generated_delta': questions_generated_delta,
+        'shortlisted_candidates': shortlisted_candidates,
+        'shortlisted_candidates_delta': shortlisted_candidates_delta
+    })
 
 if __name__ == '__main__':
     with app.app_context():

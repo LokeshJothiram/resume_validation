@@ -16,25 +16,53 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
       <div class="bg-blue-100 bg-opacity-40 border border-blue-200 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
         <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i>Resumes Analyzed</div>
-        <div class="text-3xl font-bold text-gray-900 mb-1">1,247</div>
-        <div class="text-green-500 text-xs font-semibold">+12% from last month</div>
+        <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-resumes-analyzed">...</span></div>
+        <div class="text-green-500 text-xs font-semibold" id="dashboard-resumes-analyzed-delta">...</div>
       </div>
       <div class="bg-green-100 bg-opacity-40 border border-green-200 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
         <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i>Skills Assessed</div>
-        <div class="text-3xl font-bold text-gray-900 mb-1">856</div>
-        <div class="text-green-500 text-xs font-semibold">+8% from last month</div>
+        <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-skills-assessed">...</span></div>
+        <div class="text-green-500 text-xs font-semibold" id="dashboard-skills-assessed-delta">...</div>
       </div>
       <div class="bg-purple-100 bg-opacity-40 border border-purple-200 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
         <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i>Interview Questions Generated</div>
-        <div class="text-3xl font-bold text-gray-900 mb-1">423</div>
-        <div class="text-green-500 text-xs font-semibold">+15% from last month</div>
+        <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-questions-generated">...</span></div>
+        <div class="text-green-500 text-xs font-semibold" id="dashboard-questions-generated-delta">...</div>
       </div>
       <div class="bg-yellow-100 bg-opacity-40 border border-yellow-200 rounded-xl p-6 shadow-sm backdrop-blur-sm flex flex-col justify-between">
         <div class="text-gray-500 text-sm mb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i>Shortlisted Candidates</div>
-        <div class="text-3xl font-bold text-gray-900 mb-1">89</div>
-        <div class="text-green-500 text-xs font-semibold">+22% from last month</div>
+        <div class="text-3xl font-bold text-gray-900 mb-1"><span id="dashboard-shortlisted-candidates">...</span></div>
+        <div class="text-green-500 text-xs font-semibold" id="dashboard-shortlisted-candidates-delta">...</div>
       </div>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/user_dashboard_stats').then(resp => resp.json()).then(stats => {
+        document.getElementById('dashboard-resumes-analyzed').textContent = stats.resumes_analyzed ?? '0';
+        document.getElementById('dashboard-resumes-analyzed-delta').textContent = stats.resumes_analyzed_delta ?? '';
+        document.getElementById('dashboard-skills-assessed').textContent = stats.skills_assessed ?? '0';
+        document.getElementById('dashboard-skills-assessed-delta').textContent = stats.skills_assessed_delta ?? '';
+        document.getElementById('dashboard-questions-generated').textContent = stats.questions_generated ?? '0';
+        document.getElementById('dashboard-questions-generated-delta').textContent = stats.questions_generated_delta ?? '';
+        document.getElementById('dashboard-shortlisted-candidates').textContent = stats.shortlisted_candidates ?? '0';
+        document.getElementById('dashboard-shortlisted-candidates-delta').textContent = stats.shortlisted_candidates_delta ?? '';
+      }).catch(() => {
+        // fallback: show dashes if error
+        [
+          'dashboard-resumes-analyzed',
+          'dashboard-skills-assessed',
+          'dashboard-questions-generated',
+          'dashboard-shortlisted-candidates',
+        ].forEach(id => document.getElementById(id).textContent = '-');
+        [
+          'dashboard-resumes-analyzed-delta',
+          'dashboard-skills-assessed-delta',
+          'dashboard-questions-generated-delta',
+          'dashboard-shortlisted-candidates-delta',
+        ].forEach(id => document.getElementById(id).textContent = '');
+      });
+    });
+    </script>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="bg-cyan-100 bg-opacity-40 border border-cyan-200 rounded-xl p-6 shadow-sm backdrop-blur-sm">
         <div class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</div>

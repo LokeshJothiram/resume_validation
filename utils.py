@@ -9,12 +9,20 @@ import tempfile
 from database import ActivityLog, db
 import datetime
 import pytz
+from flask import session
+from database import User
 
 SAVED_FILES_FOLDER = 'saved_files'
 
 # Helper function to get current IST time
 def get_ist_now():
     return datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+
+def get_current_user():
+    username = session.get('user')
+    if not username:
+        return None
+    return User.query.filter_by(username=username).first()
 
 def extract_text_from_pdf(pdf_path):
     try:

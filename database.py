@@ -41,3 +41,13 @@ class ActivityLog(db.Model):
     action_type = db.Column(db.String(50), nullable=False)
     details = db.Column(db.JSON, nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False) 
+
+class QuestionGeneration(db.Model):
+    __tablename__ = 'question_generation'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    technology = db.Column(db.String(100), nullable=True)
+    job_description = db.Column(db.Text, nullable=True)
+    num_questions = db.Column(db.Integer, nullable=False, default=5)
+    level = db.Column(db.String(20), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False) 

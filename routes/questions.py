@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 import re
 import google.generativeai as genai
+from database import db, QuestionGeneration
+from flask import session
+from utils import get_current_user
 
 questions_bp = Blueprint('questions', __name__)
 
@@ -43,6 +46,18 @@ You are an expert interviewer. Generate a list of {num_questions} relevant, chal
                 questions.append(line)
         if not questions:
             questions = [response.text.strip()]
+        # Save QuestionGeneration event
+        user = get_current_user() if 'get_current_user' in globals() else None
+        user_id = user.id if user else None
+        qg = QuestionGeneration(
+            user_id=user_id,
+            technology=technology,
+            job_description=job_description,
+            num_questions=num_questions,
+            level=level
+        )
+        db.session.add(qg)
+        db.session.commit()
         return jsonify({'questions': questions})
     except Exception as e:
         return jsonify({'error': f'Failed to generate questions: {e}'}), 500 
