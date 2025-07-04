@@ -8,8 +8,13 @@ from pydub import AudioSegment
 import tempfile
 from database import ActivityLog, db
 import datetime
+import pytz
 
 SAVED_FILES_FOLDER = 'saved_files'
+
+# Helper function to get current IST time
+def get_ist_now():
+    return datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
 
 def extract_text_from_pdf(pdf_path):
     try:
@@ -274,7 +279,7 @@ def log_activity(user, action_type, details=None):
         role=getattr(user, 'role', None),
         action_type=action_type,
         details=details or {},
-        timestamp=datetime.datetime.utcnow()
+        timestamp=get_ist_now()
     )
     db.session.add(log)
     db.session.commit() 

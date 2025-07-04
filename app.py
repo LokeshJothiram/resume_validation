@@ -17,6 +17,7 @@ import google.generativeai as genai
 from sarvamai import SarvamAI
 import tempfile
 import datetime
+import pytz
 import glob
 from routes import register_blueprints
 from flask_sqlalchemy import SQLAlchemy
@@ -448,6 +449,10 @@ def get_current_user():
     from database import User
     return User.query.filter_by(username=username).first()
 
+# Helper function to get current IST time
+def get_ist_now():
+    return datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -577,7 +582,7 @@ def process():
 @app.route('/save_analysis', methods=['POST'])
 def save_analysis():
     data = request.get_json()
-    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    timestamp = get_ist_now().strftime('%Y%m%d_%H%M%S')
     filename = f"analysis_{timestamp}.json"
     filepath = os.path.join(SAVED_FILES_FOLDER, filename)
     with open(filepath, 'w', encoding='utf-8') as f:
@@ -630,7 +635,7 @@ def shortlist_resume():
     if resume_file and resume_file.filename:
         ext = os.path.splitext(resume_file.filename)[1]
         original_filename = secure_filename(resume_file.filename)
-        saved_resume_filename = f"resume_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{ext}"
+        saved_resume_filename = f"resume_{get_ist_now().strftime('%Y%m%d_%H%M%S')}{ext}"
         resume_file.save(os.path.join(SHORTLIST_FOLDER, saved_resume_filename))
         # Save metadata to DB
         from database import ShortlistedResume, db
@@ -638,7 +643,7 @@ def shortlist_resume():
             user_id=user_id,
             original_filename=original_filename,
             stored_filename=saved_resume_filename,
-            timestamp=datetime.datetime.now(),
+            timestamp=get_ist_now(),
             match_percentage=match_percentage
         )
         db.session.add(shortlist)
