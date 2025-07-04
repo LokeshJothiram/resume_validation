@@ -35,11 +35,7 @@
       <button id="notification-btn" type="button" class="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-100 focus:outline-none border-none shadow-none">
         <i data-lucide="bell" class="w-4 h-4 sm:w-5 h-5 text-gray-700"></i>
       </button>
-      <div class="flex flex-col items-end justify-center mr-2">
-        <span class="font-semibold text-base text-gray-900">{% if session.user %}{{ session.user }}{% else %}User{% endif %}</span>
-        <span class="text-xs text-gray-400">{% if session.role %}{{ session.role|capitalize }}{% else %}Role{% endif %}</span>
-      </div>
-      <button id="profile-btn" type="button" class="focus:outline-none">
+      <div id="profile-container" class="flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-100 transition" onclick="toggleProfileDropdown()">
         <div id="profile-avatar" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-base" style="background: linear-gradient(135deg, #7f5af0 0%, #00c6fb 100%);">
           {% if session.user %}
             {{ session.user.split(' ')[0][0]|upper }}{% if session.user.split(' ')|length > 1 %}{{ session.user.split(' ')[1][0]|upper }}{% endif %}
@@ -47,7 +43,12 @@
             U
           {% endif %}
         </div>
-      </button>
+        <div class="flex flex-col items-start justify-center">
+          <span class="font-semibold text-base text-gray-900">{% if session.user %}{{ session.user }}{% else %}User{% endif %}</span>
+          <span class="text-xs text-gray-400">{% if session.role %}{{ session.role|capitalize }}{% else %}Role{% endif %}</span>
+        </div>
+        <svg class="w-4 h-4 text-gray-400 ml-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      </div>
       <!-- Profile Dropdown (hidden by default) -->
       <div id="profile-dropdown" class="absolute right-0 mt-24 w-36 sm:w-40 bg-white border border-gray-200 rounded-lg shadow-lg py-2 hidden z-50">
         <form action="{{ url_for('logout') }}" method="post">
@@ -74,4 +75,20 @@
       <button id="tab-shortlisted-m" type="button" class="tab-btn w-full text-left px-3 py-2 text-xs font-medium text-gray-600 bg-white focus:outline-none hover:bg-blue-50 rounded-lg">Shortlisted Resumes</button>
     {% endif %}
   </div>
-</div> 
+</div>
+<script>
+function toggleProfileDropdown() {
+  const dropdown = document.getElementById('profile-dropdown');
+  dropdown.classList.toggle('hidden');
+  // Close on outside click
+  function handler(e) {
+    if (!document.getElementById('profile-container').contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.add('hidden');
+      document.removeEventListener('click', handler);
+    }
+  }
+  setTimeout(() => {
+    document.addEventListener('click', handler);
+  }, 0);
+}
+</script> 
