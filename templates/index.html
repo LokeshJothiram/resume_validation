@@ -1045,6 +1045,7 @@
                                 newSaveBtn.disabled = true;
                                 lucide.createIcons();
                                 showToast('Analysis saved successfully!', 'success');
+                                if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
                             } else {
                                 newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
                                 newSaveBtn.disabled = false;
@@ -1114,6 +1115,10 @@
                                 newShortlistBtn.disabled = true;
                                 lucide.createIcons();
                                 showToast('Resume shortlisted!', 'shortlist');
+                                if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
+                                if (typeof refreshUserDashboardStats === 'function') refreshUserDashboardStats();
+                                if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
+                                if (typeof renderShortlistedResumes === 'function') renderShortlistedResumes();
                             } else {
                                 newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
                                 newShortlistBtn.disabled = false;
@@ -1517,6 +1522,11 @@
                 if (list.children.length === 0) {
                     list.innerHTML = `<div class="text-gray-500 text-center">No ${activeTab === 'shortlisted' ? 'shortlisted resumes' : 'saved analyses'} yet.</div>`;
                 }
+                // Refresh all relevant UI sections
+                if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
+                if (typeof refreshUserDashboardStats === 'function') refreshUserDashboardStats();
+                if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
+                if (typeof renderShortlistedResumes === 'function') renderShortlistedResumes();
             } catch (e) {
                 showToast('Error deleting analysis.', 'error');
             }
@@ -2251,6 +2261,11 @@
             container.innerHTML = '<div class="text-red-500 text-center">Failed to load logs.</div>';
             return;
           }
+          if (!Array.isArray(logs)) {
+            // Handle error response (e.g., 403 Unauthorized)
+            container.innerHTML = `<div class='text-red-500 text-center py-12'>${logs.error || 'Unauthorized or failed to load logs.'}</div>`;
+            return;
+          }
           // Filter client-side
           let filtered = logs;
           if (userSel && userSel.value !== 'all') filtered = filtered.filter(l => l.user_id == userSel.value);
@@ -2344,8 +2359,12 @@
                 <td class=\"px-2 py-1 border-b align-top\">${u.role}</td>
                 <td class=\"px-2 py-1 border-b align-top\">${new Date(u.created_at).toLocaleDateString()}</td>
                 <td class=\"px-2 py-1 border-b align-top\">
-                  <button class=\"edit-user-btn text-blue-600 mr-2\" data-id=\"${u.id}\">Edit</button>
-                  <button class=\"delete-user-btn text-red-600\" data-id=\"${u.id}\">Delete</button>
+                  <button class=\"edit-user-btn text-blue-600 mr-2\" data-id=\"${u.id}\" title=\"Edit\">
+                    <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M15.232 5.232l3.536 3.536M9 13l6-6m2 2l-6 6m-2 2h6\" /></svg>
+                  </button>
+                  <button class=\"delete-user-btn text-red-600\" data-id=\"${u.id}\" title=\"Delete\">
+                    <svg xmlns=\"http://www.w3.org/2000/svg\" class=\"w-5 h-5\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\" /></svg>
+                  </button>
                 </td>
               </tr>`;
             });
@@ -2357,7 +2376,7 @@
                 const userId = btn.getAttribute('data-id');
                 const user = filteredUsers.find(u => u.id == userId);
                 if (!user) return;
-               
+                // ... (rest of your delete logic here)
               });
             });
             // Add event listeners for edit (existing logic)
@@ -2592,6 +2611,11 @@
             logs = await resp.json();
           } catch (e) {
             container.innerHTML = '<div class="text-red-500 text-center">Failed to load logs.</div>';
+            return;
+          }
+          if (!Array.isArray(logs)) {
+            // Handle error response (e.g., 403 Unauthorized)
+            container.innerHTML = `<div class='text-red-500 text-center py-12'>${logs.error || 'Unauthorized or failed to load logs.'}</div>`;
             return;
           }
           // Filter client-side
@@ -2880,47 +2904,53 @@
     </script>
     <script>
       // Pie Chart: User Activity by Time of Day
-      fetch('/activity_logs?limit=1000')
-        .then(response => response.json())
-        .then(logs => {
-          // Only TA_TEAM users, only shortlist/analysis actions
-          const taLogs = logs.filter(l => l.role === 'TA_TEAM' && (l.action_type === 'shortlist_resume' || l.action_type === 'save_analysis'));
-          // Group by user and time of day
-          const timeBuckets = ['Morning', 'Afternoon', 'Evening', 'Night'];
-          function getTimeBucket(dateStr) {
-            const hour = new Date(dateStr).getHours();
-            if (hour >= 5 && hour < 12) return 'Morning';
-            if (hour >= 12 && hour < 17) return 'Afternoon';
-            if (hour >= 17 && hour < 21) return 'Evening';
-            return 'Night';
-          }
-          const userMap = {};
-          taLogs.forEach(log => {
-            if (!userMap[log.username]) userMap[log.username] = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
-            const bucket = getTimeBucket(log.timestamp);
-            userMap[log.username][bucket]++;
-          });
-          const usernames = Object.keys(userMap);
-          const dataByBucket = timeBuckets.map(bucket => usernames.map(u => userMap[u][bucket]));
-          if (userPieChart) userPieChart.destroy();
-          userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: usernames,
-              datasets: timeBuckets.map((bucket, i) => ({
-                label: bucket,
-                data: dataByBucket[i],
-                backgroundColor: ['#6366f1', '#10b981', '#f59e42', '#f43f5e'][i],
-                stack: 'activity',
-              }))
-            },
-            options: {
-              plugins: { legend: { position: 'bottom' } },
-              responsive: true,
-              scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+      if (window.userRole === 'admin') {
+        fetch('/activity_logs?limit=1000')
+          .then(response => response.json())
+          .then(logs => {
+            if (!Array.isArray(logs)) return; // Suppress error if not array
+            // Only TA_TEAM users, only shortlist/analysis actions
+            const taLogs = logs.filter(l => l.role === 'TA_TEAM' && (l.action_type === 'shortlist_resume' || l.action_type === 'save_analysis'));
+            // Group by user and time of day
+            const timeBuckets = ['Morning', 'Afternoon', 'Evening', 'Night'];
+            function getTimeBucket(dateStr) {
+              const hour = new Date(dateStr).getHours();
+              if (hour >= 5 && hour < 12) return 'Morning';
+              if (hour >= 12 && hour < 17) return 'Afternoon';
+              if (hour >= 17 && hour < 21) return 'Evening';
+              return 'Night';
             }
+            const userMap = {};
+            taLogs.forEach(log => {
+              if (!userMap[log.username]) userMap[log.username] = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+              const bucket = getTimeBucket(log.timestamp);
+              userMap[log.username][bucket]++;
+            });
+            const usernames = Object.keys(userMap);
+            const dataByBucket = timeBuckets.map(bucket => usernames.map(u => userMap[u][bucket]));
+            if (userPieChart) userPieChart.destroy();
+            userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
+              type: 'bar',
+              data: {
+                labels: usernames,
+                datasets: timeBuckets.map((bucket, i) => ({
+                  label: bucket,
+                  data: dataByBucket[i],
+                  backgroundColor: ['#6366f1', '#10b981', '#f59e42', '#f43f5e'][i],
+                  stack: 'activity',
+                }))
+              },
+              options: {
+                plugins: { legend: { position: 'bottom' } },
+                responsive: true,
+                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+              }
+            });
           });
-        });
+      }
+    </script>
+    <script>
+      window.userRole = '{{ session.role|default("") }}';
     </script>
 </body>
 </html>

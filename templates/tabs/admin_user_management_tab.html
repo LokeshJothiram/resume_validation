@@ -136,9 +136,14 @@
     const cancelBtn = document.getElementById('delete-user-cancel');
     // Delegate delete button clicks
     container.addEventListener('click', function(e) {
-      if (e.target.classList.contains('delete-user-btn')) {
-        const userId = e.target.getAttribute('data-id');
-        const username = e.target.closest('tr').querySelector('td').innerText.trim();
+      let btn = e.target;
+      // Traverse up to the button if SVG or path is clicked
+      while (btn && !btn.classList.contains('delete-user-btn') && btn !== container) {
+        btn = btn.parentElement;
+      }
+      if (btn && btn.classList.contains('delete-user-btn')) {
+        const userId = btn.getAttribute('data-id');
+        const username = btn.closest('tr').querySelector('td').innerText.trim();
         pendingDeleteUserId = userId;
         pendingDeleteUsername = username;
         msg.textContent = `Delete user '${username}'? This cannot be undone.`;
