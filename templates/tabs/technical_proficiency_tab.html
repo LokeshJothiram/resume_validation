@@ -12,8 +12,8 @@
         </div>
         <div class="text-sm text-green-600 mb-4 font-medium">Upload audio file for analysis</div>
         <div class="flex items-center gap-2 mb-2">
-          <label class="custom-file-upload hover:bg-green-200/80 transition-all duration-300 hover:shadow-md hover:scale-105">
-            <i data-lucide="mic" class="animate-breathe"></i>
+          <label class="custom-file-upload">
+            <i data-lucide="mic"></i>
             <span>Choose File</span>
             <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
           </label>
@@ -32,8 +32,8 @@
         </div>
         <div class="text-sm text-blue-600 mb-4 font-medium">Upload candidate resume</div>
         <div class="flex items-center gap-2 mb-2">
-          <label class="custom-file-upload hover:bg-blue-200/80 transition-all duration-300 hover:shadow-md hover:scale-105">
-            <i data-lucide="file-text" class="animate-breathe"></i>
+          <label class="custom-file-upload">
+            <i data-lucide="file-text"></i>
             <span>Choose File</span>
             <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
           </label>
@@ -52,8 +52,8 @@
         </div>
         <div class="text-sm text-purple-600 mb-4 font-medium">Upload technical questions file</div>
         <div class="flex items-center gap-2 mb-2">
-          <label class="custom-file-upload hover:bg-purple-200/80 transition-all duration-300 hover:shadow-md hover:scale-105">
-            <i data-lucide="code" class="animate-breathe"></i>
+          <label class="custom-file-upload">
+            <i data-lucide="code"></i>
             <span>Choose File</span>
             <input type="file" id="techQuestionsUpload" accept=".docx,.txt" onchange="handleTechQuestionsUpload(this)">
           </label>
@@ -160,14 +160,7 @@
   }
 }
 
-@keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-}
+
 
 @keyframes text-glow {
   0%, 100% {
@@ -204,9 +197,7 @@
   animation: ping-slow 3s ease-in-out infinite;
 }
 
-.animate-breathe {
-  animation: breathe 2s ease-in-out infinite;
-}
+
 
 .animate-text-glow {
   animation: text-glow 3s ease-in-out infinite;
@@ -229,31 +220,7 @@
   animation-delay: 0.8s;
 }
 
-/* Enhanced Interactive Elements */
-.custom-file-upload {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
 
-.custom-file-upload::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.5s;
-}
-
-.custom-file-upload:hover::before {
-  left: 100%;
-}
-
-.custom-file-upload:hover {
-  transform: translateY(-3px);
-}
 
 /* Glass Morphism Effects */
 .backdrop-blur-sm {
