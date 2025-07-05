@@ -576,10 +576,10 @@ def process():
             response['audio_error'] = "No transcript detected."
         os.remove(audio_path)
 
-    # After processing resumes (if any were analyzed), log a SkillAssessment event
+    # After processing audio (if any was analyzed), log a SkillAssessment event
     from database import SkillAssessment, db
     user = get_current_user()
-    if user:
+    if user and audio_file and audio_file.filename and 'transcription' in response:
         assessment = SkillAssessment(user_id=user.id)
         db.session.add(assessment)
         db.session.commit()
