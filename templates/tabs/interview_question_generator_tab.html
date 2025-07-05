@@ -1,10 +1,10 @@
-<div class="flex flex-col gap-6 animate-fade-in">
+<div class="flex flex-col gap-6 animate-fade-in overflow-hidden">
   <!-- Input Section: Two-column card layout -->
   <div class="flex flex-col md:flex-row gap-6">
     <!-- Left Card: Upload or Paste Job Description -->
     <div class="flex-1 bg-yellow-50 border border-yellow-100 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-left">
       <div class="mb-2 flex items-center">
-        <i data-lucide="file-text" class="inline w-5 h-5 mr-2 text-yellow-400 animate-pulse"></i>
+        <i data-lucide="file-text" class="inline w-5 h-5 mr-2 text-yellow-400"></i>
         <span class="text-lg font-bold text-gray-800">Upload or Paste Job Description</span>
       </div>
       <div class="text-sm text-yellow-400 mb-4">Provide job requirements for question generation</div>
@@ -24,7 +24,7 @@
     <div class="flex-1 bg-cyan-50 border border-cyan-100 rounded-xl p-6 shadow-sm flex flex-col justify-between min-h-[300px] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-right">
       <div>
         <div class="mb-2 flex items-center">
-          <i data-lucide="list" class="inline w-5 h-5 mr-2 text-cyan-400 animate-pulse"></i>
+          <i data-lucide="list" class="inline w-5 h-5 mr-2 text-cyan-400"></i>
           <span class="text-lg font-bold text-gray-800">Number of Questions</span>
         </div>
         <div class="text-sm text-cyan-400 mb-4">Specify how many questions to generate</div>
@@ -186,18 +186,22 @@
 /* Animation Classes */
 .animate-fade-in {
   animation: fade-in 0.6s ease-out;
+  overflow: hidden;
 }
 
 .animate-slide-in-left {
   animation: slide-in-left 0.8s ease-out;
+  overflow: hidden;
 }
 
 .animate-slide-in-right {
   animation: slide-in-right 0.8s ease-out;
+  overflow: hidden;
 }
 
 .animate-slide-in-up {
   animation: slide-in-up 0.8s ease-out;
+  overflow: hidden;
 }
 
 .animate-fade-in-scale {
