@@ -161,6 +161,9 @@
                         <div id="user-management-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                           {% include 'tabs/admin_user_management_tab.html' %}
                         </div>
+                        <div id="job-requirement-upload-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
+                          {% include 'tabs/admin_job_requirement_upload_tab.html' %}
+                        </div>
             </div>
 
             <!-- Add User Modal -->
@@ -2126,7 +2129,7 @@
           renderTopUsers(selectedRole);
         });
 
-        const adminTabIds = ['tab-dashboard', 'tab-analytics', 'tab-activity-logs', 'tab-user-management'];
+        const adminTabIds = ['tab-dashboard', 'tab-analytics', 'tab-activity-logs', 'tab-user-management', 'tab-job-requirement-upload'];
         function setAdminActiveTab(tab) {
           adminTabIds.forEach(id => {
             const btn = document.getElementById(id);
@@ -2168,6 +2171,16 @@
             document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
             userManagementTabContent.classList.remove('hidden');
             renderUserManagement();
+          });
+        }
+        
+        // Job Requirement Upload tab
+        const tabJobRequirementUpload = document.getElementById('tab-job-requirement-upload');
+        if (tabJobRequirementUpload) {
+          tabJobRequirementUpload.addEventListener('click', () => {
+            setAdminActiveTab('job-requirement-upload');
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            document.getElementById('job-requirement-upload-tab-content').classList.remove('hidden');
           });
         }
 
@@ -2427,7 +2440,7 @@
         };
 
         // For mobile nav as well
-        const adminTabIdsM = ['tab-dashboard-m', 'tab-analytics-m', 'tab-activity-logs-m', 'tab-user-management-m'];
+        const adminTabIdsM = ['tab-dashboard-m', 'tab-analytics-m', 'tab-activity-logs-m', 'tab-user-management-m', 'tab-job-requirement-upload-m'];
         function setAdminActiveTabMobile(tab) {
           adminTabIdsM.forEach(id => {
             const btn = document.getElementById(id);
@@ -2474,6 +2487,17 @@
             document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
             userManagementTabContent.classList.remove('hidden');
             renderUserManagement();
+          });
+        }
+        
+        // Job Requirement Upload tab (mobile)
+        const tabJobRequirementUploadM = document.getElementById('tab-job-requirement-upload-m');
+        if (tabJobRequirementUploadM) {
+          tabJobRequirementUploadM.addEventListener('click', () => {
+            setAdminActiveTabMobile('job-requirement-upload');
+            // Show job requirement upload content
+            document.querySelectorAll('.tab-content').forEach(div => div.classList.add('hidden'));
+            document.getElementById('job-requirement-upload-tab-content').classList.remove('hidden');
           });
         }
 

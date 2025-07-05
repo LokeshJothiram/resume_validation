@@ -16,7 +16,7 @@ from pyannote.audio import Pipeline
 import google.generativeai as genai
 from sarvamai import SarvamAI
 import tempfile
-import datetime
+from datetime import datetime
 import pytz
 import glob
 from routes import register_blueprints
@@ -1026,6 +1026,130 @@ def user_dashboard_stats():
         'shortlisted_candidates': shortlisted_candidates,
         'shortlisted_candidates_delta': shortlisted_candidates_delta
     })
+
+# Job Requirement Upload Routes
+@app.route('/admin/upload-job-requirement', methods=['POST'])
+def admin_upload_job_requirement():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        job_title = request.form.get('job_title', '')
+        job_description = request.form.get('job_description', '')
+        uploaded_file = request.files.get('job_file')
+        
+        if not job_title or not job_description:
+            return jsonify({'error': 'Job title and description are required'}), 400
+        
+        # Create admin_uploads directory if it doesn't exist
+        import os
+        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        filename = None
+        if uploaded_file and uploaded_file.filename:
+            # Secure filename
+            from werkzeug.utils import secure_filename
+            filename = secure_filename(uploaded_file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f"{timestamp}_{filename}"
+            file_path = os.path.join(upload_dir, filename)
+            uploaded_file.save(file_path)
+        
+        # Save to database (you'll need to create a JobRequirement model)
+        # For now, we'll just save the file and return success
+        # TODO: Add database model for job requirements
+        
+        log_activity(get_current_user(), 'admin_upload_job_requirement', {
+            'job_title': job_title,
+            'filename': filename,
+            'has_file': bool(filename)
+        })
+        
+        return jsonify({'status': 'success', 'message': 'Job requirement uploaded successfully'})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/job-requirements', methods=['GET'])
+def admin_get_job_requirements():
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        import os
+        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
+        
+        if not os.path.exists(upload_dir):
+            return jsonify({'status': 'success', 'files': []})
+        
+        files = []
+        for filename in os.listdir(upload_dir):
+            if filename.endswith(('.pdf', '.doc', '.docx', '.txt')):
+                file_path = os.path.join(upload_dir, filename)
+                file_stat = os.stat(file_path)
+                files.append({
+                    'id': filename,  # Using filename as ID for now
+                    'filename': filename,
+                    'job_title': filename.replace('.pdf', '').replace('.doc', '').replace('.docx', '').replace('.txt', ''),
+                    'upload_date': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
+                    'size': file_stat.st_size
+                })
+        
+        # Sort by upload date (newest first)
+        files.sort(key=lambda x: x['upload_date'], reverse=True)
+        
+        return jsonify({'status': 'success', 'files': files})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/download-job-requirement/<filename>', methods=['GET'])
+def admin_download_job_requirement(filename):
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        import os
+        from werkzeug.utils import secure_filename
+        from flask import send_from_directory
+        
+        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
+        file_path = os.path.join(upload_dir, secure_filename(filename))
+        
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'File not found'}), 404
+        
+        return send_from_directory(upload_dir, filename, as_attachment=True)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-job-requirement/<filename>', methods=['DELETE'])
+def admin_delete_job_requirement(filename):
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        import os
+        from werkzeug.utils import secure_filename
+        
+        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
+        file_path = os.path.join(upload_dir, secure_filename(filename))
+        
+        if not os.path.exists(file_path):
+            return jsonify({'error': 'File not found'}), 404
+        
+        os.remove(file_path)
+        
+        log_activity(get_current_user(), 'admin_delete_job_requirement', {
+            'deleted_file': filename
+        })
+        
+        return jsonify({'status': 'success', 'message': 'File deleted successfully'})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     with app.app_context():

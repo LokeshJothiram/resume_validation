@@ -1,0 +1,183 @@
+<div class="p-2 md:p-8 bg-gray-50 min-h-[80vh]">
+  <!-- Header Row: Title/Subtitle left, Upload button right -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+    <div>
+      <h2 class="text-2xl md:text-3xl font-bold header-gradient flex items-center gap-2">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="inline w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </span>
+        Job Requirement Upload
+      </h2>
+      <p class="text-gray-500 mt-1">Upload and manage job requirement documents</p>
+    </div>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6">
+    <h3 class="text-lg font-semibold mb-4 text-gray-800">Upload Job Requirement</h3>
+    <form id="job-requirement-upload-form" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label for="job-title" class="block text-sm font-medium text-gray-700 mb-2">Job Title</label>
+        <input type="text" id="job-title" name="job_title" required 
+               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+               placeholder="e.g., Senior Python Developer">
+      </div>
+      <div>
+        <label for="job-description" class="block text-sm font-medium text-gray-700 mb-2">Job Description</label>
+        <textarea id="job-description" name="job_description" rows="4" required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter detailed job description..."></textarea>
+      </div>
+      <div>
+        <label for="job-file" class="block text-sm font-medium text-gray-700 mb-2">Upload File (Optional)</label>
+        <input type="file" id="job-file" name="job_file" accept=".pdf,.doc,.docx,.txt"
+               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <p class="text-xs text-gray-500 mt-1">Supported formats: PDF, DOC, DOCX, TXT</p>
+      </div>
+      <div class="flex justify-end">
+        <button type="submit" class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-2 rounded-lg text-base font-semibold shadow hover:from-blue-600 hover:to-indigo-600 transition flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          Upload Requirement
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Uploaded Files Section -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+    <h3 class="text-lg font-semibold mb-4 text-gray-800">Uploaded Job Requirements</h3>
+    <div id="uploaded-files-container" class="space-y-3">
+      <!-- Files will be loaded here dynamically -->
+      <div class="text-gray-500 text-center py-8">No job requirements uploaded yet.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('job-requirement-upload-form');
+  const filesContainer = document.getElementById('uploaded-files-container');
+
+  // Handle form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Uploading...';
+    submitBtn.disabled = true;
+
+    fetch('/admin/upload-job-requirement', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        showToast('Job requirement uploaded successfully!', 'success');
+        form.reset();
+        loadUploadedFiles(); // Refresh the file list
+      } else {
+        showToast(data.error || 'Upload failed', 'error');
+      }
+    })
+    .catch(error => {
+      showToast('Error uploading file', 'error');
+      console.error('Error:', error);
+    })
+    .finally(() => {
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+    });
+  });
+
+  // Load uploaded files
+  function loadUploadedFiles() {
+    fetch('/admin/job-requirements')
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success' && data.files.length > 0) {
+        renderFiles(data.files);
+      } else {
+        filesContainer.innerHTML = '<div class="text-gray-500 text-center py-8">No job requirements uploaded yet.</div>';
+      }
+    })
+    .catch(error => {
+      console.error('Error loading files:', error);
+      filesContainer.innerHTML = '<div class="text-red-500 text-center py-8">Error loading files.</div>';
+    });
+  }
+
+  // Render files list
+  function renderFiles(files) {
+    let html = '';
+    files.forEach(file => {
+      html += `
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900">${file.job_title || 'Untitled'}</h4>
+              <p class="text-sm text-gray-500">${file.filename} • ${file.upload_date}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="downloadFile('${file.id}')" class="text-blue-600 hover:text-blue-800 p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+            <button onclick="deleteFile('${file.id}')" class="text-red-600 hover:text-red-800 p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+    filesContainer.innerHTML = html;
+  }
+
+  // Load files on page load
+  loadUploadedFiles();
+});
+
+// Download file function
+function downloadFile(fileId) {
+  window.open(`/admin/download-job-requirement/${fileId}`, '_blank');
+}
+
+// Delete file function
+function deleteFile(fileId) {
+  if (confirm('Are you sure you want to delete this job requirement?')) {
+    fetch(`/admin/delete-job-requirement/${fileId}`, {
+      method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        showToast('File deleted successfully!', 'success');
+        loadUploadedFiles(); // Refresh the list
+      } else {
+        showToast(data.error || 'Delete failed', 'error');
+      }
+    })
+    .catch(error => {
+      showToast('Error deleting file', 'error');
+      console.error('Error:', error);
+    });
+  }
+}
+</script> 
