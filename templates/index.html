@@ -161,6 +161,32 @@
                           {% include 'tabs/admin_user_management_tab.html' %}
                         </div>
                     </form>
+                     <!-- Add User Modal -->
+        <div id="add-user-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
+          <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+              <div class="text-lg font-semibold mb-4">Add New User</div>
+              <form id="add-user-form" class="space-y-4">
+                  <div>
+                      <input type="text" id="add-user-username" class="w-full p-2 border border-gray-300 rounded" placeholder="Username" required />
+                  </div>
+                  <div>
+                      <input type="password" id="add-user-password" class="w-full p-2 border border-gray-300 rounded" placeholder="Password" required />
+                  </div>
+                  <div>
+                      <select id="add-user-role" class="w-full p-2 border border-gray-300 rounded" required>
+                          <option value="">Select Role</option>
+                          <option value="admin">Admin</option>
+                          <option value="TA_TEAM">TA_TEAM</option>
+                      </select>
+                  </div>
+                  <div id="add-user-error" class="text-red-600 text-sm hidden"></div>
+                  <div class="flex justify-center gap-4 mt-6">
+                      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold">Add</button>
+                      <button type="button" id="add-user-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+                  </div>
+              </form>
+          </div>
+      </div>
             </div>
 
             <!-- Results Modal -->
@@ -220,32 +246,7 @@
             </div>
         </div>
 
-        <!-- Add User Modal -->
-        <div id="add-user-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
-            <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
-                <div class="text-lg font-semibold mb-4">Add New User</div>
-                <form id="add-user-form" class="space-y-4">
-                    <div>
-                        <input type="text" id="add-user-username" class="w-full p-2 border border-gray-300 rounded" placeholder="Username" required />
-                    </div>
-                    <div>
-                        <input type="password" id="add-user-password" class="w-full p-2 border border-gray-300 rounded" placeholder="Password" required />
-                    </div>
-                    <div>
-                        <select id="add-user-role" class="w-full p-2 border border-gray-300 rounded" required>
-                            <option value="">Select Role</option>
-                            <option value="admin">Admin</option>
-                            <option value="TA_TEAM">TA_TEAM</option>
-                        </select>
-                    </div>
-                    <div id="add-user-error" class="text-red-600 text-sm hidden"></div>
-                    <div class="flex justify-center gap-4 mt-6">
-                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 font-semibold">Add</button>
-                        <button type="button" id="add-user-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+       
 
         <!-- Edit User Modal -->
         <div id="edit-user-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden" style="z-index: 1000;">
@@ -2388,6 +2389,7 @@
         };
         if (addUserForm) addUserForm.onsubmit = async (e) => {
           e.preventDefault();
+          e.stopPropagation(); // Prevent bubbling to main form
           addUserError.classList.add('hidden');
           const username = document.getElementById('add-user-username').value.trim();
           const password = document.getElementById('add-user-password').value;
@@ -2398,6 +2400,7 @@
             return;
           }
           try {
+            // Only call /admin_users, not /process
             const resp = await fetch('/admin_users', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
