@@ -163,4 +163,86 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.8; }
 }
-</style> 
+
+/* Modern, smooth fade and slide for table rows */
+@keyframes rowFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98);}
+  to { opacity: 1; transform: translateY(0) scale(1);}
+}
+.log-row-animate {
+  animation: rowFadeIn 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Dropdown fade/slide */
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98);}
+  to { opacity: 1; transform: translateY(0) scale(1);}
+}
+.dropdown-animate-in {
+  animation: dropdownIn 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Enhanced hover for dropdown/filter */
+.filter-hover:hover, .filter-hover:focus {
+  background: #f0f6ff;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.10);
+  transform: scale(1.04);
+  transition: all 0.2s;
+}
+
+/* Shimmer for loading */
+.logs-loading::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(200,220,255,0.2), transparent);
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+</style>
+
+<script>
+// Animate log rows when rendered (if logs are rendered dynamically via JS)
+function animateLogRows() {
+  const rows = document.querySelectorAll('.log-row');
+  rows.forEach((row, i) => {
+    setTimeout(() => row.classList.add('log-row-animate'), i * 40);
+  });
+}
+// Call this after logs are rendered
+// animateLogRows();
+
+// Animate dropdown
+const actionFilter = document.getElementById('logActionFilter');
+const moreDropdown = document.getElementById('moreActionsDropdown');
+actionFilter && actionFilter.addEventListener('change', function() {
+  if (this.value === 'more') {
+    moreDropdown.classList.remove('dropdown-hide');
+    moreDropdown.classList.add('dropdown-animate-in');
+    moreDropdown.classList.remove('hidden');
+    setTimeout(() => {
+      moreDropdown.classList.add('dropdown-show');
+    }, 10);
+  } else {
+    moreDropdown.classList.remove('dropdown-show', 'dropdown-animate-in');
+    moreDropdown.classList.add('dropdown-hide');
+    setTimeout(() => {
+      moreDropdown.classList.add('hidden');
+    }, 300);
+  }
+});
+// Hide dropdown on click outside
+window.addEventListener('click', function(e) {
+  if (!moreDropdown.contains(e.target) && e.target !== actionFilter) {
+    moreDropdown.classList.remove('dropdown-show', 'dropdown-animate-in');
+    moreDropdown.classList.add('dropdown-hide');
+    setTimeout(() => {
+      moreDropdown.classList.add('hidden');
+    }, 300);
+  }
+});
+</script> 
