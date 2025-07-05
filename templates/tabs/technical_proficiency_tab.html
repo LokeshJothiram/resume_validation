@@ -1,17 +1,19 @@
-<div class="w-full">
+<div class="w-full animate-fade-in">
   <div class="mb-6">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Upload Interview Audio -->
-      <div class="bg-green-50 border border-green-100 rounded-xl p-6 shadow-sm flex-1">
+      <div class="bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200/60 rounded-xl p-6 shadow-sm flex-1 animate-slide-up hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-green-300 hover:bg-gradient-to-br hover:from-green-100 hover:to-green-200/50 backdrop-blur-sm">
         <div class="flex items-center mb-2">
-          <i data-lucide="mic" class="w-6 h-6 text-green-400 mr-2"></i>
-          <span class="text-xl font-bold text-gray-800">Upload Interview Audio</span>
+          <div class="relative">
+            <i data-lucide="mic" class="w-6 h-6 text-green-500 mr-2 animate-float"></i>
+            <div class="absolute inset-0 w-6 h-6 bg-green-400/20 rounded-full animate-ping-slow"></div>
+          </div>
+          <span class="text-xl font-bold text-gray-800 animate-text-glow">Upload Interview Audio</span>
         </div>
-        <div class="text-sm text-green-400 mb-4">Upload audio file for analysis</div>
-        <!-- <label for="audio" class="block text-sm font-medium text-gray-700 mb-1">Upload Interview Audio</label> -->
+        <div class="text-sm text-green-600 mb-4 font-medium">Upload audio file for analysis</div>
         <div class="flex items-center gap-2 mb-2">
-          <label class="custom-file-upload">
-            <i data-lucide="mic"></i>
+          <label class="custom-file-upload hover:bg-green-200/80 transition-all duration-300 hover:shadow-md hover:scale-105">
+            <i data-lucide="mic" class="animate-breathe"></i>
             <span>Choose File</span>
             <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
           </label>
@@ -20,16 +22,18 @@
         <p id="audio_error" class="text-red-500 text-xs mt-1 hidden">Audio file is required.</p>
       </div>
       <!-- Upload Resume -->
-      <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm flex-1">
+      <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/60 rounded-xl p-6 shadow-sm flex-1 animate-slide-up animation-delay-200 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-100 hover:to-blue-200/50 backdrop-blur-sm">
         <div class="flex items-center mb-2">
-          <i data-lucide="upload" class="w-6 h-6 text-blue-400 mr-2"></i>
-          <span class="text-xl font-bold text-gray-800">Upload Resume (PDF/DOCX)</span>
+          <div class="relative">
+            <i data-lucide="upload" class="w-6 h-6 text-blue-500 mr-2 animate-float"></i>
+            <div class="absolute inset-0 w-6 h-6 bg-blue-400/20 rounded-full animate-ping-slow"></div>
+          </div>
+          <span class="text-xl font-bold text-gray-800 animate-text-glow">Upload Resume (PDF/DOCX)</span>
         </div>
-        <div class="text-sm text-blue-400 mb-4">Upload candidate resume</div>
-        <!-- <label for="tech_resume" class="block text-sm font-medium text-gray-700 mb-1">Upload Resume (PDF/DOCX)</label> -->
+        <div class="text-sm text-blue-600 mb-4 font-medium">Upload candidate resume</div>
         <div class="flex items-center gap-2 mb-2">
-          <label class="custom-file-upload">
-            <i data-lucide="file-text"></i>
+          <label class="custom-file-upload hover:bg-blue-200/80 transition-all duration-300 hover:shadow-md hover:scale-105">
+            <i data-lucide="file-text" class="animate-breathe"></i>
             <span>Choose File</span>
             <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
           </label>
@@ -38,16 +42,18 @@
         <p id="tech_resume_error" class="text-red-500 text-xs mt-1 hidden">Resume file is required.</p>
       </div>
       <!-- Upload Technology Questions -->
-      <div class="bg-purple-50 border border-purple-100 rounded-xl p-6 shadow-sm flex-1">
+      <div class="bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-200/60 rounded-xl p-6 shadow-sm flex-1 animate-slide-up animation-delay-400 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-purple-300 hover:bg-gradient-to-br hover:from-purple-100 hover:to-purple-200/50 backdrop-blur-sm">
         <div class="flex items-center mb-2">
-          <i data-lucide="code" class="w-6 h-6 text-purple-400 mr-2"></i>
-          <span class="text-xl font-bold text-gray-800">Upload Technology Questions (.docx,.txt)</span>
+          <div class="relative">
+            <i data-lucide="code" class="w-6 h-6 text-purple-500 mr-2 animate-float"></i>
+            <div class="absolute inset-0 w-6 h-6 bg-purple-400/20 rounded-full animate-ping-slow"></div>
+          </div>
+          <span class="text-xl font-bold text-gray-800 animate-text-glow">Upload Technology Questions (.docx,.txt)</span>
         </div>
-        <div class="text-sm text-purple-400 mb-4">Upload technical questions file</div>
-        <!-- <label for="techQuestionsUpload" class="block text-sm font-medium text-gray-700 mb-1">Upload Technology Questions (.docx,.txt)</label> -->
+        <div class="text-sm text-purple-600 mb-4 font-medium">Upload technical questions file</div>
         <div class="flex items-center gap-2 mb-2">
-          <label class="custom-file-upload">
-            <i data-lucide="code"></i>
+          <label class="custom-file-upload hover:bg-purple-200/80 transition-all duration-300 hover:shadow-md hover:scale-105">
+            <i data-lucide="code" class="animate-breathe"></i>
             <span>Choose File</span>
             <input type="file" id="techQuestionsUpload" accept=".docx,.txt" onchange="handleTechQuestionsUpload(this)">
           </label>
@@ -56,14 +62,16 @@
         <input type="hidden" id="tech_questions" name="tech_questions">
       </div>
       <!-- Primary Technology -->
-      <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-6 shadow-sm flex-1">
+      <div class="bg-gradient-to-br from-yellow-50 to-yellow-100/50 border border-yellow-200/60 rounded-xl p-6 shadow-sm flex-1 animate-slide-up animation-delay-600 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-yellow-300 hover:bg-gradient-to-br hover:from-yellow-100 hover:to-yellow-200/50 backdrop-blur-sm">
         <div class="flex items-center mb-2">
-          <i data-lucide="cpu" class="w-6 h-6 text-yellow-400 mr-2"></i>
-          <span class="text-xl font-bold text-gray-800">Primary Technology</span>
+          <div class="relative">
+            <i data-lucide="cpu" class="w-6 h-6 text-yellow-600 mr-2 animate-float"></i>
+            <div class="absolute inset-0 w-6 h-6 bg-yellow-400/20 rounded-full animate-ping-slow"></div>
+          </div>
+          <span class="text-xl font-bold text-gray-800 animate-text-glow">Primary Technology</span>
         </div>
-        <div class="text-sm text-yellow-400 mb-4">Select the primary technology</div>
-        <!-- <label for="technology" class="block text-sm font-medium text-gray-700 mb-1">Primary Technology</label> -->
-        <select id="technology" name="technology" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        <div class="text-sm text-yellow-700 mb-4 font-medium">Select the primary technology</div>
+        <select id="technology" name="technology" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 hover:shadow-md hover:border-yellow-400 bg-white/80 backdrop-blur-sm">
           <option value="">Select Technology</option>
           <option value="General">General</option>
           <option value="Python">Python</option>
@@ -76,11 +84,205 @@
         <p id="technology_error" class="text-red-500 text-xs mt-1 hidden">Technology is required.</p>
       </div>
     </div>
-    <button type="submit" class="mx-auto block mt-8 bg-blue-600 text-white font-semibold py-2 px-6 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105 text-base flex items-center justify-center w-auto min-w-[160px]">
-      <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
+    <button type="submit" class="mx-auto block mt-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-8 rounded-full hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 text-base flex items-center justify-center w-auto min-w-[180px] animate-fade-in-up animation-delay-800 hover:shadow-2xl hover:shadow-blue-500/25">
+      <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom animate-pulse-slow"></i>Analyze Candidate
     </button>
   </div>
 </div>
+
+<style>
+/* Modern Professional Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes text-glow {
+  0%, 100% {
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  50% {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Enhanced Animation Classes */
+.animate-fade-in {
+  animation: fade-in 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2.5s ease-in-out infinite;
+}
+
+.animate-ping-slow {
+  animation: ping-slow 3s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+.animate-text-glow {
+  animation: text-glow 3s ease-in-out infinite;
+}
+
+/* Staggered Animation Delays */
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-800 {
+  animation-delay: 0.8s;
+}
+
+/* Enhanced Interactive Elements */
+.custom-file-upload {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.custom-file-upload::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+.custom-file-upload:hover::before {
+  left: 100%;
+}
+
+.custom-file-upload:hover {
+  transform: translateY(-3px);
+}
+
+/* Glass Morphism Effects */
+.backdrop-blur-sm {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Smooth Transitions */
+* {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Focus States */
+select:focus,
+input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Professional Shadow Effects */
+.hover\:shadow-xl:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.hover\:shadow-2xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+</style>
 
 <script>
 function handleTechQuestionsUpload(input) {
