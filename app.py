@@ -450,7 +450,7 @@ def separate_hr_candidate_with_gemini(transcript):
 
 # Helper function to get current IST time
 def get_ist_now():
-    return datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+    return datetime.now(pytz.timezone('Asia/Kolkata'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

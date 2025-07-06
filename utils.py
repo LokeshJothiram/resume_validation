@@ -11,12 +11,13 @@ import datetime
 import pytz
 from flask import session
 from database import User
+from datetime import datetime
 
 SAVED_FILES_FOLDER = 'saved_files'
 
 # Helper function to get current IST time
 def get_ist_now():
-    return datetime.datetime.now(pytz.timezone('Asia/Kolkata'))
+    return datetime.now(pytz.timezone('Asia/Kolkata'))
 
 def get_current_user():
     username = session.get('user')
