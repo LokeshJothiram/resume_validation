@@ -1151,6 +1151,33 @@ def admin_delete_job_requirement(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/job-requirements', methods=['GET'])
+def get_job_requirements_public():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 403
+    try:
+        import os
+        from datetime import datetime
+        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
+        if not os.path.exists(upload_dir):
+            return jsonify({'status': 'success', 'files': []})
+        files = []
+        for filename in os.listdir(upload_dir):
+            if filename.endswith(('.pdf', '.doc', '.docx', '.txt')):
+                file_path = os.path.join(upload_dir, filename)
+                file_stat = os.stat(file_path)
+                files.append({
+                    'id': filename,
+                    'filename': filename,
+                    'job_title': filename.replace('.pdf', '').replace('.doc', '').replace('.docx', '').replace('.txt', ''),
+                    'upload_date': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
+                    'size': file_stat.st_size
+                })
+        files.sort(key=lambda x: x['upload_date'], reverse=True)
+        return jsonify({'status': 'success', 'files': files})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

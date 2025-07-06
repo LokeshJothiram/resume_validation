@@ -12,6 +12,7 @@ def login():
         user = User.query.filter_by(username=username, password=password).first()
         if user:
             session['user'] = username
+            session['user_id'] = user.id  # Ensure user_id is set for all users
             session['role'] = user.role
             log_activity(user, 'login', {'message': 'User logged in', 'username': user.username})
             return redirect(url_for('index'))

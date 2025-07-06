@@ -18,8 +18,15 @@
         <textarea id="job_description" name="job_description" class="modern-textarea w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 transition-all duration-200 transform hover:scale-[1.01]" rows="4" placeholder="Or paste job description here..."></textarea>
         <p id="job_description_error" class="text-red-500 text-xs mt-1 hidden animate-shake">Job Description is required.</p>
     </div>
-    <!-- Upload Resume Card -->
-    <div class="flex-1 bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-200/50 animate-slide-in-right mx-3 my-2">
+    <!-- Upload Resume Card + Job Requirement Dropdown -->
+    <div class="flex-1 flex flex-col gap-4">
+      <div class="bg-white border border-blue-100 rounded-xl p-4 shadow-sm flex flex-col gap-2">
+        <label for="job-requirement-dropdown" class="font-semibold text-gray-700 mb-1">Select Job Requirement (Admin Uploaded)</label>
+        <select id="job-requirement-dropdown" class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500">
+          <option value="">-- Select a job requirement --</option>
+        </select>
+      </div>
+      <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-200/50 animate-slide-in-right mx-3 my-2">
         <div class="flex items-center mb-2">
             <i data-lucide="upload" class="w-6 h-6 text-gray-500 mr-2 animate-pulse-slow"></i>
             <span class="text-xl font-bold text-gray-800">Upload Resume</span>
@@ -48,6 +55,7 @@
         </button>
         <p id="resume_error" class="text-red-500 text-xs mt-1 hidden animate-shake">At least one resume file is required.</p>
         <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95">Analyze Candidate</button>
+      </div>
     </div>
 </div>
 
@@ -61,6 +69,27 @@ function updateFileNameDisplay(input) {
         }
     }
 }
+
+// Fetch and populate job requirements dropdown
+function populateJobRequirementDropdown() {
+  fetch('/job-requirements')
+    .then(response => response.json())
+    .then(data => {
+      const dropdown = document.getElementById('job-requirement-dropdown');
+      if (data.status === 'success' && data.files.length > 0) {
+        data.files.forEach(file => {
+          const option = document.createElement('option');
+          option.value = file.id;
+          option.textContent = file.job_title || file.filename;
+          dropdown.appendChild(option);
+        });
+      }
+    })
+    .catch(err => {
+      // Optionally handle error
+    });
+}
+document.addEventListener('DOMContentLoaded', populateJobRequirementDropdown);
 </script>
 
 <style>
