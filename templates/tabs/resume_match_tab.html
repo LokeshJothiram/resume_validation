@@ -5,7 +5,7 @@
             <i data-lucide="file-text" class="w-6 h-6 text-blue-400 mr-2 animate-pulse-slow"></i>
             <span class="text-xl font-bold text-gray-800">Job Description</span>
         </div>
-        <div class="text-sm text-blue-400 mb-4 animate-fade-in-delay">Upload your job requirements</div>
+        <div class="text-sm text-blue-400 mb-4 animate-fade-in-delay">Upload your job requirements or paste description</div>
         <div class="flex items-center gap-2 mb-2">
             <label class="custom-file-upload">
                 <i data-lucide="file-text" class="animate-pulse-slow"></i>
@@ -16,7 +16,7 @@
         </div>
         <select id="savedDescriptions" class="w-full mb-2 p-2 border border-gray-300 rounded text-sm hidden hover:border-blue-400 transition-colors duration-200"></select>
         <textarea id="job_description" name="job_description" class="modern-textarea w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 transition-all duration-200 transform hover:scale-[1.01]" rows="4" placeholder="Or paste job description here..."></textarea>
-        <p id="job_description_error" class="text-red-500 text-xs mt-1 hidden animate-shake">Job Description is required.</p>
+        <p id="job_description_error" class="text-red-500 text-xs mt-1 hidden animate-shake">Job Description is required when no job requirement file is selected.</p>
     </div>
     <!-- Upload Resume Card + Job Requirement Dropdown -->
     <div class="flex-1 flex flex-col gap-4">
@@ -25,13 +25,14 @@
         <select id="job-requirement-dropdown" class="w-full p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500">
           <option value="">-- Select a job requirement --</option>
         </select>
+        <p class="text-xs text-gray-500 mt-1">Select a job requirement file to analyze it, or upload resumes to compare against job description</p>
       </div>
       <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-gray-300 hover:bg-gradient-to-br hover:from-gray-100 hover:to-gray-200/50 animate-slide-in-right mx-3 my-2">
         <div class="flex items-center mb-2">
             <i data-lucide="upload" class="w-6 h-6 text-gray-500 mr-2 animate-pulse-slow"></i>
             <span class="text-xl font-bold text-gray-800">Upload Resume</span>
         </div>
-        <div class="text-sm text-gray-500 mb-4 animate-fade-in-delay">Upload candidate resumes for analysis</div>
+        <div class="text-sm text-gray-500 mb-4 animate-fade-in-delay">Upload candidate resumes for analysis (optional if job requirement is selected)</div>
         <div id="resume-inputs-container" class="max-h-48 overflow-y-auto mb-2">
             <div id="resume-inputs">
                 <div class="flex items-center mb-2 resume-input-row gap-2 animate-slide-in-up relative top-1">
@@ -53,8 +54,8 @@
           <i data-lucide="plus-circle" class="w-5 h-5"></i>
           Add another resume
         </button>
-        <p id="resume_error" class="text-red-500 text-xs mt-1 hidden animate-shake">At least one resume file is required.</p>
-        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95">Analyze Candidate</button>
+        <p id="resume_error" class="text-red-500 text-xs mt-1 hidden animate-shake">At least one resume file is required when no job requirement is selected.</p>
+        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95">Analyze</button>
       </div>
     </div>
 </div>
@@ -89,7 +90,65 @@ function populateJobRequirementDropdown() {
       // Optionally handle error
     });
 }
-document.addEventListener('DOMContentLoaded', populateJobRequirementDropdown);
+
+// Add validation logic for the form
+function validateResumeForm() {
+    const jobDesc = document.getElementById('job_description').value.trim();
+    const jobRequirementId = document.getElementById('job-requirement-dropdown').value;
+    const resumeFiles = document.querySelectorAll('.resume-file');
+    let hasResumeFiles = false;
+    
+    resumeFiles.forEach(input => {
+        if (input.files && input.files.length > 0) {
+            hasResumeFiles = true;
+        }
+    });
+    
+    // Clear previous errors
+    document.getElementById('job_description_error').classList.add('hidden');
+    document.getElementById('resume_error').classList.add('hidden');
+    
+    let isValid = true;
+    
+    // If no job requirement is selected, we need either job description or resume files
+    if (!jobRequirementId) {
+        if (!jobDesc && !hasResumeFiles) {
+            document.getElementById('job_description_error').classList.remove('hidden');
+            document.getElementById('resume_error').classList.remove('hidden');
+            isValid = false;
+        } else if (!jobDesc) {
+            document.getElementById('job_description_error').classList.remove('hidden');
+            isValid = false;
+        } else if (!hasResumeFiles) {
+            document.getElementById('resume_error').classList.remove('hidden');
+            isValid = false;
+        }
+    }
+    
+    return isValid;
+}
+
+// Add event listeners for real-time validation
+document.addEventListener('DOMContentLoaded', function() {
+    populateJobRequirementDropdown();
+    
+    // Add validation on dropdown change
+    document.getElementById('job-requirement-dropdown').addEventListener('change', function() {
+        validateResumeForm();
+    });
+    
+    // Add validation on job description change
+    document.getElementById('job_description').addEventListener('input', function() {
+        validateResumeForm();
+    });
+    
+    // Add validation on resume file change
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('resume-file')) {
+            validateResumeForm();
+        }
+    });
+});
 </script>
 
 <style>

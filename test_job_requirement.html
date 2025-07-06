@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Requirement Analysis Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Job Requirement Analysis Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Fetch Job Requirements</h2>
+        <button onclick="testFetchJobRequirements()">Fetch Job Requirements</button>
+        <div id="job-requirements-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Analyze Job Requirement Only</h2>
+        <select id="job-requirement-select">
+            <option value="">Select a job requirement...</option>
+        </select>
+        <button onclick="testAnalyzeJobRequirement()">Analyze Job Requirement</button>
+        <div id="analysis-result" class="result"></div>
+    </div>
+
+    <script>
+        // Test 1: Fetch job requirements
+        async function testFetchJobRequirements() {
+            const resultDiv = document.getElementById('job-requirements-result');
+            resultDiv.innerHTML = 'Fetching job requirements...';
+            
+            try {
+                const response = await fetch('/job-requirements');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `<div class="success">Found ${data.files.length} job requirement files:</div>`;
+                    data.files.forEach(file => {
+                        resultDiv.innerHTML += `<div>- ${file.filename} (${file.job_title})</div>`;
+                        
+                        // Populate the select dropdown
+                        const select = document.getElementById('job-requirement-select');
+                        const option = document.createElement('option');
+                        option.value = file.id;
+                        option.textContent = file.filename;
+                        select.appendChild(option);
+                    });
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Error: ${data.error || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+            }
+        }
+        
+        // Test 2: Analyze job requirement
+        async function testAnalyzeJobRequirement() {
+            const resultDiv = document.getElementById('analysis-result');
+            const selectedId = document.getElementById('job-requirement-select').value;
+            
+            if (!selectedId) {
+                resultDiv.innerHTML = '<div class="error">Please select a job requirement first.</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = 'Analyzing job requirement...';
+            
+            try {
+                const formData = new FormData();
+                formData.append('job_requirement_id', selectedId);
+                
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.job_requirement_analysis) {
+                    const analysis = data.job_requirement_analysis;
+                    if (analysis.error) {
+                        resultDiv.innerHTML = `<div class="error">Error: ${analysis.error}</div>`;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="success">Analysis completed successfully!</div>
+                            <div><strong>File:</strong> ${analysis.filename}</div>
+                            <div><strong>Match Percentage:</strong> ${analysis.match_percentage}%</div>
+                            <div><strong>Skills Matched:</strong> ${analysis.skills_matched}/${analysis.total_skills}</div>
+                            <div><strong>Experience Match:</strong> ${analysis.experience_match}%</div>
+                            <div><strong>Education Match:</strong> ${analysis.education_match}%</div>
+                            <div><strong>Certifications Match:</strong> ${analysis.certifications_match}%</div>
+                            <div><strong>Role Match:</strong> ${analysis.role_match}%</div>
+                            <div><strong>Explanation:</strong> ${analysis.explanation}</div>
+                        `;
+                    }
+                } else {
+                    resultDiv.innerHTML = '<div class="error">No analysis result received.</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-fetch job requirements on page load
+        window.onload = function() {
+            testFetchJobRequirements();
+        };
+    </script>
+</body>
+</html> 

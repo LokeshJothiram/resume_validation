@@ -538,23 +538,36 @@
                 const audioFile = document.getElementById('audio').files[0];
                 const technology = document.getElementById('technology').value;
 
+                // NEW: Get selected job requirement file ID
+                const jobRequirementDropdown = document.getElementById('job-requirement-dropdown');
+                let selectedJobRequirementId = '';
+                if (jobRequirementDropdown) {
+                    selectedJobRequirementId = jobRequirementDropdown.value;
+                }
+
                 // Hide/show errors based on validity
                 if (activeTab === 'resume') {
-                    if (!jobDesc) {
-                        const el = document.getElementById('job_description_error');
-                        if (el) el.classList.remove('hidden');
-                        valid = false;
+                    // Use the validation function from resume_match_tab.html
+                    if (typeof validateResumeForm === 'function') {
+                        valid = validateResumeForm();
                     } else {
-                        const el = document.getElementById('job_description_error');
-                        if (el) el.classList.add('hidden');
-                    }
-                    if (resumeFiles.length === 0) {
-                        const el = document.getElementById('resume_error');
-                        if (el) el.classList.remove('hidden');
-                        valid = false;
-                    } else {
-                        const el = document.getElementById('resume_error');
-                        if (el) el.classList.add('hidden');
+                        // Fallback validation logic
+                        if (!jobDesc && !selectedJobRequirementId) {
+                            const el = document.getElementById('job_description_error');
+                            if (el) el.classList.remove('hidden');
+                            valid = false;
+                        } else {
+                            const el = document.getElementById('job_description_error');
+                            if (el) el.classList.add('hidden');
+                        }
+                        if (resumeFiles.length === 0 && !selectedJobRequirementId) {
+                            const el = document.getElementById('resume_error');
+                            if (el) el.classList.remove('hidden');
+                            valid = false;
+                        } else {
+                            const el = document.getElementById('resume_error');
+                            if (el) el.classList.add('hidden');
+                        }
                     }
                 } else if (activeTab === 'audio') {
                     if (!audioFile) {
@@ -599,6 +612,10 @@
                     }
                 } else if (activeTab === 'audio') {
                     if (audioFile) formData.append('audio', audioFile);
+                }
+                // NEW: Add selected job requirement file ID to formData
+                if (activeTab === 'resume' && selectedJobRequirementId) {
+                    formData.append('job_requirement_id', selectedJobRequirementId);
                 }
 
                 // Use unique IDs for each tab
@@ -693,7 +710,7 @@
                 if (resultDiv) resultDiv.innerHTML = '';
                 if (resultCardDiv) resultCardDiv.classList.add('hidden');
                 // If no results, show placeholder again
-                if (activeTab === 'resume' && (!result || (!result.resumes && !result.resume_error))) {
+                if (activeTab === 'resume' && (!result || (!result.resumes && !result.job_requirement_analysis && !result.resume_error))) {
                     const ph = document.getElementById('placeholder-resume');
                     if (ph) ph.classList.remove('hidden');
                 } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
@@ -719,15 +736,17 @@
                 }
                 
                 if (activeTab === 'resume') {
-                if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+                if ((Array.isArray(result.resumes) && result.resumes.length > 0) || result.job_requirement_analysis) {
                         resultCardDiv.classList.remove('hidden');
-                    // Sort resumes by match percentage in descending order
-                    result.resumes.sort((a, b) => {
-                        const scoreA = a.match_percentage || -1;
-                        const scoreB = b.match_percentage || -1;
-                        return scoreB - scoreA;
-                    });
-                    let allResumesHTML = result.resumes.map((r, idx) => {
+                    let allResumesHTML = '';
+                    if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+                        // Sort resumes by match percentage in descending order
+                        result.resumes.sort((a, b) => {
+                            const scoreA = a.match_percentage || -1;
+                            const scoreB = b.match_percentage || -1;
+                            return scoreB - scoreA;
+                        });
+                        allResumesHTML = result.resumes.map((r, idx) => {
                         if (r.error) {
                             return `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>${r.filename}</strong>: <span class='text-red-600'>${r.error}</span></div>`;
                         } else {
@@ -765,32 +784,67 @@
                             </div>`;
                         }
                     }).join('');
-                        resultDiv.innerHTML = allResumesHTML;
-                    // Robust donut rendering: wait for all canvases to exist
-                    function renderAllDonutsWhenReady(resumes) {
-                        let tries = 0;
-                        function tryRender() {
-                            let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
-                            if (allReady || tries > 20) {
-                                resumes.forEach((r, idx) => {
-                                    if (!r.error) {
-                                        const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
-                                        renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
-                                        renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
-                                        renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
-                                        renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
-                                        renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
-                                        renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
-                                    }
-                                });
-                            } else {
-                                tries++;
-                                setTimeout(tryRender, 100);
-                            }
-                        }
-                        tryRender();
                     }
-                    renderAllDonutsWhenReady(result.resumes);
+                    resultDiv.innerHTML = allResumesHTML;
+                    // Render job requirement analysis HTML (append)
+                    if (result.job_requirement_analysis) {
+                        const jra = result.job_requirement_analysis;
+                        let jraHTML = '';
+                        if (jra.error) {
+                            jraHTML = `<div class='mb-4 p-4 border border-red-300 rounded bg-red-50'><strong>Job Requirement Analysis (${jra.filename})</strong>: <span class='text-red-600'>${jra.error}</span></div>`;
+                        } else {
+                            const skillCoverage = jra.total_skills > 0 ? Math.round((jra.skills_matched / jra.total_skills) * 100) : 0;
+                            jraHTML = `<div class='mb-4 p-4 border border-purple-200 rounded bg-purple-50'>
+                                <p><strong>Job Requirement Analysis (${jra.filename})</strong></p>
+                                <div class="grid grid-cols-2 sm:flex sm:flex-row gap-4 sm:gap-6 my-4 items-center justify-center">
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutJRAMatch" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Match %</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutJRASkills" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Skill Coverage</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutJRAExp" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Exp. Match</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutJRAEdu" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Education Match</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutJRACert" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Certifications</div>
+                                    </div>
+                                    <div class="flex flex-col items-center">
+                                        <canvas id="donutJRARole" width="80" height="80"></canvas>
+                                        <div class="mt-2 text-center text-xs font-semibold">Role Match</div>
+                                    </div>
+                                </div>
+                                <p><strong>Match %:</strong> <span class=\"font-bold text-purple-600\">${jra.match_percentage}%</span></p>
+                                <p><strong>Explanation:</strong> ${jra.explanation}</p>
+                            </div>`;
+                        }
+                        resultDiv.innerHTML += jraHTML;
+                    }
+                    // Render donuts for resumes
+                    if (Array.isArray(result.resumes) && result.resumes.length > 0) {
+                        renderAllDonutsWhenReady(result.resumes);
+                    }
+                    // Render donuts for job requirement analysis
+                    if (result.job_requirement_analysis && !result.job_requirement_analysis.error) {
+                        const jra = result.job_requirement_analysis;
+                        const skillCoverage = jra.total_skills > 0 ? Math.round((jra.skills_matched / jra.total_skills) * 100) : 0;
+                        setTimeout(() => {
+                            try { renderDonut('donutJRAMatch', jra.match_percentage || 0, '#a855f7'); } catch (e) { console.error('Error rendering donutJRAMatch', e); }
+                            try { renderDonut('donutJRASkills', skillCoverage, '#22d3ee'); } catch (e) { console.error('Error rendering donutJRASkills', e); }
+                            try { renderDonut('donutJRAExp', jra.experience_match || 0, '#f59e42'); } catch (e) { console.error('Error rendering donutJRAExp', e); }
+                            try { renderDonut('donutJRAEdu', jra.education_match || 0, '#a855f7'); } catch (e) { console.error('Error rendering donutJRAEdu', e); }
+                            try { renderDonut('donutJRACert', jra.certifications_match || 0, '#0ea5e9'); } catch (e) { console.error('Error rendering donutJRACert', e); }
+                            try { renderDonut('donutJRARole', jra.role_match || 0, '#f43f5e'); } catch (e) { console.error('Error rendering donutJRARole', e); }
+                        }, 200);
+                    }
                 } else if (result.resume_error) {
                         resultCardDiv.classList.remove('hidden');
                         resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
@@ -1283,7 +1337,14 @@
                                            .replace(/id="donutExp(\d+)"/g, `id="donutExp_${file.id}_$1"`)
                                            .replace(/id="donutEdu(\d+)"/g, `id="donutEdu_${file.id}_$1"`)
                                            .replace(/id="donutCert(\d+)"/g, `id="donutCert_${file.id}_$1"`)
-                                           .replace(/id="donutRole(\d+)"/g, `id="donutRole_${file.id}_$1"`);
+                                           .replace(/id="donutRole(\d+)"/g, `id="donutRole_${file.id}_$1"`)
+                                           // JRA donut IDs
+                                           .replace(/id="donutJRAMatch"/g, `id="donutJRAMatch_${file.id}"`)
+                                           .replace(/id="donutJRASkills"/g, `id="donutJRASkills_${file.id}"`)
+                                           .replace(/id="donutJRAExp"/g, `id="donutJRAExp_${file.id}"`)
+                                           .replace(/id="donutJRAEdu"/g, `id="donutJRAEdu_${file.id}"`)
+                                           .replace(/id="donutJRACert"/g, `id="donutJRACert_${file.id}"`)
+                                           .replace(/id="donutJRARole"/g, `id="donutJRARole_${file.id}"`);
                 // Also for technical tab
                 resumeSummary = resumeSummary.replace(/id="donutRelevance"/g, `id="donutRelevance_${file.id}"`)
                                            .replace(/id="donutConfidence"/g, `id="donutConfidence_${file.id}"`)
@@ -1508,6 +1569,42 @@
                             renderDonut(id, resumeScores[i], resumeColors[i]);
                          }
                     });
+                });
+            }
+
+            // For Job Requirement Analysis charts
+            if (rawData.job_requirement_analysis && !rawData.job_requirement_analysis.error) {
+                const jra = rawData.job_requirement_analysis;
+                const skillCoverage = jra.total_skills > 0 ? Math.round((jra.skills_matched / jra.total_skills) * 100) : 0;
+                const jraCanvasIds = [
+                    `donutJRAMatch_${fileId}`,
+                    `donutJRASkills_${fileId}`,
+                    `donutJRAExp_${fileId}`,
+                    `donutJRAEdu_${fileId}`,
+                    `donutJRACert_${fileId}`,
+                    `donutJRARole_${fileId}`
+                ];
+                const jraScores = [
+                    jra.match_percentage || 0,
+                    skillCoverage,
+                    jra.experience_match || 0,
+                    jra.education_match || 0,
+                    jra.certifications_match || 0,
+                    jra.role_match || 0
+                ];
+                const jraColors = [
+                    '#a855f7',
+                    '#22d3ee',
+                    '#f59e42',
+                    '#a855f7',
+                    '#0ea5e9',
+                    '#f43f5e'
+                ];
+                jraCanvasIds.forEach((id, i) => {
+                    const canvas = containerElement.querySelector(`#${id}`);
+                    if (canvas) {
+                        renderDonut(canvas.id, jraScores[i], jraColors[i]);
+                    }
                 });
             }
         }
@@ -2905,6 +3002,32 @@
     </script>
     <script>
       window.userRole = '{{ session.role|default("") }}';
+    </script>
+    <script>
+      // Place this at the top level, before any usage
+      function renderAllDonutsWhenReady(resumes) {
+          let tries = 0;
+          function tryRender() {
+              let allReady = resumes.every((r, idx) => document.getElementById(`donutMatch${idx}`));
+              if (allReady || tries > 20) {
+                  resumes.forEach((r, idx) => {
+                      if (!r.error) {
+                          const skillCoverage = r.total_skills > 0 ? Math.round((r.skills_matched / r.total_skills) * 100) : 0;
+                          renderDonut(`donutMatch${idx}`, r.match_percentage || 0, '#2563eb');
+                          renderDonut(`donutSkills${idx}`, skillCoverage, '#22c55e');
+                          renderDonut(`donutExp${idx}`, r.experience_match || 0, '#f59e42');
+                          renderDonut(`donutEdu${idx}`, r.education_match || 0, '#a855f7');
+                          renderDonut(`donutCert${idx}`, r.certifications_match || 0, '#0ea5e9');
+                          renderDonut(`donutRole${idx}`, r.role_match || 0, '#f43f5e');
+                      }
+                  });
+              } else {
+                  tries++;
+                  setTimeout(tryRender, 100);
+              }
+          }
+          tryRender();
+      }
     </script>
 </body>
 </html>
