@@ -814,19 +814,19 @@ def admin_analytics():
         role_stats[role]['users'] += 1
     # Count shortlisted resumes per user
     for sr in ShortlistedResume.query.all():
-        user = User.query.get(sr.user_id) if sr.user_id else None
+        user = db.session.get(User, sr.user_id) if sr.user_id else None
         if user:
             role_stats[user.role]['shortlisted'] += 1
     # Count saved analyses per user
     for sa in SavedAnalysis.query.all():
-        user = User.query.get(sa.user_id) if sa.user_id else None
+        user = db.session.get(User, sa.user_id) if sa.user_id else None
         if user:
             role_stats[user.role]['analyses'] += 1
     # Count questions generated per user (assuming you have a QuestionGeneration model)
     try:
         from database import QuestionGeneration
         for qg in QuestionGeneration.query.all():
-            user = User.query.get(qg.user_id) if qg.user_id else None
+            user = db.session.get(User, qg.user_id) if qg.user_id else None
             if user:
                 role_stats[user.role]['questions'] += 1
     except ImportError:
