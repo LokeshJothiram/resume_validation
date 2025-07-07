@@ -1,13 +1,25 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 import re
 import google.generativeai as genai
 from database import db, QuestionGeneration
-from flask import session
 from utils import get_current_user
+from functools import wraps
 
 questions_bp = Blueprint('questions', __name__)
 
+# Authentication decorator for blueprint
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            # Clear any existing session data
+            session.clear()
+            return jsonify({'error': 'Unauthorized'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 @questions_bp.route('/generate_questions', methods=['POST'])
+@login_required
 def generate_questions():
     data = request.get_json()
     technology = data.get('technology', '').strip()

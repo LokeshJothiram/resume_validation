@@ -278,6 +278,31 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
+            // Prevent browser back button from going to login page
+            if (window.history && window.history.pushState) {
+                window.addEventListener('popstate', function() {
+                    window.history.pushState(null, null, window.location.href);
+                });
+                window.history.pushState(null, null, window.location.href);
+            }
+            
+            // Session timeout check (every 5 minutes)
+            setInterval(function() {
+                fetch('/user_dashboard_stats?validate_session=1', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => {
+                        if (response.status === 401 || response.status === 403) {
+                            window.location.href = '/login';
+                        }
+                    })
+                    .catch(() => {
+                        // If network error, don't redirect immediately
+                    });
+            }, 300000); // 5 minutes
+            
             // Tab navigation button IDs (define once, globally)
             const tabIds = ['tab-dashboard', 'tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
 

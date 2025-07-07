@@ -1,17 +1,29 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 import os, uuid
 from utils import extract_text_from_pdf, extract_text_from_docx, calculate_resume_match_with_gemini, SAVED_FILES_FOLDER
+from functools import wraps
 
 resume_bp = Blueprint('resume', __name__)
 
+# Authentication decorator for blueprint
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            # Clear any existing session data
+            session.clear()
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @resume_bp.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
-    if 'user' not in session:
-        return redirect(url_for('auth.login'))
     username = session.get('user')
     return render_template('index.html', username=username)
 
 @resume_bp.route('/process', methods=['POST'])
+@login_required
 def process():
     from database import SkillAssessment, db
     from utils import get_current_user

@@ -26,6 +26,7 @@ from database import db, User, SavedAnalysis, ShortlistedResume, ActivityLog, Qu
 from werkzeug.utils import secure_filename
 from utils import log_activity, get_current_user
 from sqlalchemy.exc import IntegrityError
+from functools import wraps
 
 load_dotenv()
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
@@ -40,6 +41,10 @@ MYSQL_DB = os.getenv('MYSQL_DB')
 
 app = Flask(__name__)
 app.secret_key = '123'  # Replace with a secure key in production
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour session timeout
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -68,6 +73,55 @@ if GEMINI_API_KEY:
 
 # Register blueprints
 register_blueprints(app)
+
+# Authentication decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            # Clear any existing session data
+            session.clear()
+            # Check if it's an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'error': 'Unauthorized'}), 401
+            return redirect(url_for('login'))
+        
+        # Check if session has expired (1 hour)
+        if 'login_time' in session:
+            try:
+                login_time = datetime.fromisoformat(session['login_time'])
+                if (datetime.now() - login_time).total_seconds() > 3600:  # 1 hour
+                    session.clear()
+                    # Check if it's an AJAX request
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return jsonify({'error': 'Session expired'}), 401
+                    return redirect(url_for('login'))
+            except:
+                session.clear()
+                # Check if it's an AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({'error': 'Invalid session'}), 401
+                return redirect(url_for('login'))
+        
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Security headers middleware
+@app.after_request
+def add_security_headers(response):
+    # Prevent caching of sensitive pages
+    if request.endpoint and request.endpoint != 'static':
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, private'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    
+    # Add other security headers
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    return response
 
 # The LLaMA 3 model will be accessed via the Ollama API, so we no longer load it here.
 
@@ -454,12 +508,18 @@ def get_ist_now():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Always clear session when visiting login page
+    session.clear()
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         user = User.query.filter_by(username=username, password=password).first()
         if user:
+            session.permanent = True
             session['user'] = username
+            session['user_id'] = user.id
+            session['role'] = user.role
+            session['login_time'] = datetime.now().isoformat()
             log_activity(user, 'login')
             return redirect(url_for('index'))
         else:
@@ -472,17 +532,38 @@ def logout():
     user = get_current_user()
     print("Logging out user:", user.username if user else None)
     log_activity(user, 'logout', {'message': 'User logged out', 'username': user.username if user else None})
-    session.pop('user', None)
+    session.clear()
     return redirect(url_for('login'))
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
-    if 'user' not in session:
-        return redirect(url_for('login'))
     username = session.get('user')
     return render_template('index.html', username=username)
 
+# Handle 404 errors
+@app.errorhandler(404)
+def not_found_error(error):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return render_template('404.html'), 404
+
+# Handle 401 errors
+@app.errorhandler(401)
+def unauthorized_error(error):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'error': 'Unauthorized'}), 401
+    return redirect(url_for('login'))
+
+# Handle 403 errors
+@app.errorhandler(403)
+def forbidden_error(error):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({'error': 'Forbidden'}), 403
+    return redirect(url_for('login'))
+
 @app.route('/process', methods=['POST'])
+@login_required
 def process():
     job_description = request.form.get('job_description', '')
     resume_files = request.files.getlist('resume')
@@ -588,6 +669,7 @@ def process():
 
 # Save analysis endpoint
 @app.route('/save_analysis', methods=['POST'])
+@login_required
 def save_analysis():
     data = request.get_json()
     timestamp = get_ist_now().strftime('%Y%m%d_%H%M%S')
@@ -600,6 +682,7 @@ def save_analysis():
 
 # List all saved analysis files
 @app.route('/list_saved_analyses', methods=['GET'])
+@login_required
 def list_saved_analyses():
     files = glob.glob(os.path.join(SAVED_FILES_FOLDER, 'analysis_*.json'))
     files.sort(reverse=True)
@@ -613,6 +696,7 @@ def list_saved_analyses():
 
 # Get a saved analysis file's contents
 @app.route('/get_saved_analysis/<filename>', methods=['GET'])
+@login_required
 def get_saved_analysis(filename):
     filepath = os.path.join(SAVED_FILES_FOLDER, filename)
     if not os.path.exists(filepath):
@@ -623,6 +707,7 @@ def get_saved_analysis(filename):
 
 # Delete a saved analysis file
 @app.route('/delete_saved_analysis/<filename>', methods=['DELETE'])
+@login_required
 def delete_saved_analysis(filename):
     filepath = os.path.join(SAVED_FILES_FOLDER, filename)
     if not os.path.exists(filepath):
@@ -632,6 +717,7 @@ def delete_saved_analysis(filename):
     return jsonify({'status': 'deleted'})
 
 @app.route('/shortlist_resume', methods=['POST'])
+@login_required
 def shortlist_resume():
     resume_file = request.files.get('shortlist_resume')
     timestamp = request.form.get('timestamp', '')
@@ -661,6 +747,7 @@ def shortlist_resume():
     return jsonify({'status': 'error', 'message': 'No file uploaded'})
 
 @app.route('/list_shortlisted', methods=['GET'])
+@login_required
 def list_shortlisted():
     user = get_current_user()
     if not user:
@@ -680,6 +767,7 @@ def list_shortlisted():
     return jsonify(result)
 
 @app.route('/get_shortlisted/<int:resume_id>', methods=['GET'])
+@login_required
 def get_shortlisted(resume_id):
     user = get_current_user()
     from database import ShortlistedResume
@@ -694,6 +782,7 @@ def get_shortlisted(resume_id):
     })
 
 @app.route('/delete_shortlisted/<int:resume_id>', methods=['DELETE'])
+@login_required
 def delete_shortlisted(resume_id):
     user = get_current_user()
     from database import ShortlistedResume, db
@@ -708,10 +797,12 @@ def delete_shortlisted(resume_id):
     return jsonify({'status': 'deleted'})
 
 @app.route('/shortlist/<filename>')
+@login_required
 def download_shortlisted_resume(filename):
     return send_from_directory(SHORTLIST_FOLDER, filename, as_attachment=True)
 
 @app.route('/admin_analytics', methods=['GET'])
+@login_required
 def admin_analytics():
     # Query all users and their roles
     users = User.query.all()
@@ -753,6 +844,7 @@ def admin_analytics():
     return jsonify(result)
 
 @app.route('/admin_analytics_users', methods=['GET'])
+@login_required
 def admin_analytics_users():
     users = User.query.all()
     shortlisted_counts = {u.id: 0 for u in users}
@@ -774,6 +866,7 @@ def admin_analytics_users():
     return jsonify(result)
 
 @app.route('/activity_logs', methods=['GET'])
+@login_required
 def get_activity_logs():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -803,6 +896,7 @@ def get_activity_logs():
     ])
 
 @app.route('/user_activity_logs', methods=['GET'])
+@login_required
 def get_user_activity_logs():
     if 'user' not in session:
         return jsonify({'error': 'Unauthorized'}), 403
@@ -826,6 +920,7 @@ def get_user_activity_logs():
     ])
 
 @app.route('/admin_users', methods=['GET'])
+@login_required
 def admin_list_users():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -835,6 +930,7 @@ def admin_list_users():
     ])
 
 @app.route('/admin_users', methods=['POST'])
+@login_required
 def admin_add_user():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -854,6 +950,7 @@ def admin_add_user():
     return jsonify({'status': 'success', 'id': user.id})
 
 @app.route('/admin_users/<int:user_id>', methods=['PUT'])
+@login_required
 def admin_edit_user(user_id):
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -878,6 +975,7 @@ def admin_edit_user(user_id):
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/<int:user_id>', methods=['DELETE'])
+@login_required
 def admin_delete_user(user_id):
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -896,6 +994,7 @@ def admin_delete_user(user_id):
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/reset_password', methods=['POST'])
+@login_required
 def admin_reset_password():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -912,6 +1011,7 @@ def admin_reset_password():
     return jsonify({'status': 'success'})
 
 @app.route('/admin_users/import', methods=['POST'])
+@login_required
 def admin_import_users():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -934,6 +1034,7 @@ def admin_import_users():
     return jsonify({'status': 'success', 'added': added})
 
 @app.route('/admin_users/export', methods=['GET'])
+@login_required
 def admin_export_users():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -944,7 +1045,12 @@ def admin_export_users():
     return jsonify({'users': data})
 
 @app.route('/user_dashboard_stats', methods=['GET'])
+@login_required
 def user_dashboard_stats():
+    # This route is also used for session validation
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.args.get('validate_session'):
+        return jsonify({'status': 'valid'})
+    
     user = get_current_user()
     if not user:
         return jsonify({
@@ -1029,6 +1135,7 @@ def user_dashboard_stats():
 
 # Job Requirement Upload Routes
 @app.route('/admin/upload-job-requirement', methods=['POST'])
+@login_required
 def admin_upload_job_requirement():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -1073,6 +1180,7 @@ def admin_upload_job_requirement():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/job-requirements', methods=['GET'])
+@login_required
 def admin_get_job_requirements():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -1106,6 +1214,7 @@ def admin_get_job_requirements():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/download-job-requirement/<filename>', methods=['GET'])
+@login_required
 def admin_download_job_requirement(filename):
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -1127,6 +1236,7 @@ def admin_download_job_requirement(filename):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/admin/delete-job-requirement/<filename>', methods=['DELETE'])
+@login_required
 def admin_delete_job_requirement(filename):
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
@@ -1159,6 +1269,7 @@ def admin_delete_job_requirement(filename):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/job-requirements', methods=['GET'])
+@login_required
 def get_job_requirements_public():
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 403

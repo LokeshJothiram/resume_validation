@@ -1,10 +1,23 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 import os, uuid
 from utils import transcribe_audio_with_sarvam, separate_hr_candidate_with_gemini, evaluate_technical_proficiency_with_gemini
+from functools import wraps
 
 audio_bp = Blueprint('audio', __name__)
 
+# Authentication decorator for blueprint
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            # Clear any existing session data
+            session.clear()
+            return jsonify({'error': 'Unauthorized'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 @audio_bp.route('/process_audio', methods=['POST'])
+@login_required
 def process_audio():
     from database import SkillAssessment, db
     from utils import get_current_user

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Login - AI Talent Acquisition Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -42,7 +45,23 @@
         </form>
     </div>
     <script>
+      // Clear all browser storage and session data
       localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear any existing cookies (except essential ones)
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      // Prevent browser back button from going to protected pages
+      if (window.history && window.history.pushState) {
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', function() {
+          window.history.pushState(null, null, window.location.href);
+        });
+      }
+      
       lucide.createIcons();
       const passwordInput = document.getElementById('password');
       const togglePassword = document.getElementById('togglePassword');
