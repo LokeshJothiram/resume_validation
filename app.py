@@ -1034,12 +1034,12 @@ def admin_upload_job_requirement():
         return jsonify({'error': 'Unauthorized'}), 403
     
     try:
-        job_title = request.form.get('job_title', '')
-        job_description = request.form.get('job_description', '')
+        # job_title = request.form.get('job_title', '')
+        # job_description = request.form.get('job_description', '')
         uploaded_file = request.files.get('job_file')
         
-        if not job_title or not job_description:
-            return jsonify({'error': 'Job title and description are required'}), 400
+        if not uploaded_file or not uploaded_file.filename:
+            return jsonify({'error': 'File is required'}), 400
         
         # Create admin_uploads directory if it doesn't exist
         import os
@@ -1051,6 +1051,7 @@ def admin_upload_job_requirement():
             # Secure filename
             from werkzeug.utils import secure_filename
             filename = secure_filename(uploaded_file.filename)
+            from datetime import datetime
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f"{timestamp}_{filename}"
             file_path = os.path.join(upload_dir, filename)
@@ -1061,7 +1062,7 @@ def admin_upload_job_requirement():
         # TODO: Add database model for job requirements
         
         log_activity(get_current_user(), 'admin_upload_job_requirement', {
-            'job_title': job_title,
+            # 'job_title': job_title,
             'filename': filename,
             'has_file': bool(filename)
         })
