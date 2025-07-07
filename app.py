@@ -41,7 +41,7 @@ MYSQL_DB = os.getenv('MYSQL_DB')
 
 app = Flask(__name__)
 app.secret_key = '123'  # Replace with a secure key in production
-app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour session timeout
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24 hour session timeout
 app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -90,7 +90,7 @@ def login_required(f):
         if 'login_time' in session:
             try:
                 login_time = datetime.fromisoformat(session['login_time'])
-                if (datetime.now() - login_time).total_seconds() > 3600:  # 1 hour
+                if (datetime.now() - login_time).total_seconds() > 86400:  # 24 hours
                     session.clear()
                     # Check if it's an AJAX request
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
