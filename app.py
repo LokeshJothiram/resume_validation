@@ -1141,11 +1141,17 @@ def admin_delete_job_requirement(filename):
         if not os.path.exists(file_path):
             return jsonify({'error': 'File not found'}), 404
         
+        # Delete the file first
         os.remove(file_path)
         
-        log_activity(get_current_user(), 'admin_delete_job_requirement', {
-            'deleted_file': filename
-        })
+        # Try to log the activity, but don't fail if logging fails
+        try:
+            log_activity(get_current_user(), 'admin_delete_job_requirement', {
+                'deleted_file': filename
+            })
+        except Exception as log_error:
+            # Log the error but don't fail the delete operation
+            print(f"Warning: Failed to log activity for file deletion: {log_error}")
         
         return jsonify({'status': 'success', 'message': 'File deleted successfully'})
         

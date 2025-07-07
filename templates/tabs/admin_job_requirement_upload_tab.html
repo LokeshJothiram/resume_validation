@@ -104,7 +104,7 @@
       });
 
       // Load uploaded files
-      function loadUploadedFiles() {
+      window.loadUploadedFiles = function() {
         fetch('/admin/job-requirements')
         .then(response => response.json())
         .then(data => {
@@ -156,7 +156,7 @@
       }
 
       // Load files on page load
-      loadUploadedFiles();
+      window.loadUploadedFiles();
     });
   }
 
@@ -175,14 +175,25 @@
       .then(data => {
         if (data.status === 'success') {
           showToast('File deleted successfully!', 'success');
-          loadUploadedFiles(); // Refresh the list
+          // Refresh the list to show current state
+          if (window.loadUploadedFiles) {
+            window.loadUploadedFiles();
+          }
         } else {
           showToast(data.error || 'Delete failed', 'error');
+          // Still refresh the list to show current state
+          if (window.loadUploadedFiles) {
+            window.loadUploadedFiles();
+          }
         }
       })
       .catch(error => {
         showToast('Error deleting file', 'error');
         console.error('Error:', error);
+        // Even if there's an error, try to refresh the list to show current state
+        if (window.loadUploadedFiles) {
+          window.loadUploadedFiles();
+        }
       });
     }
   }
