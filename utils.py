@@ -240,7 +240,7 @@ Answers:
         response = model.generate_content(
             prompt,
             generation_config=genai.types.GenerationConfig(
-                max_output_tokens=4000
+                max_output_tokens=2000
             )
         )
         match_obj = re.search(r'\{.*\}', response.text, re.DOTALL)
