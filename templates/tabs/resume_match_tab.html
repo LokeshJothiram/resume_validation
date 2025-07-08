@@ -307,6 +307,53 @@ document.addEventListener('DOMContentLoaded', function() {
             validateResumeForm();
         }
     });
+
+    // Synchronize first resume file between Resume Matcher and Technical Proficiency sections (one-time sync only)
+    const resumeMatcherInput = document.querySelector('.resume-file');
+    const techResumeInput = document.getElementById('tech_resume');
+    const resumeMatcherFileName = document.getElementById('resumeFileName0');
+    const techResumeFileName = document.getElementById('techResumeFileName');
+
+    function setFileInput(input, file) {
+        if (!file) return;
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Only sync if the other input is empty
+    resumeMatcherInput.addEventListener('change', function() {
+        if (resumeMatcherInput.files && resumeMatcherInput.files.length > 0) {
+            const file = resumeMatcherInput.files[0];
+            if (!techResumeInput.files || techResumeInput.files.length === 0) {
+                setFileInput(techResumeInput, file);
+                techResumeFileName.textContent = file.name;
+            }
+        } else {
+            // If cleared, clear the other as well only if it is also empty
+            if (!techResumeInput.files || techResumeInput.files.length === 0) {
+                techResumeInput.value = '';
+                techResumeFileName.textContent = 'No file chosen';
+            }
+        }
+    });
+
+    techResumeInput.addEventListener('change', function() {
+        if (techResumeInput.files && techResumeInput.files.length > 0) {
+            const file = techResumeInput.files[0];
+            if (!resumeMatcherInput.files || resumeMatcherInput.files.length === 0) {
+                setFileInput(resumeMatcherInput, file);
+                resumeMatcherFileName.textContent = file.name;
+            }
+        } else {
+            // If cleared, clear the other as well only if it is also empty
+            if (!resumeMatcherInput.files || resumeMatcherInput.files.length === 0) {
+                resumeMatcherInput.value = '';
+                resumeMatcherFileName.textContent = 'No file chosen';
+            }
+        }
+    });
 });
 
 function handleTechQuestionsUpload(input) {
