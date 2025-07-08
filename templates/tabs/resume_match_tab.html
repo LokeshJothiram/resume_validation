@@ -1,11 +1,11 @@
-<div class="flex flex-col gap-10 w-full animate-fade-in overflow-visible">
+<div class="flex flex-col gap-5 w-full animate-fade-in overflow-visible resume-tab-animate">
     <!-- Row 1: Resume Match -->
     <div class="flex flex-col md:flex-row gap-6 w-full">
         <!-- Left: Resume Match Upload Area -->
         <div class="flex flex-col gap-4 flex-none md:w-1/2">
-            <div class="bg-white/80 border border-blue-200 rounded-xl p-4 shadow-md hover:shadow-xl transition-all duration-300 animate-fade-in mx-2 my-2 flex flex-col gap-3" style="font-size: 0.95rem;">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/60 rounded-xl p-6 shadow-sm animate-fade-in mt-2 hover:shadow-xl hover:border-blue-300 transition-all duration-300 group">
                 <!-- Job Description Upload -->
-                <div class="border border-blue-100 rounded-lg bg-blue-50/40 p-3 mb-1">
+                <div class="border border-blue-100 rounded-lg bg-blue-50/60 p-3 mb-3 resume-section-hover resume-jobdesc-section">
                     <div class="flex items-center mb-1">
                         <i data-lucide="file-text" class="w-5 h-5 text-blue-400 mr-2"></i>
                         <span class="text-base font-bold text-gray-800">Job Description</span>
@@ -24,7 +24,7 @@
                     <p id="job_description_error" class="text-red-500 text-xs mt-1 hidden animate-shake">Job Description is required when no job requirement file is selected.</p>
                 </div>
                 <!-- Resume Upload -->
-                <div class="border border-gray-200 rounded-lg bg-gray-50/60 p-3 mb-1">
+                <div class="border border-teal-200 rounded-lg bg-teal-50/60 p-3 mb-3 resume-section-hover resume-upload-section">
                     <div class="flex items-center mb-1">
                         <i data-lucide="upload" class="w-5 h-5 text-gray-500 mr-2"></i>
                         <span class="text-base font-bold text-gray-800">Upload Resume</span>
@@ -43,7 +43,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="button" id="add-resume-btn" class="w-full flex items-center justify-center gap-2 py-1 px-2 my-2 border border-blue-100 rounded-lg bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-800 font-semibold text-xs transition-all duration-200">
+                    <button type="button" id="add-resume-btn" class="w-fit flex items-center justify-center gap-1 py-1 px-2 my-2 border border-blue-100 rounded bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-800 font-semibold text-xs transition-all duration-200 text-xs min-w-0" style="font-size:11px;">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                         Add another resume
                     </button>
@@ -551,5 +551,51 @@ button[type="submit"]:active {
     .animate-slide-in-right {
         animation: slide-in-up 0.6s ease-out;
     }
+}
+
+.resume-section-hover {
+    transition: box-shadow 0.2s, border-color 0.2s, background 0.2s;
+}
+.resume-jobdesc-section {
+    background: #eff6ff !important; /* blue-50 */
+    border-color: #bfdbfe !important; /* blue-100 */
+}
+.resume-jobdesc-section:hover {
+    box-shadow: 0 4px 16px 0 rgba(59,130,246,0.10);
+    border-color: #2563eb !important;
+    z-index: 1;
+}
+.resume-upload-section {
+    background: #f0fdfa !important; /* teal-50 */
+    border-color: #99f6e4 !important; /* teal-200 */
+}
+.resume-upload-section:hover {
+    box-shadow: 0 4px 16px 0 rgba(20,184,166,0.10);
+    border-color: #14b8a6 !important; /* teal-500 */
+    z-index: 1;
+}
+
+@keyframes fade-in-up-tab {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.resume-tab-animate {
+    animation: fade-in-up-tab 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.resume-tab-animate > .flex.flex-col.md\:flex-row {
+    opacity: 0;
+    animation: fade-in-up-tab 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.resume-tab-animate > .flex.flex-col.md\:flex-row:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.resume-tab-animate > .flex.flex-col.md\:flex-row:nth-child(3) {
+    animation-delay: 0.3s;
 }
 </style> 
