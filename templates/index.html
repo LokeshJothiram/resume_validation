@@ -519,6 +519,11 @@
                 e.preventDefault();
                 let valid = true;
 
+                // Identify which button was clicked
+                const submitter = e.submitter || document.activeElement;
+                const isTechnicalBtn = submitter && submitter.id === 'analyze-technical-btn';
+                const isResumeBtn = submitter && submitter.id === 'analyze-resume-btn';
+
                 // Resume tab
                 const jobDesc = document.getElementById('job_description').value.trim();
                 const resumeInputs = document.querySelectorAll('.resume-file');
@@ -544,10 +549,10 @@
                 // Detect if technical proficiency fields are filled
                 let isTechnicalProficiency = audioFile && technology && techResumeFile;
 
-                // Hide/show errors based on validity
+                // Hide/show errors based on which button was clicked
                 if (activeTab === 'resume') {
-                    if (isTechnicalProficiency) {
-                        // Validate technical proficiency fields
+                    if (isTechnicalBtn) {
+                        // Only validate technical proficiency fields
                         if (!audioFile) {
                             const el = document.getElementById('audio_error');
                             if (el) el.classList.remove('hidden');
@@ -572,12 +577,11 @@
                             const el = document.getElementById('tech_resume_error');
                             if (el) el.classList.add('hidden');
                         }
-                    } else {
-                        // Use the validation function from resume_match_tab.html
+                    } else if (isResumeBtn) {
+                        // Only validate resume match fields
                         if (typeof validateResumeForm === 'function') {
                             valid = validateResumeForm();
                         } else {
-                            // Fallback validation logic
                             if (!jobDesc && !selectedJobRequirementId) {
                                 const el = document.getElementById('job_description_error');
                                 if (el) el.classList.remove('hidden');
@@ -593,6 +597,56 @@
                             } else {
                                 const el = document.getElementById('resume_error');
                                 if (el) el.classList.add('hidden');
+                            }
+                        }
+                    } else {
+                        // Fallback: default to previous logic
+                        if (isTechnicalProficiency) {
+                            // Validate technical proficiency fields
+                            if (!audioFile) {
+                                const el = document.getElementById('audio_error');
+                                if (el) el.classList.remove('hidden');
+                                valid = false;
+                            } else {
+                                const el = document.getElementById('audio_error');
+                                if (el) el.classList.add('hidden');
+                            }
+                            if (!technology) {
+                                const el = document.getElementById('technology_error');
+                                if (el) el.classList.remove('hidden');
+                                valid = false;
+                            } else {
+                                const el = document.getElementById('technology_error');
+                                if (el) el.classList.add('hidden');
+                            }
+                            if (!techResumeFile) {
+                                const el = document.getElementById('tech_resume_error');
+                                if (el) el.classList.remove('hidden');
+                                valid = false;
+                            } else {
+                                const el = document.getElementById('tech_resume_error');
+                                if (el) el.classList.add('hidden');
+                            }
+                        } else {
+                            if (typeof validateResumeForm === 'function') {
+                                valid = validateResumeForm();
+                            } else {
+                                if (!jobDesc && !selectedJobRequirementId) {
+                                    const el = document.getElementById('job_description_error');
+                                    if (el) el.classList.remove('hidden');
+                                    valid = false;
+                                } else {
+                                    const el = document.getElementById('job_description_error');
+                                    if (el) el.classList.add('hidden');
+                                }
+                                if (resumeFiles.length === 0 && !selectedJobRequirementId) {
+                                    const el = document.getElementById('resume_error');
+                                    if (el) el.classList.remove('hidden');
+                                    valid = false;
+                                } else {
+                                    const el = document.getElementById('resume_error');
+                                    if (el) el.classList.add('hidden');
+                                }
                             }
                         }
                     }
