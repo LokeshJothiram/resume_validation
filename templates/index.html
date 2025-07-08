@@ -72,45 +72,7 @@
                                 <!-- Analysis Results section removed: now inside resume_match_tab.html -->
                             </div>
                         </div>
-                        <div id="audio-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
-                            <div class="flex flex-col items-start w-full">
-                                <div class="w-full pr-0 self-start">
-                                {% include 'tabs/technical_proficiency_tab.html' %}
-                                </div>
-                                <div class="w-full pl-0 mt-8">
-                                    <h2 class="text-2xl font-bold mb-4 text-gray-800 header-gradient">Analysis Results</h2>
-                                    <!-- Loader under Analysis Results -->
-                                    <div id="loader-audio" class="text-center p-8 hidden">
-                                        <div role="status" class="flex flex-col items-center justify-center">
-                                            <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                                                <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                                            </svg>
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                        <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-                                    </div>
-                                    <!-- Save and Shortlist buttons -->
-                                    <div id="action-btns-audio" class="flex gap-4 mb-4 hidden">
-                                        <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center">
-                                            <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                                        </button>
-                                        <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center">
-                                            <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                                        </button>
-                                    </div>
-                                    <div id="results-audio" class="p-0">
-                                         <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                                         <div class="space-y-6">
-                                            <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
-                                                <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                                                <div id="audio_result_audio"></div>
-                                            </div>
-                                         </div>
-                                     </div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Removed audio-tab-content (Technical Proficiency tab) -->
                         <div id="question-gen-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             {% include 'tabs/interview_question_generator_tab.html' %}
                         </div>
