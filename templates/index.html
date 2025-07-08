@@ -528,9 +528,11 @@
                         resumeFiles.push(input.files[0]);
                     }
                 });
-                // Technical tab
+                // Technical tab fields (even if inside resume tab)
                 const audioFile = document.getElementById('audio').files[0];
                 const technology = document.getElementById('technology').value;
+                const techResumeInput = document.getElementById('tech_resume');
+                const techResumeFile = techResumeInput && techResumeInput.files && techResumeInput.files[0];
 
                 // NEW: Get selected job requirement file ID
                 const jobRequirementDropdown = document.getElementById('job-requirement-dropdown');
@@ -539,31 +541,63 @@
                     selectedJobRequirementId = jobRequirementDropdown.value;
                 }
 
+                // Detect if technical proficiency fields are filled
+                let isTechnicalProficiency = audioFile && technology && techResumeFile;
+
                 // Hide/show errors based on validity
                 if (activeTab === 'resume') {
-                    // Use the validation function from resume_match_tab.html
-                    if (typeof validateResumeForm === 'function') {
-                        valid = validateResumeForm();
-                    } else {
-                        // Fallback validation logic
-                        if (!jobDesc && !selectedJobRequirementId) {
-                            const el = document.getElementById('job_description_error');
+                    if (isTechnicalProficiency) {
+                        // Validate technical proficiency fields
+                        if (!audioFile) {
+                            const el = document.getElementById('audio_error');
                             if (el) el.classList.remove('hidden');
                             valid = false;
                         } else {
-                            const el = document.getElementById('job_description_error');
+                            const el = document.getElementById('audio_error');
                             if (el) el.classList.add('hidden');
                         }
-                        if (resumeFiles.length === 0 && !selectedJobRequirementId) {
-                            const el = document.getElementById('resume_error');
+                        if (!technology) {
+                            const el = document.getElementById('technology_error');
                             if (el) el.classList.remove('hidden');
                             valid = false;
                         } else {
-                            const el = document.getElementById('resume_error');
+                            const el = document.getElementById('technology_error');
                             if (el) el.classList.add('hidden');
+                        }
+                        if (!techResumeFile) {
+                            const el = document.getElementById('tech_resume_error');
+                            if (el) el.classList.remove('hidden');
+                            valid = false;
+                        } else {
+                            const el = document.getElementById('tech_resume_error');
+                            if (el) el.classList.add('hidden');
+                        }
+                    } else {
+                        // Use the validation function from resume_match_tab.html
+                        if (typeof validateResumeForm === 'function') {
+                            valid = validateResumeForm();
+                        } else {
+                            // Fallback validation logic
+                            if (!jobDesc && !selectedJobRequirementId) {
+                                const el = document.getElementById('job_description_error');
+                                if (el) el.classList.remove('hidden');
+                                valid = false;
+                            } else {
+                                const el = document.getElementById('job_description_error');
+                                if (el) el.classList.add('hidden');
+                            }
+                            if (resumeFiles.length === 0 && !selectedJobRequirementId) {
+                                const el = document.getElementById('resume_error');
+                                if (el) el.classList.remove('hidden');
+                                valid = false;
+                            } else {
+                                const el = document.getElementById('resume_error');
+                                if (el) el.classList.add('hidden');
+                            }
                         }
                     }
                 } else if (activeTab === 'audio') {
+                    // (Unchanged: for separate audio tab)
                     if (!audioFile) {
                         const el = document.getElementById('audio_error');
                         if (el) el.classList.remove('hidden');
@@ -580,7 +614,6 @@
                         const el = document.getElementById('technology_error');
                         if (el) el.classList.add('hidden');
                     }
-                    // Custom validation for tech_resume
                     if (!techResumeInput.files || techResumeInput.files.length === 0) {
                         const el = document.getElementById('tech_resume_error');
                         if (el) el.classList.remove('hidden');
@@ -600,30 +633,22 @@
                     }
                 });
                 // Add all selected resume files
-                if (activeTab === 'resume' && resumeFiles.length > 0) {
+                if (!isTechnicalProficiency && activeTab === 'resume' && resumeFiles.length > 0) {
                     for (let i = 0; i < resumeFiles.length; i++) {
                         formData.append('resume', resumeFiles[i]);
                     }
-                } else if (activeTab === 'audio') {
+                } else if (isTechnicalProficiency || activeTab === 'audio') {
                     if (audioFile) formData.append('audio', audioFile);
+                    if (techResumeFile) formData.append('tech_resume', techResumeFile);
                 }
                 // NEW: Add selected job requirement file ID to formData
-                if (activeTab === 'resume' && selectedJobRequirementId) {
+                if (!isTechnicalProficiency && activeTab === 'resume' && selectedJobRequirementId) {
                     formData.append('job_requirement_id', selectedJobRequirementId);
                 }
 
-                // Use unique IDs for each tab
+                // Use unique IDs for each tab or mode
                 let loaderId, resultsId, actionBtnsId, saveBtnId, shortlistBtnId, metaInfoId, resultCardId, resultDivId;
-                if (activeTab === 'resume') {
-                    loaderId = 'loader-resume';
-                    resultsId = 'results-resume';
-                    actionBtnsId = 'action-btns-resume';
-                    saveBtnId = 'save-analysis-btn-resume';
-                    shortlistBtnId = 'shortlist-btn-resume';
-                    metaInfoId = 'meta_info_resume';
-                    resultCardId = 'resume_result_card_resume';
-                    resultDivId = 'resume_result_resume';
-                } else if (activeTab === 'audio') {
+                if ((activeTab === 'resume' && isTechnicalProficiency) || activeTab === 'audio') {
                     loaderId = 'loader-audio';
                     resultsId = 'results-audio';
                     actionBtnsId = 'action-btns-audio';
@@ -632,6 +657,15 @@
                     metaInfoId = 'meta_info_audio';
                     resultCardId = 'audio_result_card_audio';
                     resultDivId = 'audio_result_audio';
+                } else if (activeTab === 'resume') {
+                    loaderId = 'loader-resume';
+                    resultsId = 'results-resume';
+                    actionBtnsId = 'action-btns-resume';
+                    saveBtnId = 'save-analysis-btn-resume';
+                    shortlistBtnId = 'shortlist-btn-resume';
+                    metaInfoId = 'meta_info_resume';
+                    resultCardId = 'resume_result_card_resume';
+                    resultDivId = 'resume_result_resume';
                 }
 
                 // Disable all tab buttons while loading, except the active tab
@@ -649,10 +683,10 @@
                     const actionBtnsElem = document.getElementById(actionBtnsId);
                     if (actionBtnsElem) actionBtnsElem.classList.add('hidden');
                     // Hide placeholder when analyzing
-                    if (activeTab === 'resume') {
+                    if (resultCardId === 'resume_result_card_resume') {
                         const ph = document.getElementById('placeholder-resume');
                         if (ph) ph.classList.add('hidden');
-                    } else if (activeTab === 'audio') {
+                    } else if (resultCardId === 'audio_result_card_audio') {
                         const ph = document.getElementById('placeholder-audio');
                         if (ph) ph.classList.add('hidden');
                     }
@@ -675,8 +709,8 @@
                     }
                 }
 
-                // CHANGED: Dynamically select endpoint based on active tab
-                const endpoint = (activeTab === 'audio') ? '/process_audio' : '/process';
+                // CHANGED: Dynamically select endpoint based on mode
+                const endpoint = ((activeTab === 'resume' && isTechnicalProficiency) || activeTab === 'audio') ? '/process_audio' : '/process';
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     body: formData
@@ -704,16 +738,16 @@
                 if (resultDiv) resultDiv.innerHTML = '';
                 if (resultCardDiv) resultCardDiv.classList.add('hidden');
                 // If no results, show placeholder again
-                if (activeTab === 'resume' && (!result || (!result.resumes && !result.job_requirement_analysis && !result.resume_error))) {
+                if (resultCardId === 'resume_result_card_resume' && (!result || (!result.resumes && !result.job_requirement_analysis && !result.resume_error))) {
                     const ph = document.getElementById('placeholder-resume');
                     if (ph) ph.classList.remove('hidden');
-                } else if (activeTab === 'audio' && (!result || (!result.transcription && !result.audio_error))) {
+                } else if (resultCardId === 'audio_result_card_audio' && (!result || (!result.transcription && !result.audio_error))) {
                     const ph = document.getElementById('placeholder-audio');
                     if (ph) ph.classList.remove('hidden');
                 }
                 
-                // Show selected technology and audio file name only for audio tab
-                if (activeTab === 'audio') {
+                // Show selected technology and audio file name only for technical proficiency
+                if (resultCardId === 'audio_result_card_audio') {
                     const selectedTechInput = document.getElementById('technology');
                     const selectedTech = selectedTechInput ? selectedTechInput.value : '';
                     const audioInput = document.getElementById('audio');
@@ -729,7 +763,7 @@
                     if (metaInfoDiv) metaInfoDiv.innerHTML = '';
                 }
                 
-                if (activeTab === 'resume') {
+                if (resultCardId === 'resume_result_card_resume') {
                 if ((Array.isArray(result.resumes) && result.resumes.length > 0) || result.job_requirement_analysis) {
                         resultCardDiv.classList.remove('hidden');
                     let allResumesHTML = '';
@@ -843,7 +877,7 @@
                         resultCardDiv.classList.remove('hidden');
                         resultDiv.innerHTML = `<p class="text-red-500"><strong>Error:</strong> ${result.resume_error}</p>`;
                 }
-                } else if (activeTab === 'audio') {
+                } else if (resultCardId === 'audio_result_card_audio') {
                 if (result.transcription || result.audio_error) {
                         resultCardDiv.classList.remove('hidden');
                     if (result.transcription) {
