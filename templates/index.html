@@ -73,9 +73,11 @@
                             </div>
                         </div>
                         <!-- Removed audio-tab-content (Technical Proficiency tab) -->
+                        {% if session.role == 'admin' %}
                         <div id="question-gen-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             {% include 'tabs/interview_question_generator_tab.html' %}
                         </div>
+                        {% endif %}
                         <div id="saved-tab-content" class="tab-content hidden relative -top-5 md:-top-5">
                             {% include 'tabs/saved_analyses_tab.html' %}
                         </div>

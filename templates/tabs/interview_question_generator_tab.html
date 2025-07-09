@@ -1,4 +1,18 @@
 <div class="flex flex-col gap-6 animate-fade-in overflow-hidden">
+  <!-- File Upload Section for Interview Question Generator -->
+  <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm mb-4">
+    <div id="iqg-upload-form" class="flex flex-col md:flex-row gap-4 items-center">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Upload Interview/Tech Question File</label>
+      <input type="file" id="iqg-upload-input" name="iqg_file" accept=".docx,.pdf" class="border border-gray-300 rounded p-2" required>
+      <button id="iqg-upload-btn" type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">Upload</button>
+    </div>
+    <div class="mt-4">
+      <span class="font-semibold text-gray-700">Uploaded Files:</span>
+      <ul id="iqg-uploaded-files-list" class="mt-2 space-y-1 text-sm text-blue-700">
+        <!-- Uploaded files will be listed here by JS -->
+      </ul>
+    </div>
+  </div>
   <!-- Input Section: Two-column card layout -->
   <div class="flex flex-col md:flex-row gap-6">
     <!-- Left Card: Upload or Paste Job Description -->
@@ -394,4 +408,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// Handle Interview Question Generator file upload
+const iqgForm = document.getElementById('iqg-upload-form');
+const iqgInput = document.getElementById('iqg-upload-input');
+const iqgFileList = document.getElementById('iqg-uploaded-files-list');
+const iqgBtn = document.getElementById('iqg-upload-btn');
+
+function fetchIQGFiles() {
+  fetch('/list_iqg_files')
+    .then(res => res.json())
+    .then(data => {
+      iqgFileList.innerHTML = '';
+      if (data.files && data.files.length > 0) {
+        data.files.forEach(file => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="/download_iqg_file/${encodeURIComponent(file.filename)}" class="underline hover:text-blue-900" target="_blank">${file.filename}</a> <span class='text-xs text-gray-400'>(${file.upload_date})</span>`;
+          iqgFileList.appendChild(li);
+        });
+      } else {
+        iqgFileList.innerHTML = '<li class="text-gray-400">No files uploaded yet.</li>';
+      }
+    });
+}
+
+if (iqgBtn) {
+  iqgBtn.addEventListener('click', function() {
+    const formData = new FormData();
+    if (iqgInput.files.length === 0) return;
+    formData.append('iqg_file', iqgInput.files[0]);
+    fetch('/upload_iqg_file', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        iqgInput.value = '';
+        fetchIQGFiles();
+      } else {
+        alert(data.message || 'Upload failed');
+      }
+    })
+    .catch(() => alert('Upload failed'));
+  });
+  fetchIQGFiles();
+}
 </script> 

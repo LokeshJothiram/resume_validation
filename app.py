@@ -1301,6 +1301,45 @@ def get_job_requirements_public():
 def test_job_requirement():
     return send_from_directory('.', 'test_job_requirement.html')
 
+@app.route('/upload_iqg_file', methods=['POST'])
+@login_required
+def upload_iqg_file():
+    uploaded_file = request.files.get('iqg_file')
+    if not uploaded_file or not uploaded_file.filename:
+        return jsonify({'status': 'error', 'message': 'No file uploaded'})
+    upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'tech_questions')
+    os.makedirs(upload_dir, exist_ok=True)
+    filename = secure_filename(uploaded_file.filename)
+    from datetime import datetime
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"{timestamp}_{filename}"
+    file_path = os.path.join(upload_dir, filename)
+    uploaded_file.save(file_path)
+    return jsonify({'status': 'success', 'message': 'File uploaded successfully'})
+
+@app.route('/list_iqg_files', methods=['GET'])
+@login_required
+def list_iqg_files():
+    upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'tech_questions')
+    files = []
+    if os.path.exists(upload_dir):
+        for filename in os.listdir(upload_dir):
+            file_path = os.path.join(upload_dir, filename)
+            if os.path.isfile(file_path):
+                file_stat = os.stat(file_path)
+                files.append({
+                    'filename': filename,
+                    'upload_date': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M')
+                })
+    files.sort(key=lambda x: x['upload_date'], reverse=True)
+    return jsonify({'files': files})
+
+@app.route('/download_iqg_file/<filename>')
+@login_required
+def download_iqg_file(filename):
+    upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'tech_questions')
+    return send_from_directory(upload_dir, filename, as_attachment=True)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
