@@ -83,7 +83,7 @@
 from flask import Blueprint, request, jsonify, session
 import re
 import google.generativeai as genai
-from database import db, QuestionGeneration
+from database import db, QuestionGeneration, IQGFileUpload
 from utils import get_current_user
 from functools import wraps
 
@@ -195,3 +195,35 @@ def generate_questions():
         return jsonify({'questions': questions})
     except Exception as e:
         return jsonify({'error': f'Failed to generate questions: {e}'}), 500
+
+@questions_bp.route('/get_iqg_file/<int:file_id>', methods=['GET'])
+def get_iqg_file(file_id):
+    file = IQGFileUpload.query.get(file_id)
+    if not file:
+        return jsonify({'content': ''}), 404
+    # Try to decode as UTF-8 text (for .txt), or extract text from .docx if needed
+    import os
+    import tempfile
+    content = ''
+    filename = file.original_filename.lower()
+    if filename.endswith('.txt'):
+        try:
+            content = file.file_data.decode('utf-8', errors='replace')
+        except Exception:
+            content = ''
+    elif filename.endswith('.docx'):
+        try:
+            import mammoth
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp:
+                tmp.write(file.file_data)
+                tmp.flush()
+                with open(tmp.name, 'rb') as docx_file:
+                    result = mammoth.extract_raw_text(docx_file)
+                    content = result.value
+            os.unlink(tmp.name)
+        except Exception:
+            content = ''
+    else:
+        # Unknown file type
+        content = ''
+    return jsonify({'content': content})

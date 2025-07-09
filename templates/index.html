@@ -1319,31 +1319,34 @@
             }
         });
 
-        document.getElementById('techQuestionsUpload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.name.endsWith('.docx')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    mammoth.extractRawText({arrayBuffer: event.target.result})
-                        .then(function(result) {
-                            document.getElementById('tech_questions').value = result.value;
-                        })
-                        .catch(function(err) {
-                            alert('Could not read the Word file.');
-                        });
-                };
-                reader.readAsArrayBuffer(file);
-            } else if (file && file.name.endsWith('.txt')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    document.getElementById('tech_questions').value = event.target.result;
-                };
-                reader.readAsText(file);
-            } else if (file) {
-                alert('Only .docx or .txt files are supported.');
-                e.target.value = '';
-            }
-        });
+        const techQuestionsUpload = document.getElementById('techQuestionsUpload');
+        if (techQuestionsUpload) {
+            techQuestionsUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.name.endsWith('.docx')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        mammoth.extractRawText({arrayBuffer: event.target.result})
+                            .then(function(result) {
+                                document.getElementById('tech_questions').value = result.value;
+                            })
+                            .catch(function(err) {
+                                alert('Could not read the Word file.');
+                            });
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else if (file && file.name.endsWith('.txt')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('tech_questions').value = event.target.result;
+                    };
+                    reader.readAsText(file);
+                } else if (file) {
+                    alert('Only .docx or .txt files are supported.');
+                    e.target.value = '';
+                }
+            });
+        }
 
         // Resume dynamic add/remove logic
         document.getElementById('add-resume-btn').addEventListener('click', function() {

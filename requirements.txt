@@ -18,3 +18,4 @@ Flask-SQLAlchemy
 Flask-Migrate
 mysqlclient
 pytz
+mammoth
