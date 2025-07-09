@@ -1745,97 +1745,109 @@
                 }
             });
         }
-        document.getElementById('generate-questions-btn').addEventListener('click', async function() {
-            // Validation for Interview Question Generator
-            let valid = true;
-            const jd = document.getElementById('question_gen_jd').value.trim();
-            const numQuestions = parseInt(document.getElementById('num_questions').value, 10) || 5;
-            const jdError = document.getElementById('question_gen_jd_error');
-            const numQuestionsError = document.getElementById('num_questions_error');
-            const level = document.querySelector('input[name="question_level"]:checked').value;
-            if (!jd) {
-                jdError.classList.remove('hidden');
-                valid = false;
-            } else {
-                jdError.classList.add('hidden');
-            }
-            if (numQuestions < 1 || numQuestions > 20) {
-                numQuestionsError.classList.remove('hidden');
-                valid = false;
-                numQuestionsError.classList.add('hidden');
-            }
-            if (!valid) return;
-            const loader = document.getElementById('question-gen-loader');
-            const resultDiv = document.getElementById('question-gen-result');
-            const listPre = document.getElementById('question-gen-list');
-            const loaderElem = document.getElementById('question-gen-loader');
-            if (loaderElem) loaderElem.classList.remove('hidden');
-            resultDiv.classList.add('hidden');
-            listPre.textContent = '';
-            setTabNavigationEnabled(false); // Disable tabs while loading
-            try {
-                const resp = await fetch('/generate_questions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ technology: '', job_description: jd, num_questions: numQuestions, level: level })
-                });
-                const data = await resp.json();
-                const loaderElem = document.getElementById('question-gen-loader');
-                if (loaderElem) loaderElem.classList.add('hidden');
-                setTabNavigationEnabled(true); // Enable tabs after loading
-                if (data.questions && Array.isArray(data.questions)) {
-                    listPre.textContent = data.questions.map((q, i) => `${i+1}. ${q}`).join('\n');
-                    resultDiv.classList.remove('hidden');
+        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
+        if (generateQuestionsBtn) {
+            generateQuestionsBtn.addEventListener('click', async function() {
+                // Validation for Interview Question Generator
+                let valid = true;
+                const jd = document.getElementById('question_gen_jd').value.trim();
+                const numQuestions = parseInt(document.getElementById('num_questions').value, 10) || 5;
+                const jdError = document.getElementById('question_gen_jd_error');
+                const numQuestionsError = document.getElementById('num_questions_error');
+                const level = document.querySelector('input[name="question_level"]:checked').value;
+                if (!jd) {
+                    jdError.classList.remove('hidden');
+                    valid = false;
                 } else {
-                    showToast(data.error || 'Failed to generate questions.', 'error');
+                    jdError.classList.add('hidden');
                 }
-            } catch (e) {
+                if (numQuestions < 1 || numQuestions > 20) {
+                    numQuestionsError.classList.remove('hidden');
+                    valid = false;
+                    numQuestionsError.classList.add('hidden');
+                }
+                if (!valid) return;
+                const loader = document.getElementById('question-gen-loader');
+                const resultDiv = document.getElementById('question-gen-result');
+                const listPre = document.getElementById('question-gen-list');
                 const loaderElem = document.getElementById('question-gen-loader');
-                if (loaderElem) loaderElem.classList.add('hidden');
-                setTabNavigationEnabled(true); // Enable tabs after loading
-                showToast('Error generating questions.', 'error');
-            }
-        });
-        document.getElementById('copy-questions-btn').addEventListener('click', function() {
-            const listPre = document.getElementById('question-gen-list');
-            navigator.clipboard.writeText(listPre.textContent).then(() => {
-                showToast('Questions copied!', 'success');
+                if (loaderElem) loaderElem.classList.remove('hidden');
+                resultDiv.classList.add('hidden');
+                listPre.textContent = '';
+                setTabNavigationEnabled(false); // Disable tabs while loading
+                try {
+                    const resp = await fetch('/generate_questions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ technology: '', job_description: jd, num_questions: numQuestions, level: level })
+                    });
+                    const data = await resp.json();
+                    const loaderElem = document.getElementById('question-gen-loader');
+                    if (loaderElem) loaderElem.classList.add('hidden');
+                    setTabNavigationEnabled(true); // Enable tabs after loading
+                    if (data.questions && Array.isArray(data.questions)) {
+                        listPre.textContent = data.questions.map((q, i) => `${i+1}. ${q}`).join('\n');
+                        resultDiv.classList.remove('hidden');
+                    } else {
+                        showToast(data.error || 'Failed to generate questions.', 'error');
+                    }
+                } catch (e) {
+                    const loaderElem = document.getElementById('question-gen-loader');
+                    if (loaderElem) loaderElem.classList.add('hidden');
+                    setTabNavigationEnabled(true); // Enable tabs after loading
+                    showToast('Error generating questions.', 'error');
+                }
             });
-        });
-        document.getElementById('download-questions-btn').addEventListener('click', function() {
-            const listPre = document.getElementById('question-gen-list');
-            const blob = new Blob([listPre.textContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'interview_questions.txt';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-        });
+        }
+        const copyQuestionsBtn = document.getElementById('copy-questions-btn');
+        if (copyQuestionsBtn) {
+            copyQuestionsBtn.addEventListener('click', function() {
+                const listPre = document.getElementById('question-gen-list');
+                navigator.clipboard.writeText(listPre.textContent).then(() => {
+                    showToast('Questions copied!', 'success');
+                });
+            });
+        }
+        const downloadQuestionsBtn = document.getElementById('download-questions-btn');
+        if (downloadQuestionsBtn) {
+            downloadQuestionsBtn.addEventListener('click', function() {
+                const listPre = document.getElementById('question-gen-list');
+                const blob = new Blob([listPre.textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'interview_questions.txt';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+            });
+        }
 
         // Interview Question Generator JD .docx upload logic
-        document.getElementById('question_gen_jd_upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.name.endsWith('.docx')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    mammoth.extractRawText({arrayBuffer: event.target.result})
-                        .then(function(result) {
-                            document.getElementById('question_gen_jd').value = result.value;
-                            const el = document.getElementById('question_gen_jd_error');
-                            if (el) el.classList.add('hidden');
-                        })
-                        .catch(function(err) {
-                            alert('Could not read the Word file.');
-                        });
-                };
-                reader.readAsArrayBuffer(file);
-            } else if (file) {
-                alert('Only .docx files are supported.');
-                e.target.value = '';
-            }
-        });
+        const questionGenJdUpload = document.getElementById('question_gen_jd_upload');
+        if (questionGenJdUpload) {
+            questionGenJdUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.name.endsWith('.docx')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        mammoth.extractRawText({arrayBuffer: event.target.result})
+                            .then(function(result) {
+                                document.getElementById('question_gen_jd').value = result.value;
+                                const el = document.getElementById('question_gen_jd_error');
+                                if (el) el.classList.add('hidden');
+                            })
+                            .catch(function(err) {
+                                alert('Could not read the Word file.');
+                            });
+                    };
+                    reader.readAsArrayBuffer(file);
+                } else if (file) {
+                    alert('Only .docx files are supported.');
+                    e.target.value = '';
+                }
+            });
+        }
 
         // Hide error when user starts typing or selects a file in Interview Question Generator
         /* document.getElementById('question_gen_technology').addEventListener('change', () => {
@@ -1843,31 +1855,39 @@
                 document.getElementById('question_gen_technology_error').classList.add('hidden');
             }
         }); */
-        document.getElementById('question_gen_jd').addEventListener('input', () => {
-            if (document.getElementById('question_gen_jd').value.trim()) {
-                const el = document.getElementById('question_gen_jd_error');
-                if (el) el.classList.add('hidden');
-            }
-        });
+        const questionGenJd = document.getElementById('question_gen_jd');
+        if (questionGenJd) {
+            questionGenJd.addEventListener('input', () => {
+                if (questionGenJd.value.trim()) {
+                    const el = document.getElementById('question_gen_jd_error');
+                    if (el) el.classList.add('hidden');
+                }
+            });
+        }
 
         // Prevent Enter in num_questions from submitting the form
-        document.getElementById('num_questions').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-            }
-        });
+        const numQuestions = document.getElementById('num_questions');
+        if (numQuestions) {
+            numQuestions.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        }
 
         // Live validation for number of questions input
         const numQuestionsInput = document.getElementById('num_questions');
         const numQuestionsError = document.getElementById('num_questions_error');
-        numQuestionsInput.addEventListener('input', function() {
-            const value = parseInt(numQuestionsInput.value, 10);
-            if (value < 1 || value > 20) {
-                numQuestionsError.classList.remove('hidden');
-            } else {
-                numQuestionsError.classList.add('hidden');
-            }
-        });
+        if (numQuestionsInput) {
+            numQuestionsInput.addEventListener('input', function() {
+                const value = parseInt(numQuestionsInput.value, 10);
+                if (value < 1 || value > 20) {
+                    if (numQuestionsError) numQuestionsError.classList.remove('hidden');
+                } else {
+                    if (numQuestionsError) numQuestionsError.classList.add('hidden');
+                }
+            });
+        }
 
         // Donut chart renderer for resume match
         function renderDonut(canvasId, value, color) {
