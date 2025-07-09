@@ -116,6 +116,20 @@
   </div>
 </div>
 
+<!-- Toast Notification -->
+<div id="iqg-toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2" style="pointer-events: none;"></div>
+
+<!-- Delete Confirmation Modal -->
+<div id="iqg-delete-modal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+    <div class="text-lg font-semibold mb-4">Delete this file?</div>
+    <div class="flex justify-center gap-4 mt-6">
+      <button id="iqg-delete-confirm" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 font-semibold">Delete</button>
+      <button id="iqg-delete-cancel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 font-semibold">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <style>
 /* Custom Animations */
 @keyframes fade-in {
@@ -415,6 +429,30 @@ const iqgInput = document.getElementById('iqg-upload-input');
 const iqgFileList = document.getElementById('iqg-uploaded-files-list');
 const iqgBtn = document.getElementById('iqg-upload-btn');
 
+function showIQGToast(message, type) {
+  const toast = document.getElementById('iqg-toast');
+  let icon = '';
+  toast.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded shadow-lg text-center text-sm font-semibold opacity-0 pointer-events-none transition-opacity duration-500 flex items-center gap-2';
+  if (type === 'success') {
+    toast.classList.add('bg-green-600', 'text-white');
+    icon = '<i data-lucide="check-circle" class="w-5 h-5 mr-1"></i>';
+  } else if (type === 'error') {
+    toast.classList.add('bg-red-600', 'text-white');
+    icon = '<i data-lucide="x-circle" class="w-5 h-5 mr-1"></i>';
+  } else {
+    toast.classList.add('bg-gray-700', 'text-white');
+    icon = '<i data-lucide="info" class="w-5 h-5 mr-1"></i>';
+  }
+  toast.innerHTML = icon + '<span>' + message + '</span>';
+  setTimeout(() => { toast.style.opacity = '1'; if(window.lucide) lucide.createIcons(); }, 10);
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+  }, 2000);
+}
+
+let fileIdToDelete = null;
+
 function fetchIQGFiles() {
   fetch('/list_iqg_files')
     .then(res => res.json())
@@ -423,12 +461,20 @@ function fetchIQGFiles() {
       if (data.files && data.files.length > 0) {
         data.files.forEach(file => {
           const li = document.createElement('li');
-          li.innerHTML = `<a href="/download_iqg_file/${file.id}" class="underline hover:text-blue-900" target="_blank">${file.original_filename}</a> <span class='text-xs text-gray-400'>(${file.upload_date})</span>`;
+          li.innerHTML = `<a href="/download_iqg_file/${file.id}" class="underline hover:text-blue-900" target="_blank">${file.original_filename}</a> <span class='text-xs text-gray-400'>(${file.upload_date})</span> <button class="ml-2 text-red-600 hover:text-red-800 text-xs font-bold delete-iqg-file-btn" data-id="${file.id}">Delete</button>`;
           iqgFileList.appendChild(li);
         });
       } else {
         iqgFileList.innerHTML = '<li class="text-gray-400">No files uploaded yet.</li>';
       }
+      // Add delete event listeners
+      document.querySelectorAll('.delete-iqg-file-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          fileIdToDelete = this.getAttribute('data-id');
+          document.getElementById('iqg-delete-modal').classList.remove('hidden');
+        });
+      });
     });
 }
 
@@ -446,12 +492,47 @@ if (iqgBtn) {
       if (data.status === 'success') {
         iqgInput.value = '';
         fetchIQGFiles();
+        showIQGToast('File uploaded successfully!', 'success');
       } else {
-        alert(data.message || 'Upload failed');
+        showIQGToast(data.message || 'Upload failed', 'error');
       }
     })
-    .catch(() => alert('Upload failed'));
+    .catch(() => {
+      showIQGToast('Upload failed', 'error');
+    });
   });
   fetchIQGFiles();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('iqg-delete-modal');
+  const confirmBtn = document.getElementById('iqg-delete-confirm');
+  const cancelBtn = document.getElementById('iqg-delete-cancel');
+  if (confirmBtn && cancelBtn && modal) {
+    confirmBtn.addEventListener('click', function() {
+      if (!fileIdToDelete) return;
+      fetch(`/delete_iqg_file/${fileIdToDelete}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            showIQGToast('File deleted successfully!', 'success');
+            fetchIQGFiles();
+          } else {
+            showIQGToast(data.message || 'Delete failed', 'error');
+          }
+          modal.classList.add('hidden');
+          fileIdToDelete = null;
+        })
+        .catch(() => {
+          showIQGToast('Delete failed', 'error');
+          modal.classList.add('hidden');
+          fileIdToDelete = null;
+        });
+    });
+    cancelBtn.addEventListener('click', function() {
+      modal.classList.add('hidden');
+      fileIdToDelete = null;
+    });
+  }
+});
 </script> 

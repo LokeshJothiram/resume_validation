@@ -1317,6 +1317,17 @@ def download_iqg_file(file_id):
         download_name=file_record.original_filename
     )
 
+@app.route('/delete_iqg_file/<int:file_id>', methods=['DELETE'])
+@login_required
+def delete_iqg_file(file_id):
+    from database import IQGFileUpload, db
+    file = IQGFileUpload.query.get(file_id)
+    if not file:
+        return {'status': 'error', 'message': 'File not found'}, 404
+    db.session.delete(file)
+    db.session.commit()
+    return {'status': 'success', 'message': 'File deleted'}
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
