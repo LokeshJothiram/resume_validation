@@ -642,24 +642,28 @@
                 if (!valid) return;
                 const form = document.getElementById('talentForm');
                 const formData = new FormData();
-                // Add all form fields except resume
-                Array.from(form.elements).forEach(el => {
-                    if (el.name && el.type !== 'file' && el.type !== 'submit') {
-                        formData.append(el.name, el.value);
-                    }
-                });
-                // Add all selected resume files
-                if (!isTechnicalProficiency && activeTab === 'resume' && resumeFiles.length > 0) {
-                    for (let i = 0; i < resumeFiles.length; i++) {
-                        formData.append('resume', resumeFiles[i]);
-                    }
-                } else if (isTechnicalProficiency || activeTab === 'audio') {
+                
+                // Optimize payload: Only send relevant fields based on analysis type
+                if (isTechnicalBtn || activeTab === 'audio') {
+                    // Technical Proficiency Analysis - only send relevant fields
+                    const technology = document.getElementById('technology');
+                    const techQuestions = document.getElementById('tech_questions');
+                    if (technology && technology.value) formData.append('technology', technology.value);
+                    if (techQuestions && techQuestions.value) formData.append('tech_questions', techQuestions.value);
                     if (audioFile) formData.append('audio', audioFile);
                     if (techResumeFile) formData.append('tech_resume', techResumeFile);
-                }
-                // NEW: Add selected job requirement file ID to formData
-                if (!isTechnicalProficiency && activeTab === 'resume' && selectedJobRequirementId) {
-                    formData.append('job_requirement_id', selectedJobRequirementId);
+                } else if (isResumeBtn && activeTab === 'resume') {
+                    // Resume Analysis - only send relevant fields
+                    const jobDescription = document.getElementById('job_description');
+                    if (jobDescription && jobDescription.value) formData.append('job_description', jobDescription.value);
+                    if (resumeFiles.length > 0) {
+                        for (let i = 0; i < resumeFiles.length; i++) {
+                            formData.append('resume', resumeFiles[i]);
+                        }
+                    }
+                    if (selectedJobRequirementId) {
+                        formData.append('job_requirement_id', selectedJobRequirementId);
+                    }
                 }
 
                 // Use unique IDs for each tab or mode
@@ -726,8 +730,18 @@
                     }
                 }
 
-                // CHANGED: Dynamically select endpoint based on mode
-                const endpoint = ((activeTab === 'resume' && isTechnicalProficiency) || activeTab === 'audio') ? '/process_audio' : '/process';
+                // FIXED: Use button detection instead of field detection for endpoint selection
+                const endpoint = (isTechnicalBtn || activeTab === 'audio') ? '/process_audio' : '/process';
+                
+                // Debug logging to verify endpoint selection
+                console.log('Analysis Type Detection:', {
+                    isTechnicalBtn,
+                    isResumeBtn,
+                    activeTab,
+                    endpoint,
+                    isTechnicalProficiency
+                });
+                
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     body: formData
