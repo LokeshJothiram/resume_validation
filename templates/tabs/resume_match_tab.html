@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-5 w-full animate-fade-in overflow-visible resume-tab-animate">
     <!-- Row 1: Resume Match -->
-    <div class="flex flex-col md:flex-row gap-6 w-full">
+    <div class="flex flex-col md:flex-row gap-6 w-full min-h-[600px]">
         <!-- Left: Resume Match Upload Area -->
         <div class="flex flex-col gap-4 flex-none md:w-1/2">
             <div class="bg-white/60 backdrop-blur-sm border border-blue-200/60 rounded-xl p-6 shadow-sm animate-fade-in mt-2 hover:shadow-xl transition-all duration-300 group
@@ -61,11 +61,11 @@
             </div>
         </div>
         <!-- Right: Resume Match Analysis Result -->
-        <div class="flex-1 flex flex-col gap-4">
-            <div class="w-full pl-0 mt-0">
+        <div class="flex-1 flex flex-col gap-4 h-full">
+            <div class="w-full pl-0 mt-0 h-full flex flex-col">
                 <h2 class="text-2xl font-bold mb-4 text-gray-800 header-gradient">Analysis Results</h2>
                 <!-- Loader under Analysis Results -->
-                <div id="loader-resume" class="text-center p-8 hidden">
+                <div id="loader-resume" class="text-center p-8 hidden flex-1 flex items-center justify-center">
                     <div role="status" class="flex flex-col items-center justify-center">
                         <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
@@ -84,12 +84,18 @@
                         <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
                     </button>
                 </div>
-                <div id="results-resume" class="p-0">
+                <div id="results-resume" class="flex-1 flex flex-col min-h-0">
                     <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
-                    <div class="space-y-6">
-                        <div id="resume_result_card_resume" class="bg-white p-4 rounded-lg shadow-md">
-                            <div id="placeholder-resume" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                            <div id="resume_result_resume"></div>
+                    <div class="flex-1 flex flex-col">
+                        <div id="resume_result_card_resume" class="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl p-6 shadow-lg flex-1 flex flex-col min-h-0">
+                            <div id="placeholder-resume" class="text-gray-400 text-center py-16 flex-1 flex items-center justify-center">
+                                <div class="text-center">
+                                    <i data-lucide="file-text" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                                    <p class="text-lg font-medium">No analysis yet</p>
+                                    <p class="text-sm">Please upload files and click <b>Analyze</b> to get started.</p>
+                                </div>
+                            </div>
+                            <div id="resume_result_resume" class="flex-1 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +103,7 @@
         </div>
     </div>
     <!-- Row 2: Technical Proficiency -->
-    <div class="flex flex-col md:flex-row gap-6 w-full">
+    <div class="flex flex-col md:flex-row gap-6 w-full min-h-[600px]">
         <!-- Left: Technical Proficiency Upload Area -->
         <div class="flex flex-col gap-4 flex-none md:w-1/2">
             <div class="bg-white/60 backdrop-blur-sm border border-green-200/60 rounded-xl p-6 shadow-sm animate-fade-in mt-2">
@@ -193,11 +199,11 @@
             </div>
         </div>
         <!-- Right: Technical Proficiency Analysis Result -->
-        <div class="flex-1 flex flex-col gap-4">
-            <div class="w-full pl-0 mt-0">
+        <div class="flex-1 flex flex-col gap-4 h-full">
+            <div class="w-full pl-0 mt-0 h-full flex flex-col">
                 <h2 class="text-2xl font-bold mb-4 text-gray-800 header-gradient">Technical Proficiency Analysis Results</h2>
                 <!-- Loader under Analysis Results -->
-                <div id="loader-audio" class="text-center p-8 hidden">
+                <div id="loader-audio" class="text-center p-8 hidden flex-1 flex items-center justify-center">
                     <div role="status" class="flex flex-col items-center justify-center">
                         <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
@@ -216,12 +222,18 @@
                         <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
                     </button>
                 </div>
-                <div id="results-audio" class="p-0">
+                <div id="results-audio" class="flex-1 flex flex-col min-h-0">
                     <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                    <div class="space-y-6">
-                        <div id="audio_result_card_audio" class="bg-white p-4 rounded-lg shadow-md">
-                            <div id="placeholder-audio" class="text-gray-400 text-center py-12">No analysis yet. Please upload files and click <b>Analyze Candidate</b>.</div>
-                            <div id="audio_result_audio"></div>
+                    <div class="flex-1 flex flex-col">
+                        <div id="audio_result_card_audio" class="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl p-6 shadow-lg flex-1 flex flex-col min-h-0">
+                            <div id="placeholder-audio" class="text-gray-400 text-center py-16 flex-1 flex items-center justify-center">
+                                <div class="text-center">
+                                    <i data-lucide="mic" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                                    <p class="text-lg font-medium">No analysis yet</p>
+                                    <p class="text-sm">Please upload files and click <b>Analyze Candidate</b> to get started.</p>
+                                </div>
+                            </div>
+                            <div id="audio_result_audio" class="flex-1 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
@@ -598,5 +610,58 @@ button[type="submit"]:active {
 }
 .resume-tab-animate > .flex.flex-col.md\:flex-row:nth-child(3) {
     animation-delay: 0.3s;
+}
+
+/* Enhanced analysis results styling */
+#resume_result_card_resume,
+#audio_result_card_audio {
+    transition: all 0.3s ease-in-out;
+    border: 1px solid rgba(229, 231, 235, 0.6);
+}
+
+#resume_result_card_resume:hover,
+#audio_result_card_audio:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+}
+
+/* Improved placeholder styling */
+#placeholder-resume,
+#placeholder-audio {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 0.75rem;
+    border: 2px dashed #cbd5e1;
+}
+
+/* Better scrollbar styling for results */
+#resume_result_resume::-webkit-scrollbar,
+#audio_result_audio::-webkit-scrollbar {
+    width: 6px;
+}
+
+#resume_result_resume::-webkit-scrollbar-track,
+#audio_result_audio::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+#resume_result_resume::-webkit-scrollbar-thumb,
+#audio_result_audio::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#resume_result_resume::-webkit-scrollbar-thumb:hover,
+#audio_result_audio::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Ensure proper height distribution */
+.flex-1 {
+    flex: 1 1 0%;
+}
+
+.min-h-0 {
+    min-height: 0;
 }
 </style> 
