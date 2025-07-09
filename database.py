@@ -58,3 +58,11 @@ class SkillAssessment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     # Add more fields as needed (e.g., resume filename, result, etc.) 
+
+class IQGFileUpload(db.Model):
+    __tablename__ = 'iqg_file_uploads'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    original_filename = db.Column(db.String(255), nullable=False)
+    file_data = db.Column(db.LargeBinary, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False) 

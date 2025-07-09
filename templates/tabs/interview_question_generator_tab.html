@@ -423,7 +423,7 @@ function fetchIQGFiles() {
       if (data.files && data.files.length > 0) {
         data.files.forEach(file => {
           const li = document.createElement('li');
-          li.innerHTML = `<a href="/download_iqg_file/${encodeURIComponent(file.filename)}" class="underline hover:text-blue-900" target="_blank">${file.filename}</a> <span class='text-xs text-gray-400'>(${file.upload_date})</span>`;
+          li.innerHTML = `<a href="/download_iqg_file/${file.id}" class="underline hover:text-blue-900" target="_blank">${file.original_filename}</a> <span class='text-xs text-gray-400'>(${file.upload_date})</span>`;
           iqgFileList.appendChild(li);
         });
       } else {

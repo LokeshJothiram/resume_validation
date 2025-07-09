@@ -789,9 +789,9 @@ def delete_shortlisted(resume_id):
     from database import ShortlistedResume, db
     r = ShortlistedResume.query.filter_by(id=resume_id, user_id=user.id).first_or_404()
     # Optionally, delete the file from disk as well
-    file_path = os.path.join(SHORTLIST_FOLDER, r.stored_filename)
-    if os.path.exists(file_path):
-        os.remove(file_path)
+    # file_path = os.path.join(SHORTLIST_FOLDER, r.stored_filename)
+    # if os.path.exists(file_path):
+    #     os.remove(file_path)
     db.session.delete(r)
     db.session.commit()
     log_activity(user, 'delete_shortlisted', {'resume_id': resume_id})
@@ -1304,41 +1304,54 @@ def test_job_requirement():
 @app.route('/upload_iqg_file', methods=['POST'])
 @login_required
 def upload_iqg_file():
+    from database import IQGFileUpload, db
+    from utils import get_current_user
     uploaded_file = request.files.get('iqg_file')
     if not uploaded_file or not uploaded_file.filename:
         return jsonify({'status': 'error', 'message': 'No file uploaded'})
-    upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'tech_questions')
-    os.makedirs(upload_dir, exist_ok=True)
-    filename = secure_filename(uploaded_file.filename)
+    original_filename = secure_filename(uploaded_file.filename)
+    file_data = uploaded_file.read()
     from datetime import datetime
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f"{timestamp}_{filename}"
-    file_path = os.path.join(upload_dir, filename)
-    uploaded_file.save(file_path)
+    user = get_current_user()
+    user_id = user.id if user else None
+    iqg_file = IQGFileUpload(
+        user_id=user_id,
+        original_filename=original_filename,
+        file_data=file_data,
+        timestamp=datetime.now()
+    )
+    db.session.add(iqg_file)
+    db.session.commit()
     return jsonify({'status': 'success', 'message': 'File uploaded successfully'})
 
 @app.route('/list_iqg_files', methods=['GET'])
 @login_required
 def list_iqg_files():
-    upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'tech_questions')
+    from database import IQGFileUpload
     files = []
-    if os.path.exists(upload_dir):
-        for filename in os.listdir(upload_dir):
-            file_path = os.path.join(upload_dir, filename)
-            if os.path.isfile(file_path):
-                file_stat = os.stat(file_path)
-                files.append({
-                    'filename': filename,
-                    'upload_date': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M')
-                })
-    files.sort(key=lambda x: x['upload_date'], reverse=True)
+    for f in IQGFileUpload.query.order_by(IQGFileUpload.timestamp.desc()).all():
+        files.append({
+            'id': f.id,
+            'original_filename': f.original_filename,
+            'upload_date': f.timestamp.strftime('%Y-%m-%d %H:%M'),
+            'user_id': f.user_id
+        })
     return jsonify({'files': files})
 
-@app.route('/download_iqg_file/<filename>')
+@app.route('/download_iqg_file/<int:file_id>')
 @login_required
-def download_iqg_file(filename):
-    upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'tech_questions')
-    return send_from_directory(upload_dir, filename, as_attachment=True)
+def download_iqg_file(file_id):
+    from database import IQGFileUpload
+    from flask import send_file
+    import io
+    file_record = IQGFileUpload.query.get(file_id)
+    if not file_record:
+        return jsonify({'error': 'File not found'}), 404
+    return send_file(
+        io.BytesIO(file_record.file_data),
+        as_attachment=True,
+        download_name=file_record.original_filename
+    )
 
 if __name__ == '__main__':
     with app.app_context():
