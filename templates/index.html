@@ -664,7 +664,8 @@
 
                 // Use unique IDs for each tab or mode
                 let loaderId, resultsId, actionBtnsId, saveBtnId, shortlistBtnId, metaInfoId, resultCardId, resultDivId;
-                if ((activeTab === 'resume' && isTechnicalProficiency) || activeTab === 'audio') {
+                // FIX: Use which button was clicked, not just field values
+                if (isTechnicalBtn || activeTab === 'audio') {
                     loaderId = 'loader-audio';
                     resultsId = 'results-audio';
                     actionBtnsId = 'action-btns-audio';
@@ -673,7 +674,7 @@
                     metaInfoId = 'meta_info_audio';
                     resultCardId = 'audio_result_card_audio';
                     resultDivId = 'audio_result_audio';
-                } else if (activeTab === 'resume') {
+                } else if (isResumeBtn && activeTab === 'resume') {
                     loaderId = 'loader-resume';
                     resultsId = 'results-resume';
                     actionBtnsId = 'action-btns-resume';
