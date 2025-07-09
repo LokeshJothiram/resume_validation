@@ -1140,43 +1140,39 @@ def user_dashboard_stats():
 def admin_upload_job_requirement():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
-    
     try:
-        # job_title = request.form.get('job_title', '')
-        # job_description = request.form.get('job_description', '')
+        from database import JobRequirementFile, db
+        from utils import get_current_user
         uploaded_file = request.files.get('job_file')
-        
         if not uploaded_file or not uploaded_file.filename:
             return jsonify({'error': 'File is required'}), 400
-        
-        # Create admin_uploads directory if it doesn't exist
-        import os
-        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
-        os.makedirs(upload_dir, exist_ok=True)
-        
-        filename = None
-        if uploaded_file and uploaded_file.filename:
-            # Secure filename
-            from werkzeug.utils import secure_filename
-            filename = secure_filename(uploaded_file.filename)
-            from datetime import datetime
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            filename = f"{timestamp}_{filename}"
-            file_path = os.path.join(upload_dir, filename)
-            uploaded_file.save(file_path)
-        
-        # Save to database (you'll need to create a JobRequirement model)
-        # For now, we'll just save the file and return success
-        # TODO: Add database model for job requirements
-        
-        log_activity(get_current_user(), 'admin_upload_job_requirement', {
-            # 'job_title': job_title,
-            'filename': filename,
-            'has_file': bool(filename)
+        original_filename = secure_filename(uploaded_file.filename)
+        file_data = uploaded_file.read()
+        from datetime import datetime
+        user = get_current_user()
+        user_id = user.id if user else None
+        timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_id = uuid.uuid4().hex[:8]
+        if '.' in original_filename:
+            name, ext = original_filename.rsplit('.', 1)
+            unique_filename = f"{unique_id}_{name}_{timestamp_str}.{ext}"
+        else:
+            unique_filename = f"{unique_id}_{original_filename}_{timestamp_str}"
+        job_title = unique_filename.rsplit('.', 1)[0]
+        job_file = JobRequirementFile(
+            user_id=user_id,
+            original_filename=unique_filename,
+            file_data=file_data,
+            timestamp=datetime.now(),
+            job_title=job_title
+        )
+        db.session.add(job_file)
+        db.session.commit()
+        log_activity(user, 'admin_upload_job_requirement', {
+            'filename': original_filename,
+            'has_file': True
         })
-        
         return jsonify({'status': 'success', 'message': 'Job requirement uploaded successfully'})
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1185,87 +1181,57 @@ def admin_upload_job_requirement():
 def admin_get_job_requirements():
     if 'role' not in session or session['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 403
-    
     try:
-        import os
-        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
-        
-        if not os.path.exists(upload_dir):
-            return jsonify({'status': 'success', 'files': []})
-        
+        from database import JobRequirementFile
         files = []
-        for filename in os.listdir(upload_dir):
-            if filename.endswith(('.pdf', '.doc', '.docx', '.txt')):
-                file_path = os.path.join(upload_dir, filename)
-                file_stat = os.stat(file_path)
-                files.append({
-                    'id': filename,  # Using filename as ID for now
-                    'filename': filename,
-                    'job_title': filename.replace('.pdf', '').replace('.doc', '').replace('.docx', '').replace('.txt', ''),
-                    'upload_date': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
-                    'size': file_stat.st_size
-                })
-        
-        # Sort by upload date (newest first)
-        files.sort(key=lambda x: x['upload_date'], reverse=True)
-        
-        return jsonify({'status': 'success', 'files': files})
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/admin/download-job-requirement/<filename>', methods=['GET'])
-@login_required
-def admin_download_job_requirement(filename):
-    if 'role' not in session or session['role'] != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 403
-    
-    try:
-        import os
-        from werkzeug.utils import secure_filename
-        from flask import send_from_directory
-        
-        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
-        file_path = os.path.join(upload_dir, secure_filename(filename))
-        
-        if not os.path.exists(file_path):
-            return jsonify({'error': 'File not found'}), 404
-        
-        return send_from_directory(upload_dir, filename, as_attachment=True)
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/admin/delete-job-requirement/<filename>', methods=['DELETE'])
-@login_required
-def admin_delete_job_requirement(filename):
-    if 'role' not in session or session['role'] != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 403
-    
-    try:
-        import os
-        from werkzeug.utils import secure_filename
-        
-        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
-        file_path = os.path.join(upload_dir, secure_filename(filename))
-        
-        if not os.path.exists(file_path):
-            return jsonify({'error': 'File not found'}), 404
-        
-        # Delete the file first
-        os.remove(file_path)
-        
-        # Try to log the activity, but don't fail if logging fails
-        try:
-            log_activity(get_current_user(), 'admin_delete_job_requirement', {
-                'deleted_file': filename
+        for f in JobRequirementFile.query.order_by(JobRequirementFile.timestamp.desc()).all():
+            files.append({
+                'id': f.id,
+                'filename': f.original_filename,
+                'job_title': f.job_title,
+                'upload_date': f.timestamp.strftime('%Y-%m-%d %H:%M'),
+                'size': len(f.file_data)
             })
-        except Exception as log_error:
-            # Log the error but don't fail the delete operation
-            print(f"Warning: Failed to log activity for file deletion: {log_error}")
-        
+        return jsonify({'status': 'success', 'files': files})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/download-job-requirement/<int:file_id>', methods=['GET'])
+@login_required
+def admin_download_job_requirement(file_id):
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    try:
+        from database import JobRequirementFile
+        from flask import send_file
+        import io
+        file_record = JobRequirementFile.query.get(file_id)
+        if not file_record:
+            return jsonify({'error': 'File not found'}), 404
+        return send_file(
+            io.BytesIO(file_record.file_data),
+            as_attachment=True,
+            download_name=file_record.original_filename
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/delete-job-requirement/<int:file_id>', methods=['DELETE'])
+@login_required
+def admin_delete_job_requirement(file_id):
+    if 'role' not in session or session['role'] != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 403
+    try:
+        from database import JobRequirementFile, db
+        file_record = JobRequirementFile.query.get(file_id)
+        if not file_record:
+            return jsonify({'error': 'File not found'}), 404
+        db.session.delete(file_record)
+        db.session.commit()
+        log_activity(get_current_user(), 'admin_delete_job_requirement', {
+            'deleted_file_id': file_id
+        })
         return jsonify({'status': 'success', 'message': 'File deleted successfully'})
-        
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1275,24 +1241,16 @@ def get_job_requirements_public():
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 403
     try:
-        import os
-        from datetime import datetime
-        upload_dir = os.path.join(os.getcwd(), 'admin_uploads', 'job_requirements')
-        if not os.path.exists(upload_dir):
-            return jsonify({'status': 'success', 'files': []})
+        from database import JobRequirementFile
         files = []
-        for filename in os.listdir(upload_dir):
-            if filename.endswith(('.pdf', '.doc', '.docx', '.txt')):
-                file_path = os.path.join(upload_dir, filename)
-                file_stat = os.stat(file_path)
-                files.append({
-                    'id': filename,
-                    'filename': filename,
-                    'job_title': filename.replace('.pdf', '').replace('.doc', '').replace('.docx', '').replace('.txt', ''),
-                    'upload_date': datetime.fromtimestamp(file_stat.st_mtime).strftime('%Y-%m-%d %H:%M'),
-                    'size': file_stat.st_size
-                })
-        files.sort(key=lambda x: x['upload_date'], reverse=True)
+        for f in JobRequirementFile.query.order_by(JobRequirementFile.timestamp.desc()).all():
+            files.append({
+                'id': f.id,
+                'filename': f.original_filename,
+                'job_title': f.job_title,
+                'upload_date': f.timestamp.strftime('%Y-%m-%d %H:%M'),
+                'size': len(f.file_data)
+            })
         return jsonify({'status': 'success', 'files': files})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

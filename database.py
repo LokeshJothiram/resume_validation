@@ -66,3 +66,12 @@ class IQGFileUpload(db.Model):
     original_filename = db.Column(db.String(255), nullable=False)
     file_data = db.Column(db.LargeBinary, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False) 
+
+class JobRequirementFile(db.Model):
+    __tablename__ = 'job_requirement_files'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    original_filename = db.Column(db.String(255), nullable=False)
+    file_data = db.Column(db.LargeBinary, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+    job_title = db.Column(db.String(255), nullable=True) 
