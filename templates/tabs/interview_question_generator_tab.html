@@ -1,14 +1,19 @@
 <div class="flex flex-col gap-6 animate-fade-in overflow-hidden">
   <!-- File Upload Section for Interview Question Generator -->
   <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm mb-4">
-    <div id="iqg-upload-form" class="flex flex-col md:flex-row gap-4 items-center">
+    <div id="iqg-upload-form" class="flex flex-col md:flex-row gap-4 items-center animate-fade-in-scale">
       <label class="block text-sm font-medium text-gray-700 mb-1">Upload Interview/Tech Question File</label>
-      <input type="file" id="iqg-upload-input" name="iqg_file" accept=".docx,.pdf" class="border border-gray-300 rounded p-2" required>
-      <button id="iqg-upload-btn" type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold">Upload</button>
+      <label for="iqg-upload-input" class="custom-file-upload">
+        <i data-lucide="file-text"></i>
+        <span>Choose File</span>
+        <input type="file" id="iqg-upload-input" name="iqg_file" accept=".docx,.pdf" style="display: none;" required>
+      </label>
+      <span class="file-name transition-all duration-300" id="iqgUploadFileName">No file chosen</span>
+      <button id="iqg-upload-btn" type="button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold transition-all duration-300 transform hover:scale-105">Upload</button>
     </div>
     <div class="mt-4">
       <span class="font-semibold text-gray-700">Uploaded Files:</span>
-      <ul id="iqg-uploaded-files-list" class="mt-2 space-y-1 text-sm text-blue-700">
+      <ul id="iqg-uploaded-files-list" class="mt-2 space-y-2 text-sm animate-fade-in-up flex flex-col gap-2 sm:gap-2 w-full">
         <!-- Uploaded files will be listed here by JS -->
       </ul>
     </div>
@@ -378,6 +383,19 @@ if (document.getElementById('question_gen_jd_upload')) {
   });
 }
 
+// Modern file input for Interview/Tech Question File
+if (document.getElementById('iqg-upload-input')) {
+  document.getElementById('iqg-upload-input').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const fileNameElement = document.getElementById('iqgUploadFileName');
+    fileNameElement.textContent = file ? file.name : 'No file chosen';
+    fileNameElement.classList.add('animate-fade-in-scale');
+    setTimeout(() => {
+      fileNameElement.classList.remove('animate-fade-in-scale');
+    }, 600);
+  });
+}
+
 // Add success animations for copy and download buttons
 document.addEventListener('DOMContentLoaded', function() {
   const copyBtn = document.getElementById('copy-questions-btn');
@@ -461,9 +479,22 @@ function fetchIQGFiles() {
       if (data.files && data.files.length > 0) {
         data.files.forEach(file => {
           const li = document.createElement('li');
-          li.innerHTML = `<a href="/download_iqg_file/${file.id}" class="underline hover:text-blue-900" target="_blank">${file.original_filename}</a> <span class='text-xs text-gray-400'>(${file.upload_date})</span> <button class="ml-2 text-red-600 hover:text-red-800 text-xs font-bold delete-iqg-file-btn" data-id="${file.id}">Delete</button>`;
+          li.className = 'bg-white border border-blue-100 rounded-lg p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm hover:shadow-md transition-all duration-300 animate-fade-in-up gap-2 sm:gap-0 w-full';
+          li.innerHTML = `
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+              <div class='flex items-center gap-2'>
+                <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+                <a href="/download_iqg_file/${file.id}" class="underline hover:text-blue-900 font-medium transition-colors duration-200 break-all" target="_blank">${file.original_filename}</a>
+              </div>
+              <span class='text-xs text-gray-400 ml-0 sm:ml-2'>(${file.upload_date})</span>
+            </div>
+            <button class="mt-2 sm:mt-0 ml-0 sm:ml-4 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-800 text-xs font-bold px-3 py-1 rounded transition-all duration-200 delete-iqg-file-btn flex items-center gap-1 w-max" data-id="${file.id}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>Delete
+            </button>
+          `;
           iqgFileList.appendChild(li);
         });
+        if(window.lucide) lucide.createIcons();
       } else {
         iqgFileList.innerHTML = '<li class="text-gray-400">No files uploaded yet.</li>';
       }
