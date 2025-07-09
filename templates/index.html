@@ -211,17 +211,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            // --- DOM ELEMENT VARIABLE DECLARATIONS (move to top) ---
-            const jobDocxUpload = document.getElementById('jobDocxUpload');
-            const techQuestionsUpload = document.getElementById('techQuestionsUpload');
-            const addResumeBtn = document.getElementById('add-resume-btn');
-            const resumeInputs = document.getElementById('resume-inputs');
-            const jobDescriptionInput = document.getElementById('job_description');
-            const savedDescriptions = document.getElementById('savedDescriptions');
-            const audioInput = document.getElementById('audio');
-            const techInput = document.getElementById('technology');
-            // --- END DOM ELEMENT VARIABLE DECLARATIONS ---
-            
             // Prevent browser back button from going to login page
             if (window.history && window.history.pushState) {
                 window.addEventListener('popstate', function() {
@@ -369,8 +358,7 @@
                 }
             });
 
-            // Declare techResumeInput with let to avoid redeclaration errors
-            let techResumeInput = document.getElementById('tech_resume');
+            const techResumeInput = document.getElementById('tech_resume');
             let latestAnalysisResult = null;
             let latestResumeResult = null;
             let latestTechnicalResult = null;
@@ -1098,6 +1086,7 @@
                         if (activeTab === 'audio') {
                             const techInput = document.getElementById('technology');
                             if (techInput) technology = techInput.value;
+                            const audioInput = document.getElementById('audio');
                             if (audioInput && audioInput.files && audioInput.files.length > 0) {
                                 audioFileName = audioInput.files[0].name;
                             }
@@ -1257,23 +1246,21 @@
             }
         });
         // Technical tab
-        if (audioInput) {
-            audioInput.addEventListener('change', () => {
-                if (audioInput.files && audioInput.files.length > 0) {
-                    const el = document.getElementById('audio_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
-        if (techInput) {
-            techInput.addEventListener('change', () => {
-                if (techInput.value) {
-                    const el = document.getElementById('technology_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
-        if (typeof techResumeInput !== 'undefined' && techResumeInput) {
+        const audioInput = document.getElementById('audio');
+        const techInput = document.getElementById('technology');
+        audioInput.addEventListener('change', () => {
+            if (audioInput.files && audioInput.files.length > 0) {
+                const el = document.getElementById('audio_error');
+                if (el) el.classList.add('hidden');
+            }
+        });
+        techInput.addEventListener('change', () => {
+            if (techInput.value) {
+                const el = document.getElementById('technology_error');
+                if (el) el.classList.add('hidden');
+            }
+        });
+        if (techResumeInput) {
             techResumeInput.addEventListener('change', () => {
                 if (techResumeInput.files && techResumeInput.files.length > 0) {
                     const el = document.getElementById('tech_resume_error');
@@ -1309,142 +1296,91 @@
             });
         });
 
-        if (jobDocxUpload) {
-            jobDocxUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && file.name.endsWith('.docx')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        mammoth.extractRawText({arrayBuffer: event.target.result})
-                            .then(function(result) {
-                                const jdText = result.value;
-                                document.getElementById('job_description').value = jdText;
-                                const el = document.getElementById('job_description_error');
-                                if (el) el.classList.add('hidden');
-                            })
-                            .catch(function(err) {
-                                alert('Could not read the Word file.');
-                            });
+        document.getElementById('jobDocxUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.docx')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    mammoth.extractRawText({arrayBuffer: event.target.result})
+                        .then(function(result) {
+                            const jdText = result.value;
+                            document.getElementById('job_description').value = jdText;
+                            const el = document.getElementById('job_description_error');
+                            if (el) el.classList.add('hidden');
+                        })
+                        .catch(function(err) {
+                            alert('Could not read the Word file.');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file) {
+                alert('Only .docx files are supported.');
+                e.target.value = '';
+            }
+        });
+
+        document.getElementById('techQuestionsUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.docx')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    mammoth.extractRawText({arrayBuffer: event.target.result})
+                        .then(function(result) {
+                            document.getElementById('tech_questions').value = result.value;
+                        })
+                        .catch(function(err) {
+                            alert('Could not read the Word file.');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file && file.name.endsWith('.txt')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('tech_questions').value = event.target.result;
+                };
+                reader.readAsText(file);
+            } else if (file) {
+                alert('Only .docx or .txt files are supported.');
+                e.target.value = '';
+            }
+        });
+
+        // Resume dynamic add/remove logic
+        document.getElementById('add-resume-btn').addEventListener('click', function() {
+            const container = document.getElementById('resume-inputs');
+            const row = document.createElement('div');
+            row.className = 'flex items-center mb-2 resume-input-row gap-2';
+            const idx = container.querySelectorAll('.resume-input-row').length;
+            row.innerHTML = `
+              <label class="custom-file-upload">
+                <i data-lucide="file-text"></i>
+                <span>Choose File</span>
+                <input type="file" name="resume" accept=".pdf,.docx" class="resume-file" onchange="document.getElementById('resumeFileName${idx}').textContent = this.files[0]?.name || 'No file chosen'">
+              </label>
+              <span class="file-name" id="resumeFileName${idx}">No file chosen</span>
+              <button type="button" class="ml-2 remove-resume-btn" tabindex="-1"><i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i></button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons();
+            updateRemoveButtons();
+        });
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.resume-input-row');
+            rows.forEach((row, idx) => {
+                const btn = row.querySelector('.remove-resume-btn');
+                if (btn) {
+                    btn.classList.toggle('hidden', rows.length === 1);
+                    btn.onclick = function() {
+                        if (rows.length > 1) {
+                            row.remove();
+                            updateRemoveButtons();
+                        }
                     };
-                    reader.readAsArrayBuffer(file);
-                } else if (file) {
-                    alert('Only .docx files are supported.');
-                    e.target.value = '';
                 }
             });
         }
-
-        if (techQuestionsUpload) {
-            techQuestionsUpload.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && file.name.endsWith('.docx')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        mammoth.extractRawText({arrayBuffer: event.target.result})
-                            .then(function(result) {
-                                document.getElementById('tech_questions').value = result.value;
-                            })
-                            .catch(function(err) {
-                                alert('Could not read the Word file.');
-                            });
-                    };
-                    reader.readAsArrayBuffer(file);
-                } else if (file && file.name.endsWith('.txt')) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        document.getElementById('tech_questions').value = event.target.result;
-                    };
-                    reader.readAsText(file);
-                } else if (file) {
-                    alert('Only .docx or .txt files are supported.');
-                    e.target.value = '';
-                }
-            });
-        }
-
-        if (addResumeBtn) {
-            addResumeBtn.addEventListener('click', function() {
-                const container = document.getElementById('resume-inputs');
-                const row = document.createElement('div');
-                row.className = 'flex items-center mb-2 resume-input-row gap-2';
-                const idx = container.querySelectorAll('.resume-input-row').length;
-                row.innerHTML = `
-                  <label class="custom-file-upload">
-                    <i data-lucide="file-text"></i>
-                    <span>Choose File</span>
-                    <input type="file" name="resume" accept=".pdf,.docx" class="resume-file" onchange="document.getElementById('resumeFileName${idx}').textContent = this.files[0]?.name || 'No file chosen'">
-                  </label>
-                  <span class="file-name" id="resumeFileName${idx}">No file chosen</span>
-                  <button type="button" class="ml-2 remove-resume-btn" tabindex="-1"><i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i></button>
-                `;
-                container.appendChild(row);
-                lucide.createIcons();
-                updateRemoveButtons();
-            });
-        }
-
-        if (resumeInputs) {
-            resumeInputs.addEventListener('change', (e) => {
-                if (e.target.classList.contains('resume-file')) {
-                    let hasFile = false;
-                    document.querySelectorAll('.resume-file').forEach(input => {
-                        if (input.files && input.files.length > 0) hasFile = true;
-                    });
-                    if (hasFile) {
-                        const el = document.getElementById('resume_error');
-                        if (el) el.classList.add('hidden');
-                    }
-                }
-            });
-        }
-
-        if (jobDescriptionInput) {
-            jobDescriptionInput.addEventListener('input', () => {
-                if (jobDescriptionInput.value.trim()) {
-                    const el = document.getElementById('job_description_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
-
-        if (savedDescriptions) {
-            savedDescriptions.addEventListener('change', function() {
-                const idx = this.value;
-                if (idx !== '') {
-                    const saved = JSON.parse(localStorage.getItem('jobDescriptions') || '[]');
-                    document.getElementById('job_description').value = saved[idx];
-                    const el = document.getElementById('job_description_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
-
-        if (audioInput) {
-            audioInput.addEventListener('change', () => {
-                if (audioInput.files && audioInput.files.length > 0) {
-                    const el = document.getElementById('audio_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
-
-        if (techInput) {
-            techInput.addEventListener('change', () => {
-                if (techInput.value) {
-                    const el = document.getElementById('technology_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
-
-        if (techResumeInput) {
-            techResumeInput.addEventListener('change', () => {
-                if (techResumeInput.files && techResumeInput.files.length > 0) {
-                    const el = document.getElementById('tech_resume_error');
-                    if (el) el.classList.add('hidden');
-                }
-            });
-        }
+        updateRemoveButtons();
 
         console.log('Calling lucide.createIcons()');
         lucide.createIcons();
@@ -1809,9 +1745,7 @@
                 }
             });
         }
-        const generateQuestionsBtn = document.getElementById('generate-questions-btn');
-        if (generateQuestionsBtn) {
-          generateQuestionsBtn.addEventListener('click', async function() {
+        document.getElementById('generate-questions-btn').addEventListener('click', async function() {
             // Validation for Interview Question Generator
             let valid = true;
             const jd = document.getElementById('question_gen_jd').value.trim();
@@ -1862,18 +1796,13 @@
                 showToast('Error generating questions.', 'error');
             }
         });
-        const copyQuestionsBtn = document.getElementById('copy-questions-btn');
-        if (copyQuestionsBtn) {
-          copyQuestionsBtn.addEventListener('click', function() {
+        document.getElementById('copy-questions-btn').addEventListener('click', function() {
             const listPre = document.getElementById('question-gen-list');
             navigator.clipboard.writeText(listPre.textContent).then(() => {
-              showToast('Questions copied!', 'success');
+                showToast('Questions copied!', 'success');
             });
-          });
-        }
-        const downloadQuestionsBtn = document.getElementById('download-questions-btn');
-        if (downloadQuestionsBtn) {
-          downloadQuestionsBtn.addEventListener('click', function() {
+        });
+        document.getElementById('download-questions-btn').addEventListener('click', function() {
             const listPre = document.getElementById('question-gen-list');
             const blob = new Blob([listPre.textContent], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
@@ -1883,41 +1812,50 @@
             document.body.appendChild(a);
             a.click();
             setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
-          });
-        }
-        const questionGenJdUpload = document.getElementById('question_gen_jd_upload');
-        if (questionGenJdUpload) {
-          questionGenJdUpload.addEventListener('change', function(e) {
+        });
+
+        // Interview Question Generator JD .docx upload logic
+        document.getElementById('question_gen_jd_upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.name.endsWith('.docx')) {
-              const reader = new FileReader();
-              reader.onload = function(event) {
-                mammoth.extractRawText({arrayBuffer: event.target.result})
-                  .then(function(result) {
-                    document.getElementById('question_gen_jd').value = result.value;
-                    const el = document.getElementById('question_gen_jd_error');
-                    if (el) el.classList.add('hidden');
-                  })
-                  .catch(function(err) {
-                    alert('Could not read the Word file.');
-                  });
-              };
-              reader.readAsArrayBuffer(file);
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    mammoth.extractRawText({arrayBuffer: event.target.result})
+                        .then(function(result) {
+                            document.getElementById('question_gen_jd').value = result.value;
+                            const el = document.getElementById('question_gen_jd_error');
+                            if (el) el.classList.add('hidden');
+                        })
+                        .catch(function(err) {
+                            alert('Could not read the Word file.');
+                        });
+                };
+                reader.readAsArrayBuffer(file);
             } else if (file) {
-              alert('Only .docx files are supported.');
-              e.target.value = '';
+                alert('Only .docx files are supported.');
+                e.target.value = '';
             }
-          });
-        }
-        const questionGenJd = document.getElementById('question_gen_jd');
-        if (questionGenJd) {
-          questionGenJd.addEventListener('input', () => {
+        });
+
+        // Hide error when user starts typing or selects a file in Interview Question Generator
+        /* document.getElementById('question_gen_technology').addEventListener('change', () => {
+            if (document.getElementById('question_gen_technology').value) {
+                document.getElementById('question_gen_technology_error').classList.add('hidden');
+            }
+        }); */
+        document.getElementById('question_gen_jd').addEventListener('input', () => {
             if (document.getElementById('question_gen_jd').value.trim()) {
-              const el = document.getElementById('question_gen_jd_error');
-              if (el) el.classList.add('hidden');
+                const el = document.getElementById('question_gen_jd_error');
+                if (el) el.classList.add('hidden');
             }
-          });
-        }
+        });
+
+        // Prevent Enter in num_questions from submitting the form
+        document.getElementById('num_questions').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
 
         // Live validation for number of questions input
         const numQuestionsInput = document.getElementById('num_questions');
@@ -2131,7 +2069,7 @@
         let userData = null;
         let shortlistedBarChart = null;
         let analysesBarChart = null;
-        let userPieChart = null; // <-- Ensure this is declared before use
+        let userPieChart = null;
         let shortlistTrendChart = null;
 
         function updateSummaryAndCharts(filteredData) {
@@ -2428,7 +2366,7 @@
         }
 
         // Activity Logs logic
-        renderActivityLogs = async function() {
+        async function renderActivityLogs() {
           const userSel = document.getElementById('logUserFilter');
           const roleSel = document.getElementById('logRoleFilter');
           const actionSel = document.getElementById('logActionFilter');
@@ -3100,7 +3038,6 @@
       window.addEventListener('resize', adjustMainContentMargin);
     </script>
     <script>
-      // Ensure userPieChart is defined for all scripts that use it
       // Pie Chart: User Activity by Time of Day
       if (window.userRole === 'admin') {
         fetch('/activity_logs?limit=1000')
@@ -3126,7 +3063,7 @@
             });
             const usernames = Object.keys(userMap);
             const dataByBucket = timeBuckets.map(bucket => usernames.map(u => userMap[u][bucket]));
-            if (userPieChart && typeof userPieChart.destroy === 'function') userPieChart.destroy();
+            if (userPieChart) userPieChart.destroy();
             userPieChart = new Chart(document.getElementById('userPieChart').getContext('2d'), {
               type: 'bar',
               data: {
@@ -3176,6 +3113,5 @@
           tryRender();
       }
     </script>
-    
 </body>
 </html>
