@@ -262,6 +262,7 @@
             let activeTab = 'dashboard';
 
             function setActiveTab(tab) {
+                // Remove from user tabs
                 tabIds.forEach(id => {
                     const btn = document.getElementById(id);
                     if (btn) {
@@ -269,6 +270,16 @@
                         btn.classList.add('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
                     }
                 });
+                // Remove from admin tabs
+                const adminTabIds = ['tab-dashboard', 'tab-analytics', 'tab-activity-logs', 'tab-user-management', 'tab-job-requirement-upload', 'tab-question-gen'];
+                adminTabIds.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        btn.classList.remove('active-gradient', 'text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
+                        btn.classList.add('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
+                    }
+                });
+                // Now set the active one
                 const activeBtn = document.getElementById(`tab-${tab}`);
                 if (activeBtn) {
                     activeBtn.classList.remove('text-gray-600', 'border-transparent', 'bg-white', 'font-medium');
@@ -2293,10 +2304,18 @@
 
         const adminTabIds = ['tab-dashboard', 'tab-analytics', 'tab-activity-logs', 'tab-user-management', 'tab-job-requirement-upload'];
         function setAdminActiveTab(tab) {
+          // Remove from admin tabs
+          const adminTabIds = ['tab-dashboard', 'tab-analytics', 'tab-activity-logs', 'tab-user-management', 'tab-job-requirement-upload', 'tab-question-gen'];
           adminTabIds.forEach(id => {
             const btn = document.getElementById(id);
-            if (btn) btn.classList.remove('active-gradient');
+            if (btn) btn.classList.remove('active-gradient', 'text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
           });
+          // Remove from user tabs
+          tabIds.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.remove('active-gradient', 'text-blue-700', 'border-blue-600', 'bg-blue-50', 'font-semibold');
+          });
+          // Now set the active one
           const activeBtn = document.getElementById(`tab-${tab}`);
           if (activeBtn) activeBtn.classList.add('active-gradient');
         }
