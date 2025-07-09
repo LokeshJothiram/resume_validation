@@ -725,25 +725,29 @@ def shortlist_resume():
     match_percentage = request.form.get('match_percentage', None)
     user = get_current_user()
     user_id = user.id if user else None
-    saved_resume_filename = ''
-    original_filename = ''
     if resume_file and resume_file.filename:
-        ext = os.path.splitext(resume_file.filename)[1]
-        original_filename = secure_filename(resume_file.filename)
-        saved_resume_filename = f"resume_{get_ist_now().strftime('%Y%m%d_%H%M%S')}{ext}"
-        resume_file.save(os.path.join(SHORTLIST_FOLDER, saved_resume_filename))
-        # Save metadata to DB
         from database import ShortlistedResume, db
+        import uuid
+        from datetime import datetime
+        original_filename = secure_filename(resume_file.filename)
+        file_data = resume_file.read()
+        unique_id = uuid.uuid4().hex[:8]
+        timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
+        if '.' in original_filename:
+            name, ext = original_filename.rsplit('.', 1)
+            unique_filename = f"{unique_id}_{name}_{timestamp_str}.{ext}"
+        else:
+            unique_filename = f"{unique_id}_{original_filename}_{timestamp_str}"
         shortlist = ShortlistedResume(
             user_id=user_id,
-            original_filename=original_filename,
-            stored_filename=saved_resume_filename,
-            timestamp=get_ist_now(),
+            original_filename=unique_filename,
+            file_data=file_data,
+            timestamp=datetime.now(),
             match_percentage=match_percentage
         )
         db.session.add(shortlist)
         db.session.commit()
-        log_activity(user, 'shortlist_resume', {'filename': saved_resume_filename})
+        log_activity(user, 'shortlist_resume', {'filename': unique_filename})
         return jsonify({'status': 'success', 'id': shortlist.id})
     return jsonify({'status': 'error', 'message': 'No file uploaded'})
 
@@ -760,7 +764,6 @@ def list_shortlisted():
             'id': r.id,
             'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
             'original_filename': r.original_filename,
-            'stored_filename': r.stored_filename,
             'user_id': r.user_id,
             'match_percentage': r.match_percentage
         } for r in resumes
@@ -777,7 +780,6 @@ def get_shortlisted(resume_id):
         'id': r.id,
         'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
         'original_filename': r.original_filename,
-        'stored_filename': r.stored_filename,
         'user_id': r.user_id,
         'match_percentage': r.match_percentage
     })
@@ -788,19 +790,23 @@ def delete_shortlisted(resume_id):
     user = get_current_user()
     from database import ShortlistedResume, db
     r = ShortlistedResume.query.filter_by(id=resume_id, user_id=user.id).first_or_404()
-    # Optionally, delete the file from disk as well
-    # file_path = os.path.join(SHORTLIST_FOLDER, r.stored_filename)
-    # if os.path.exists(file_path):
-    #     os.remove(file_path)
     db.session.delete(r)
     db.session.commit()
     log_activity(user, 'delete_shortlisted', {'resume_id': resume_id})
     return jsonify({'status': 'deleted'})
 
-@app.route('/shortlist/<filename>')
+@app.route('/shortlist/<int:resume_id>')
 @login_required
-def download_shortlisted_resume(filename):
-    return send_from_directory(SHORTLIST_FOLDER, filename, as_attachment=True)
+def download_shortlisted_resume(resume_id):
+    from database import ShortlistedResume
+    from flask import send_file
+    import io
+    r = ShortlistedResume.query.get_or_404(resume_id)
+    return send_file(
+        io.BytesIO(r.file_data),
+        as_attachment=True,
+        download_name=r.original_filename
+    )
 
 @app.route('/admin_analytics', methods=['GET'])
 @login_required

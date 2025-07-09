@@ -27,7 +27,7 @@ class ShortlistedResume(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     original_filename = db.Column(db.String(255), nullable=False)
-    stored_filename = db.Column(db.String(255), nullable=False)
+    file_data = db.Column(db.LargeBinary, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     match_percentage = db.Column(db.Float, nullable=True)
     # Add more fields as needed 

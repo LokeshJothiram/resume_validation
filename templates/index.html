@@ -1945,7 +1945,7 @@
                 const location = data.location || 'San Francisco, CA';
                 const skills = Array.isArray(data.skills) ? data.skills : ['JavaScript', 'SQL'];
                 const matchPercent = data.match_percentage || 0;
-                const resumeUrl = data.stored_filename ? `/shortlist/${data.stored_filename}` : '#';
+                const resumeUrl = `/shortlist/${file.id}`;
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-xl shadow p-4 sm:p-6 mb-4 flex flex-col gap-4";
                 card.setAttribute('data-card-id', file.id);
