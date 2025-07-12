@@ -81,6 +81,23 @@
                     <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
                 </button>
             </div>
+            <!-- Compact Technical Proficiency Actions (hidden by default) -->
+            <div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
+                <button type="button" id="compact-audio-btn" class="btn-compact" title="Upload Interview Audio"><i data-lucide="mic"></i></button>
+                <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
+                <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
+                <select id="compact-technology" class="btn-compact-select" title="Select Primary Technology">
+                    <option value="">Tech</option>
+                    <option value="General">General</option>
+                    <option value="Python">Python</option>
+                    <option value="Java">Java</option>
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="Dotnet">Dotnet</option>
+                    <option value="Machine Learning">Machine Learning</option>
+                    <option value="DevOps">DevOps</option>
+                </select>
+                <button type="button" id="compact-analyze-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
+            </div>
             <div id="results-resume" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
                 <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
                 <div class="flex-1 flex flex-col">
@@ -450,6 +467,36 @@ function handleTechQuestionsUpload(input) {
     document.getElementById('tech_questions').value = '';
   }
 }
+
+// Show/hide compact tech actions with Save/Shortlist
+function toggleCompactTechActions(show) {
+    const compact = document.getElementById('compact-tech-actions');
+    if (compact) {
+        if (show) compact.classList.remove('hidden');
+        else compact.classList.add('hidden');
+    }
+}
+// Patch Save/Shortlist show logic to also show compact tech actions
+const actionBtnsResume = document.getElementById('action-btns-resume');
+const observer = new MutationObserver(() => {
+    toggleCompactTechActions(!actionBtnsResume.classList.contains('hidden'));
+});
+observer.observe(actionBtnsResume, { attributes: true, attributeFilter: ['class'] });
+// Compact button handlers
+function triggerInput(id) {
+    const input = document.getElementById(id);
+    if (input) input.click();
+}
+document.getElementById('compact-audio-btn').onclick = () => triggerInput('audio');
+document.getElementById('compact-tech-resume-btn').onclick = () => triggerInput('tech_resume');
+document.getElementById('compact-tech-questions-btn').onclick = () => document.getElementById('techQuestionsDropdown').focus();
+document.getElementById('compact-technology').onchange = function() {
+    document.getElementById('technology').value = this.value;
+    document.getElementById('technology').dispatchEvent(new Event('change', { bubbles: true }));
+};
+document.getElementById('compact-analyze-btn').onclick = function() {
+    document.getElementById('analyze-technical-btn').click();
+};
 </script>
 
 <style>
@@ -701,5 +748,54 @@ button[type="submit"]:active {
 
 .min-h-0 {
     min-height: 0;
+}
+
+.btn-compact {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 0.375rem;
+    border: 1px solid #d1d5db;
+    background: #f3f4f6;
+    color: #374151;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: background 0.2s, border 0.2s, color 0.2s;
+    cursor: pointer;
+    min-width: 32px;
+    min-height: 32px;
+}
+.btn-compact:hover, .btn-compact:focus {
+    background: #e0e7ff;
+    border-color: #2563eb;
+    color: #1e3a8a;
+}
+.btn-compact-select {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 0.375rem;
+    border: 1px solid #d1d5db;
+    background: #f3f4f6;
+    color: #374151;
+    min-width: 80px;
+    min-height: 32px;
+}
+.btn-compact-analyze {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 0.375rem;
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    min-width: 32px;
+    min-height: 32px;
+}
+.btn-compact-analyze:hover, .btn-compact-analyze:focus {
+    background: #1e40af;
+    border-color: #1e40af;
 }
 </style> 
