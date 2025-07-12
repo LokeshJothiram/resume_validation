@@ -127,37 +127,7 @@
         </div>
     </div>
 </div>
-<!-- Row 2: Technical Proficiency -->
-<!-- Removed the large technical proficiency section. All functionality is now handled by the compact button row below. -->
 
-<!-- Compact Technical Proficiency Actions (hidden by default, shown after resume analysis) -->
-<div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
-    <button type="button" id="compact-audio-btn" class="btn-compact" title="Upload Interview Audio"><i data-lucide="mic"></i></button>
-    <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" style="display:none" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
-    <span class="file-name text-xs text-gray-600" id="audioFileName">No file chosen</span>
-    <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
-    <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
-    <span class="file-name text-xs text-gray-600" id="techResumeFileName">No file chosen</span>
-    <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
-    <select id="techQuestionsDropdown" class="btn-compact-select" title="Select technical questions file">
-        <option value="">Select technical questions...</option>
-    </select>
-    <input type="hidden" id="tech_questions" name="tech_questions">
-    <select id="compact-technology" class="btn-compact-select" title="Select Primary Technology">
-        <option value="">Tech</option>
-        <option value="General">General</option>
-        <option value="Python">Python</option>
-        <option value="Java">Java</option>
-        <option value="JavaScript">JavaScript</option>
-        <option value="Dotnet">Dotnet</option>
-        <option value="Machine Learning">Machine Learning</option>
-        <option value="DevOps">DevOps</option>
-    </select>
-    <button type="submit" id="analyze-technical-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
-</div>
-<div id="tech-errors-container" class="w-full text-left mb-2">
-    <!-- Error messages will be injected here -->
-</div>
 
 <!-- Technical Proficiency Analysis Result (right column, unchanged) -->
 <div class="flex-1 flex flex-col gap-4 h-full w-full">
