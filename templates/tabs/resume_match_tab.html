@@ -59,6 +59,7 @@
     </div>
     <!-- Right: Resume Match Analysis Result -->
     <div class="flex-1 flex flex-col gap-4 h-full w-full">
+        <!-- Resume Match Analysis Result (keep this at the top of the right column) -->
         <div class="w-full pl-0 mt-0 h-full flex flex-col">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Analysis Results</h2>
             <!-- Loader under Analysis Results -->
@@ -109,6 +110,46 @@
             <div id="tech-errors-container" class="w-full text-left mb-2">
                 <!-- Error messages will be injected here -->
             </div>
+            <!-- Technical Proficiency Analysis Results (now below compact actions) -->
+            <div id="technical-results-container" class="flex flex-col hidden">
+                <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Technical Proficiency Analysis Results</h2>
+                <!-- Loader under Analysis Results -->
+                <div id="loader-audio" class="text-center p-4 md:p-8 hidden flex-1 flex items-center justify-center">
+                    <div role="status" class="flex flex-col items-center justify-center">
+                        <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                            <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                        </svg>
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
+                </div>
+                <!-- Save and Shortlist buttons -->
+                <div id="action-btns-audio" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
+                    <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm">
+                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                    </button>
+                    <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm">
+                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                    </button>
+                </div>
+                <div id="results-audio" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
+                    <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+                    <div class="flex-1 flex flex-col">
+                        <div id="audio_result_card_audio" class="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 md:p-6 shadow-lg flex-1 flex flex-col min-h-0">
+                            <div id="placeholder-audio" class="text-gray-400 text-center py-8 md:py-16 flex-1 flex items-center justify-center">
+                                <div class="text-center">
+                                    <i data-lucide="mic" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                                    <p class="text-lg font-medium">No analysis yet</p>
+                                    <p class="text-sm">Please upload files and click <b>Analyze Candidate</b> to get started.</p>
+                                </div>
+                            </div>
+                            <div id="audio_result_audio" class="flex-1 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Technical Proficiency Analysis Results -->
             <div id="results-resume" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
                 <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
                 <div class="flex-1 flex flex-col">
@@ -122,49 +163,6 @@
                         </div>
                         <div id="resume_result_resume" class="flex-1 overflow-y-auto"></div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- Technical Proficiency Analysis Result (right column, unchanged) -->
-<div class="flex-1 flex flex-col gap-4 h-full w-full">
-    <div class="w-full pl-0 mt-0 h-full flex flex-col">
-        <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Technical Proficiency Analysis Results</h2>
-        <!-- Loader under Analysis Results -->
-        <div id="loader-audio" class="text-center p-4 md:p-8 hidden flex-1 flex items-center justify-center">
-            <div role="status" class="flex flex-col items-center justify-center">
-                <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                    <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                </svg>
-                <span class="sr-only">Loading...</span>
-            </div>
-            <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-        </div>
-        <!-- Save and Shortlist buttons -->
-        <div id="action-btns-audio" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
-            <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm">
-                <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-            </button>
-            <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm">
-                <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-            </button>
-        </div>
-        <div id="results-audio" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
-            <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-            <div class="flex-1 flex flex-col">
-                <div id="audio_result_card_audio" class="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 md:p-6 shadow-lg flex-1 flex flex-col min-h-0">
-                    <div id="placeholder-audio" class="text-gray-400 text-center py-8 md:py-16 flex-1 flex items-center justify-center">
-                        <div class="text-center">
-                            <i data-lucide="mic" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
-                            <p class="text-lg font-medium">No analysis yet</p>
-                            <p class="text-sm">Please upload files and click <b>Analyze Candidate</b> to get started.</p>
-                        </div>
-                    </div>
-                    <div id="audio_result_audio" class="flex-1 overflow-y-auto"></div>
                 </div>
             </div>
         </div>
@@ -350,6 +348,63 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       });
     }
+
+    // Technical Proficiency Analysis: Show/hide results container and loader
+    const technicalResultsContainer = document.getElementById('technical-results-container');
+    const loaderAudio = document.getElementById('loader-audio');
+    const audioResultCard = document.getElementById('audio_result_card_audio');
+    const analyzeTechnicalBtn = document.getElementById('analyze-technical-btn');
+
+    if (analyzeTechnicalBtn && technicalResultsContainer && loaderAudio && audioResultCard) {
+        analyzeTechnicalBtn.addEventListener('click', function(e) {
+            if (typeof validateTechnicalForm === 'function' && validateTechnicalForm()) {
+                // Show container and loader, hide results
+                technicalResultsContainer.classList.remove('hidden');
+                loaderAudio.classList.remove('hidden');
+                audioResultCard.classList.add('hidden');
+            } else {
+                technicalResultsContainer.classList.add('hidden');
+            }
+        });
+    }
+    // Patch the form submit handler for technical analysis fetch completion
+    const talentForm = document.getElementById('talentForm');
+    if (talentForm) {
+        const origSubmit = talentForm.onsubmit;
+        talentForm.onsubmit = async function(e) {
+            // ... existing code ...
+            const submitter = e.submitter || document.activeElement;
+            const isTechnicalBtn = submitter && submitter.id === 'analyze-technical-btn';
+            // ... existing code ...
+            if (isTechnicalBtn) {
+                // Show container and loader, hide results (redundant but safe)
+                if (technicalResultsContainer && loaderAudio && audioResultCard) {
+                    technicalResultsContainer.classList.remove('hidden');
+                    loaderAudio.classList.remove('hidden');
+                    audioResultCard.classList.add('hidden');
+                }
+            }
+            // ... fetch logic ...
+            // After fetch('/process_audio', ...) and result rendering:
+            if (isTechnicalBtn) {
+                if (loaderAudio) loaderAudio.classList.add('hidden');
+                if (audioResultCard) audioResultCard.classList.remove('hidden');
+                // Do NOT hide technicalResultsContainer here!
+            }
+            // ... existing code ...
+        };
+    }
+
+    // Hide technical results when switching tabs (optional, for cleanliness)
+    const tabIds = ['tab-dashboard', 'tab-resume', 'tab-audio', 'tab-question-gen', 'tab-saved', 'tab-shortlisted'];
+    tabIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn && technicalResultsContainer) {
+            btn.addEventListener('click', function() {
+                technicalResultsContainer.classList.add('hidden');
+            });
+        }
+    });
 });
 
 function handleTechQuestionsUpload(input) {
