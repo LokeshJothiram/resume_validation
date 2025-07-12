@@ -59,19 +59,19 @@
     </div>
     <!-- Right: Resume Match Analysis Result and Technical Proficiency Analysis -->
     <div class="flex-1 flex flex-col gap-6 h-full w-full">
-        <!-- Unified Save and Shortlist buttons -->
-        <div id="unified-action-btns" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
-            <button id="unified-save-btn" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm" title="Save all available analyses">
-                <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-            </button>
-            <button id="unified-shortlist-btn" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm" title="Shortlist the resume">
-                <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-            </button>
-        </div>
-
         <!-- Resume Match Analysis Results -->
         <div class="w-full pl-0 mt-0 flex flex-col">
-            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Analysis Results</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800 header-gradient m-0">Analysis Results</h2>
+                <div id="unified-action-btns" class="flex flex-col sm:flex-row gap-4 hidden">
+                    <button id="unified-save-btn" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm" title="Save all available analyses">
+                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                    </button>
+                    <button id="unified-shortlist-btn" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm" title="Shortlist the resume">
+                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                    </button>
+                </div>
+            </div>
             <!-- Loader under Analysis Results -->
             <div id="loader-resume" class="text-center p-4 md:p-8 hidden flex-1 flex items-center justify-center">
                 <div role="status" class="flex flex-col items-center justify-center">
@@ -177,26 +177,22 @@ function updateUnifiedButtons() {
     
     if (!saveBtn || !shortlistBtn) return;
     
-    // Check if we have any results
-    const hasResumeResult = window.analysisState.resumeResult !== null;
+    // Check if we have technical results (this is the requirement)
     const hasTechnicalResult = window.analysisState.technicalResult !== null;
     
-    // Also check if there are visible results in the DOM
-    const resumeResultDiv = document.getElementById('resume_result_resume');
+    // Also check if there are visible technical results in the DOM
     const audioResultDiv = document.getElementById('audio_result_audio');
-    const hasVisibleResumeResults = resumeResultDiv && resumeResultDiv.innerHTML.trim() && 
-                                   !resumeResultDiv.innerHTML.includes('No analysis yet');
     const hasVisibleAudioResults = audioResultDiv && audioResultDiv.innerHTML.trim() && 
                                   !audioResultDiv.innerHTML.includes('No analysis yet');
     
-    // Show buttons if we have either state results or visible DOM results
-    if (!hasResumeResult && !hasTechnicalResult && !hasVisibleResumeResults && !hasVisibleAudioResults) {
-        // No results yet, hide buttons
+    // Only show buttons if we have technical analysis results
+    if (!hasTechnicalResult && !hasVisibleAudioResults) {
+        // No technical results yet, hide buttons
         document.getElementById('unified-action-btns').classList.add('hidden');
         return;
     }
     
-    // Show buttons
+    // Show buttons only after technical analysis
     document.getElementById('unified-action-btns').classList.remove('hidden');
     
     // Update save button
@@ -205,7 +201,7 @@ function updateUnifiedButtons() {
         saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
         saveBtn.classList.add('bg-green-700', 'cursor-default');
         saveBtn.disabled = true;
-    } else if (hasResumeResult || hasTechnicalResult) {
+    } else if (hasTechnicalResult) {
         saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
         saveBtn.classList.remove('bg-green-700', 'cursor-default');
         saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
@@ -218,16 +214,6 @@ function updateUnifiedButtons() {
         shortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
         shortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
         shortlistBtn.disabled = true;
-    } else if (hasResumeResult && hasTechnicalResult) {
-        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
-        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-        shortlistBtn.disabled = false;
-    } else if (hasResumeResult) {
-        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
-        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-        shortlistBtn.disabled = false;
     } else if (hasTechnicalResult) {
         shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
         shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
@@ -380,8 +366,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Update buttons if we have any results
-        if (window.analysisState.resumeResult || window.analysisState.technicalResult) {
+        // Update buttons only if we have technical results
+        if (window.analysisState.technicalResult) {
             updateUnifiedButtons();
         }
     }
@@ -484,7 +470,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasResumeResult = window.analysisState.resumeResult !== null;
             const hasTechnicalResult = window.analysisState.technicalResult !== null;
             
-            if (!hasResumeResult && !hasTechnicalResult) return;
+            // Only proceed if we have technical results
+            if (!hasTechnicalResult) return;
             
             try {
                 unifiedSaveBtn.disabled = true;
@@ -593,7 +580,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const hasResumeResult = window.analysisState.resumeResult !== null;
             const hasTechnicalResult = window.analysisState.technicalResult !== null;
             
-            if (!hasResumeResult && !hasTechnicalResult) return;
+            // Only proceed if we have technical results
+            if (!hasTechnicalResult) return;
             
             try {
                 unifiedShortlistBtn.disabled = true;

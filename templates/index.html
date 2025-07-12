@@ -745,9 +745,9 @@
                 }
 
                 // Clear analysis state when starting new analysis (only when actually submitting)
-                if (typeof clearAnalysisState === 'function') {
-                    clearAnalysisState();
-                }
+                // if (typeof clearAnalysisState === 'function') {
+                //     clearAnalysisState();
+                // }
 
                 // FIXED: Use button detection instead of field detection for endpoint selection
                 const endpoint = (isTechnicalBtn || activeTab === 'audio') ? '/process_audio' : '/process';
@@ -771,9 +771,11 @@
                 if (isTechnicalBtn || activeTab === 'audio') {
                     latestTechnicalResult = result;
                     window.analysisState.technicalResult = result;
+                    window.analysisState.technicalSaved = false; // Reset saved flag so Save button re-enables
                 } else if (isResumeBtn && activeTab === 'resume') {
                     latestResumeResult = result;
                     window.analysisState.resumeResult = result;
+                    window.analysisState.resumeSaved = false; // Reset saved flag so Save button re-enables
                 }
                 latestAnalysisResult = result; // (optional: keep for backward compatibility)
 
