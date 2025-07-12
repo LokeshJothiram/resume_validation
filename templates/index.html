@@ -512,7 +512,8 @@
                 });
                 // Technical tab fields (even if inside resume tab)
                 const audioFile = document.getElementById('audio').files[0];
-                const technology = document.getElementById('technology').value;
+                const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
+                const technology = techInput ? techInput.value : '';
                 const techResumeInput = document.getElementById('tech_resume');
                 const techResumeFile = techResumeInput && techResumeInput.files && techResumeInput.files[0];
 
@@ -661,9 +662,9 @@
                 // Optimize payload: Only send relevant fields based on analysis type
                 if (isTechnicalBtn || activeTab === 'audio') {
                     // Technical Proficiency Analysis - only send relevant fields
-                    const technology = document.getElementById('technology');
+                    const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
                     const techQuestions = document.getElementById('tech_questions');
-                    if (technology && technology.value) formData.append('technology', technology.value);
+                    if (techInput && techInput.value) formData.append('technology', techInput.value);
                     if (techQuestions && techQuestions.value) formData.append('tech_questions', techQuestions.value);
                     if (audioFile) formData.append('audio', audioFile);
                     if (techResumeFile) formData.append('tech_resume', techResumeFile);
@@ -1084,7 +1085,7 @@
                         let technology = '';
                         let audioFileName = '';
                         if (activeTab === 'audio') {
-                            const techInput = document.getElementById('technology');
+                            const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
                             if (techInput) technology = techInput.value;
                             const audioInput = document.getElementById('audio');
                             if (audioInput && audioInput.files && audioInput.files.length > 0) {
@@ -1247,19 +1248,23 @@
         });
         // Technical tab
         const audioInput = document.getElementById('audio');
-        const techInput = document.getElementById('technology');
-        audioInput.addEventListener('change', () => {
-            if (audioInput.files && audioInput.files.length > 0) {
-                const el = document.getElementById('audio_error');
-                if (el) el.classList.add('hidden');
-            }
-        });
-        techInput.addEventListener('change', () => {
-            if (techInput.value) {
-                const el = document.getElementById('technology_error');
-                if (el) el.classList.add('hidden');
-            }
-        });
+        const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
+        if (audioInput) {
+            audioInput.addEventListener('change', () => {
+                if (audioInput.files && audioInput.files.length > 0) {
+                    const el = document.getElementById('audio_error');
+                    if (el) el.classList.add('hidden');
+                }
+            });
+        }
+        if (techInput) {
+            techInput.addEventListener('change', () => {
+                if (techInput.value) {
+                    const el = document.getElementById('technology_error');
+                    if (el) el.classList.add('hidden');
+                }
+            });
+        }
         if (techResumeInput) {
             techResumeInput.addEventListener('change', () => {
                 if (techResumeInput.files && techResumeInput.files.length > 0) {

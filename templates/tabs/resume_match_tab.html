@@ -84,8 +84,16 @@
             <!-- Compact Technical Proficiency Actions (hidden by default) -->
             <div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
                 <button type="button" id="compact-audio-btn" class="btn-compact" title="Upload Interview Audio"><i data-lucide="mic"></i></button>
+                <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" style="display:none" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
+                <span class="file-name" id="audioFileName" style="display:none">No file chosen</span>
                 <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
+                <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
+                <span class="file-name" id="techResumeFileName" style="display:none">No file chosen</span>
                 <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
+                <select id="techQuestionsDropdown" class="btn-compact-select" title="Select technical questions file">
+                    <option value="">Select a file</option>
+                </select>
+                <input type="hidden" id="tech_questions" name="tech_questions">
                 <select id="compact-technology" class="btn-compact-select" title="Select Primary Technology">
                     <option value="">Tech</option>
                     <option value="General">General</option>
@@ -96,7 +104,7 @@
                     <option value="Machine Learning">Machine Learning</option>
                     <option value="DevOps">DevOps</option>
                 </select>
-                <button type="button" id="compact-analyze-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
+                <button type="submit" id="analyze-technical-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
             </div>
             <div id="results-resume" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
                 <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
@@ -117,136 +125,70 @@
     </div>
 </div>
 <!-- Row 2: Technical Proficiency -->
-<div class="flex flex-col gap-6 w-full min-h-[600px] md:flex-row">
-    <!-- Left: Technical Proficiency Upload Area -->
-    <div class="flex flex-col gap-4 flex-none w-full md:w-1/2">
-        <div class="bg-white/60 backdrop-blur-sm border border-green-200/60 rounded-xl p-4 md:p-6 shadow-sm animate-fade-in mt-2">
-            <div class="mb-6">
-                <div class="flex flex-col gap-6">
-                    <!-- Upload Interview Audio -->
-                    <div class="bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200/60 rounded-xl p-4 md:p-6 shadow-sm flex-1 animate-slide-up hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-green-300 hover:bg-gradient-to-br hover:from-green-100 hover:to-green-200/50 backdrop-blur-sm">
-                        <div class="flex items-center mb-2">
-                            <div class="relative">
-                                <i data-lucide="mic" class="w-6 h-6 text-green-500 mr-2 animate-float"></i>
-                                <div class="absolute inset-0 w-6 h-6 bg-green-400/20 rounded-full animate-ping-slow"></div>
-                            </div>
-                            <span class="text-lg md:text-xl font-bold text-gray-800 animate-text-glow">Upload Interview Audio</span>
-                        </div>
-                        <div class="text-sm md:text-base text-green-600 mb-4 font-medium">Upload audio file for analysis</div>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2">
-                            <label class="custom-file-upload w-full sm:w-auto">
-                                <i data-lucide="mic"></i>
-                                <span>Choose File</span>
-                                <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
-                            </label>
-                            <span class="file-name" id="audioFileName">No file chosen</span>
-                        </div>
-                        <p id="audio_error" class="text-red-500 text-xs mt-1 hidden">Audio file is required.</p>
-                    </div>
-                    <!-- Upload Resume -->
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/60 rounded-xl p-4 md:p-6 shadow-sm flex-1 animate-slide-up animation-delay-200 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-100 hover:to-blue-200/50 backdrop-blur-sm">
-                        <div class="flex items-center mb-2">
-                            <div class="relative">
-                                <i data-lucide="upload" class="w-6 h-6 text-blue-500 mr-2 animate-float"></i>
-                                <div class="absolute inset-0 w-6 h-6 bg-blue-400/20 rounded-full animate-ping-slow"></div>
-                            </div>
-                            <span class="text-lg md:text-xl font-bold text-gray-800 animate-text-glow">Upload Resume (PDF/DOCX)</span>
-                        </div>
-                        <div class="text-sm md:text-base text-blue-600 mb-4 font-medium">Upload candidate resume</div>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2">
-                            <label class="custom-file-upload w-full sm:w-auto">
-                                <i data-lucide="file-text"></i>
-                                <span>Choose File</span>
-                                <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
-                            </label>
-                            <span class="file-name" id="techResumeFileName">No file chosen</span>
-                        </div>
-                        <p id="tech_resume_error" class="text-red-500 text-xs mt-1 hidden">Resume file is required.</p>
-                    </div>
-                    <!-- Upload Technology Questions -->
-                    <div class="bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-200/60 rounded-xl p-4 md:p-6 shadow-sm flex-1 animate-slide-up animation-delay-400 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-purple-300 hover:bg-gradient-to-br hover:from-purple-100 hover:to-purple-200/50 backdrop-blur-sm">
-                        <div class="flex items-center mb-2">
-                            <div class="relative">
-                                <i data-lucide="code" class="w-6 h-6 text-purple-500 mr-2 animate-float"></i>
-                                <div class="absolute inset-0 w-6 h-6 bg-purple-400/20 rounded-full animate-ping-slow"></div>
-                            </div>
-                            <span class="text-lg md:text-xl font-bold text-gray-800 animate-text-glow">Upload Technology Questions (.docx,.txt)</span>
-                        </div>
-                        <div class="text-sm md:text-base text-purple-600 mb-4 font-medium">Select technical questions file</div>
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2">
-                            <label for="techQuestionsDropdown" class="block text-sm font-medium text-gray-700 mb-1">Choose from Admin Uploaded Files</label>
-                            <select id="techQuestionsDropdown" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 transition-all duration-300">
-                                <option value="">Select a file</option>
-                            </select>
-                        </div>
-                        <input type="hidden" id="tech_questions" name="tech_questions">
-                    </div>
-                    <!-- Primary Technology -->
-                    <div class="bg-gradient-to-br from-yellow-50 to-yellow-100/50 border border-yellow-200/60 rounded-xl p-4 md:p-6 shadow-sm flex-1 animate-slide-up animation-delay-600 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-yellow-300 hover:bg-gradient-to-br hover:from-yellow-100 hover:to-yellow-200/50 backdrop-blur-sm">
-                        <div class="flex items-center mb-2">
-                            <div class="relative">
-                                <i data-lucide="cpu" class="w-6 h-6 text-yellow-600 mr-2 animate-float"></i>
-                                <div class="absolute inset-0 w-6 h-6 bg-yellow-400/20 rounded-full animate-ping-slow"></div>
-                            </div>
-                            <span class="text-lg md:text-xl font-bold text-gray-800 animate-text-glow">Primary Technology</span>
-                        </div>
-                        <div class="text-sm md:text-base text-yellow-700 mb-4 font-medium">Select the primary technology</div>
-                        <select id="technology" name="technology" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-300 hover:shadow-md hover:border-yellow-400 bg-white/80 backdrop-blur-sm">
-                            <option value="">Select Technology</option>
-                            <option value="General">General</option>
-                            <option value="Python">Python</option>
-                            <option value="Java">Java</option>
-                            <option value="JavaScript">JavaScript</option>
-                            <option value="Dotnet">Dotnet</option>
-                            <option value="Machine Learning">Machine Learning</option>
-                            <option value="DevOps">DevOps</option>
-                        </select>
-                        <p id="technology_error" class="text-red-500 text-xs mt-1 hidden">Technology is required.</p>
-                    </div>
-                </div>
-                <button type="submit" class="mx-auto block mt-8 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-8 rounded-full hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105 text-base flex items-center justify-center w-full md:w-auto min-w-[180px] animate-fade-in-up hover:shadow-2xl hover:shadow-blue-500/25" id="analyze-technical-btn">
-                    <i data-lucide="search" class="inline w-5 h-5 mr-2 align-text-bottom"></i>Analyze Candidate
-                </button>
+<!-- Removed the large technical proficiency section. All functionality is now handled by the compact button row below. -->
+
+<!-- Compact Technical Proficiency Actions (hidden by default, shown after resume analysis) -->
+<div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
+    <button type="button" id="compact-audio-btn" class="btn-compact" title="Upload Interview Audio"><i data-lucide="mic"></i></button>
+    <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" style="display:none" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
+    <span class="file-name" id="audioFileName" style="display:none">No file chosen</span>
+    <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
+    <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
+    <span class="file-name" id="techResumeFileName" style="display:none">No file chosen</span>
+    <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
+    <select id="techQuestionsDropdown" class="btn-compact-select" title="Select technical questions file">
+        <option value="">Select a file</option>
+    </select>
+    <input type="hidden" id="tech_questions" name="tech_questions">
+    <select id="compact-technology" class="btn-compact-select" title="Select Primary Technology">
+        <option value="">Tech</option>
+        <option value="General">General</option>
+        <option value="Python">Python</option>
+        <option value="Java">Java</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="Dotnet">Dotnet</option>
+        <option value="Machine Learning">Machine Learning</option>
+        <option value="DevOps">DevOps</option>
+    </select>
+    <button type="submit" id="analyze-technical-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
+</div>
+
+<!-- Technical Proficiency Analysis Result (right column, unchanged) -->
+<div class="flex-1 flex flex-col gap-4 h-full w-full">
+    <div class="w-full pl-0 mt-0 h-full flex flex-col">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Technical Proficiency Analysis Results</h2>
+        <!-- Loader under Analysis Results -->
+        <div id="loader-audio" class="text-center p-4 md:p-8 hidden flex-1 flex items-center justify-center">
+            <div role="status" class="flex flex-col items-center justify-center">
+                <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
+                    <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                </svg>
+                <span class="sr-only">Loading...</span>
             </div>
+            <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
         </div>
-    </div>
-    <!-- Right: Technical Proficiency Analysis Result -->
-    <div class="flex-1 flex flex-col gap-4 h-full w-full">
-        <div class="w-full pl-0 mt-0 h-full flex flex-col">
-            <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Technical Proficiency Analysis Results</h2>
-            <!-- Loader under Analysis Results -->
-            <div id="loader-audio" class="text-center p-4 md:p-8 hidden flex-1 flex items-center justify-center">
-                <div role="status" class="flex flex-col items-center justify-center">
-                    <svg aria-hidden="true" class="inline w-10 h-10 text-blue-400 animate-spin drop-shadow-lg" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="45" stroke="#3B82F6" stroke-width="10" fill="none" opacity="0.2"/>
-                        <path d="M50 15a35 35 0 1 1-24.75 10.25" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
-                    </svg>
-                    <span class="sr-only">Loading...</span>
-                </div>
-                <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-            </div>
-            <!-- Save and Shortlist buttons -->
-            <div id="action-btns-audio" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
-                <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm">
-                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                </button>
-                <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm">
-                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                </button>
-            </div>
-            <div id="results-audio" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
-                <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
-                <div class="flex-1 flex flex-col">
-                    <div id="audio_result_card_audio" class="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 md:p-6 shadow-lg flex-1 flex flex-col min-h-0">
-                        <div id="placeholder-audio" class="text-gray-400 text-center py-8 md:py-16 flex-1 flex items-center justify-center">
-                            <div class="text-center">
-                                <i data-lucide="mic" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
-                                <p class="text-lg font-medium">No analysis yet</p>
-                                <p class="text-sm">Please upload files and click <b>Analyze Candidate</b> to get started.</p>
-                            </div>
+        <!-- Save and Shortlist buttons -->
+        <div id="action-btns-audio" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
+            <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm">
+                <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+            </button>
+            <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm">
+                <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+            </button>
+        </div>
+        <div id="results-audio" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
+            <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
+            <div class="flex-1 flex flex-col">
+                <div id="audio_result_card_audio" class="bg-white/80 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 md:p-6 shadow-lg flex-1 flex flex-col min-h-0">
+                    <div id="placeholder-audio" class="text-gray-400 text-center py-8 md:py-16 flex-1 flex items-center justify-center">
+                        <div class="text-center">
+                            <i data-lucide="mic" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+                            <p class="text-lg font-medium">No analysis yet</p>
+                            <p class="text-sm">Please upload files and click <b>Analyze Candidate</b> to get started.</p>
                         </div>
-                        <div id="audio_result_audio" class="flex-1 overflow-y-auto"></div>
                     </div>
+                    <div id="audio_result_audio" class="flex-1 overflow-y-auto"></div>
                 </div>
             </div>
         </div>
@@ -491,12 +433,13 @@ document.getElementById('compact-audio-btn').onclick = () => triggerInput('audio
 document.getElementById('compact-tech-resume-btn').onclick = () => triggerInput('tech_resume');
 document.getElementById('compact-tech-questions-btn').onclick = () => document.getElementById('techQuestionsDropdown').focus();
 document.getElementById('compact-technology').onchange = function() {
-    document.getElementById('technology').value = this.value;
-    document.getElementById('technology').dispatchEvent(new Event('change', { bubbles: true }));
+    const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
+    if (techInput && techInput !== this) {
+        techInput.value = this.value;
+        techInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
 };
-document.getElementById('compact-analyze-btn').onclick = function() {
-    document.getElementById('analyze-technical-btn').click();
-};
+// Remove the JS indirection for compact-analyze-btn
 </script>
 
 <style>
