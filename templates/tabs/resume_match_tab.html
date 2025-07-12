@@ -90,7 +90,6 @@
                 <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
                 <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
                 <span class="file-name text-xs text-gray-600" id="techResumeFileName">No file chosen</span>
-                <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
                 <select id="techQuestionsDropdown" class="btn-compact-select" title="Select technical questions file">
                     <option value="">Select technical questions...</option>
                 </select>
@@ -405,7 +404,6 @@ function triggerInput(id) {
 }
 document.getElementById('compact-audio-btn').onclick = () => triggerInput('audio');
 document.getElementById('compact-tech-resume-btn').onclick = () => triggerInput('tech_resume');
-document.getElementById('compact-tech-questions-btn').onclick = () => document.getElementById('techQuestionsDropdown').focus();
 document.getElementById('compact-technology').onchange = function() {
     const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
     if (techInput && techInput !== this) {
