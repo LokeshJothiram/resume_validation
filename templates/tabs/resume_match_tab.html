@@ -453,27 +453,57 @@ function validateTechnicalForm() {
     }
     return isValid;
 }
-// Disable Analyze button while fetching technical questions
+// --- Fix for Analyze Button Icon and Error Handling ---
+
 const techQuestionsDropdown = document.getElementById('techQuestionsDropdown');
 const analyzeTechnicalBtn = document.getElementById('analyze-technical-btn');
-if (techQuestionsDropdown && analyzeTechnicalBtn) {
+const techQuestionsInput = document.getElementById('tech_questions');
+const techDropdown = document.getElementById('compact-technology');
+const errorContainer = document.getElementById('tech-errors-container');
+
+if (techQuestionsDropdown && analyzeTechnicalBtn && techQuestionsInput) {
     techQuestionsDropdown.addEventListener('change', function() {
         if (this.value) {
             analyzeTechnicalBtn.disabled = true;
             analyzeTechnicalBtn.innerHTML = '<i data-lucide="loader" class="animate-spin"></i>';
+            // Fetch the file content from the backend
+            fetch(`/get_iqg_file/${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    techQuestionsInput.value = data.content || '';
+                    // Enable button and restore icon
+                    analyzeTechnicalBtn.disabled = false;
+                    analyzeTechnicalBtn.innerHTML = '<i data-lucide="search"></i>';
+                    if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+                    // Hide error if present
+                    if (errorContainer) {
+                        errorContainer.innerHTML = errorContainer.innerHTML.replace(/Technical questions are required\./g, '');
+                        // Remove empty <br> if present
+                        errorContainer.innerHTML = errorContainer.innerHTML.replace(/<br>/g, '');
+                    }
+                })
+                .catch(() => {
+                    techQuestionsInput.value = '';
+                    analyzeTechnicalBtn.disabled = false;
+                    analyzeTechnicalBtn.innerHTML = '<i data-lucide="search"></i>';
+                    if (window.lucide && window.lucide.createIcons) lucide.createIcons();
+                    alert('Failed to load technical questions file.');
+                });
+        } else {
+            techQuestionsInput.value = '';
         }
     });
 }
-// Listen for when tech_questions is populated
-const techQuestionsInput = document.getElementById('tech_questions');
-if (techQuestionsInput && analyzeTechnicalBtn) {
-    const observer = new MutationObserver(() => {
-        if (techQuestionsInput.value.trim()) {
-            analyzeTechnicalBtn.disabled = false;
-            analyzeTechnicalBtn.innerHTML = '<i data-lucide="search"></i>';
+
+// Hide error when technology is selected
+if (techDropdown && errorContainer) {
+    techDropdown.addEventListener('change', function() {
+        if (this.value) {
+            errorContainer.innerHTML = errorContainer.innerHTML.replace(/Primary technology is required\./g, '');
+            // Remove empty <br> if present
+            errorContainer.innerHTML = errorContainer.innerHTML.replace(/<br>/g, '');
         }
     });
-    observer.observe(techQuestionsInput, { attributes: true, childList: true, subtree: true, characterData: true });
 }
 if (analyzeTechnicalBtn) {
     analyzeTechnicalBtn.addEventListener('click', function(e) {
