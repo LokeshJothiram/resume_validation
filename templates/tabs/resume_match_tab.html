@@ -85,13 +85,13 @@
             <div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
                 <button type="button" id="compact-audio-btn" class="btn-compact" title="Upload Interview Audio"><i data-lucide="mic"></i></button>
                 <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" style="display:none" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
-                <span class="file-name" id="audioFileName" style="display:none">No file chosen</span>
+                <span class="file-name text-xs text-gray-600" id="audioFileName">No file chosen</span>
                 <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
                 <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
-                <span class="file-name" id="techResumeFileName" style="display:none">No file chosen</span>
+                <span class="file-name text-xs text-gray-600" id="techResumeFileName">No file chosen</span>
                 <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
                 <select id="techQuestionsDropdown" class="btn-compact-select" title="Select technical questions file">
-                    <option value="">Select a file</option>
+                    <option value="">Select technical questions...</option>
                 </select>
                 <input type="hidden" id="tech_questions" name="tech_questions">
                 <select id="compact-technology" class="btn-compact-select" title="Select Primary Technology">
@@ -105,6 +105,9 @@
                     <option value="DevOps">DevOps</option>
                 </select>
                 <button type="submit" id="analyze-technical-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
+            </div>
+            <div id="tech-errors-container" class="w-full text-left mb-2">
+                <!-- Error messages will be injected here -->
             </div>
             <div id="results-resume" class="flex-1 flex flex-col min-h-0 overflow-x-auto">
                 <div id="meta_info_resume" class="mb-4 text-gray-700"></div>
@@ -131,13 +134,13 @@
 <div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
     <button type="button" id="compact-audio-btn" class="btn-compact" title="Upload Interview Audio"><i data-lucide="mic"></i></button>
     <input type="file" id="audio" name="audio" accept=".mp3,.mp4,.wav" style="display:none" onchange="document.getElementById('audioFileName').textContent = this.files[0]?.name || 'No file chosen'">
-    <span class="file-name" id="audioFileName" style="display:none">No file chosen</span>
+    <span class="file-name text-xs text-gray-600" id="audioFileName">No file chosen</span>
     <button type="button" id="compact-tech-resume-btn" class="btn-compact" title="Upload Resume"><i data-lucide="file-text"></i></button>
     <input type="file" id="tech_resume" name="tech_resume" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('techResumeFileName').textContent = this.files[0]?.name || 'No file chosen'">
-    <span class="file-name" id="techResumeFileName" style="display:none">No file chosen</span>
+    <span class="file-name text-xs text-gray-600" id="techResumeFileName">No file chosen</span>
     <button type="button" id="compact-tech-questions-btn" class="btn-compact" title="Upload Technology Questions"><i data-lucide="code"></i></button>
     <select id="techQuestionsDropdown" class="btn-compact-select" title="Select technical questions file">
-        <option value="">Select a file</option>
+        <option value="">Select technical questions...</option>
     </select>
     <input type="hidden" id="tech_questions" name="tech_questions">
     <select id="compact-technology" class="btn-compact-select" title="Select Primary Technology">
@@ -151,6 +154,9 @@
         <option value="DevOps">DevOps</option>
     </select>
     <button type="submit" id="analyze-technical-btn" class="btn-compact-analyze" title="Analyze Candidate"><i data-lucide="search"></i></button>
+</div>
+<div id="tech-errors-container" class="w-full text-left mb-2">
+    <!-- Error messages will be injected here -->
 </div>
 
 <!-- Technical Proficiency Analysis Result (right column, unchanged) -->
@@ -232,7 +238,7 @@ function populateTechQuestionsDropdown() {
     .then(response => response.json())
     .then(data => {
       const dropdown = document.getElementById('techQuestionsDropdown');
-      dropdown.innerHTML = '<option value="">Select a file</option>';
+      dropdown.innerHTML = '<option value="">Select technical questions...</option>';
       if (data.files && data.files.length > 0) {
         data.files.forEach(file => {
           const option = document.createElement('option');
@@ -440,6 +446,74 @@ document.getElementById('compact-technology').onchange = function() {
     }
 };
 // Remove the JS indirection for compact-analyze-btn
+
+function validateTechnicalForm() {
+    let isValid = true;
+    let errors = [];
+    // Audio
+    const audioInput = document.getElementById('audio');
+    if (!audioInput.files || audioInput.files.length === 0) {
+        errors.push('Audio file is required.');
+        isValid = false;
+    }
+    // Resume
+    const techResumeInput = document.getElementById('tech_resume');
+    if (!techResumeInput.files || techResumeInput.files.length === 0) {
+        errors.push('Resume file is required.');
+        isValid = false;
+    }
+    // Technical Questions
+    const techQuestionsInput = document.getElementById('tech_questions');
+    if (!techQuestionsInput.value.trim()) {
+        errors.push('Technical questions are required.');
+        isValid = false;
+    }
+    // Technology
+    const techDropdown = document.getElementById('compact-technology');
+    if (!techDropdown.value) {
+        errors.push('Primary technology is required.');
+        isValid = false;
+    }
+    // Show errors
+    const errorContainer = document.getElementById('tech-errors-container');
+    if (!isValid) {
+        errorContainer.innerHTML = errors.map(e => `<span class='text-red-500 text-xs mr-4'>${e}</span>`).join('<br>');
+    } else {
+        errorContainer.innerHTML = '';
+    }
+    return isValid;
+}
+// Disable Analyze button while fetching technical questions
+const techQuestionsDropdown = document.getElementById('techQuestionsDropdown');
+const analyzeTechnicalBtn = document.getElementById('analyze-technical-btn');
+if (techQuestionsDropdown && analyzeTechnicalBtn) {
+    techQuestionsDropdown.addEventListener('change', function() {
+        if (this.value) {
+            analyzeTechnicalBtn.disabled = true;
+            analyzeTechnicalBtn.innerHTML = '<i data-lucide="loader" class="animate-spin"></i>';
+        }
+    });
+}
+// Listen for when tech_questions is populated
+const techQuestionsInput = document.getElementById('tech_questions');
+if (techQuestionsInput && analyzeTechnicalBtn) {
+    const observer = new MutationObserver(() => {
+        if (techQuestionsInput.value.trim()) {
+            analyzeTechnicalBtn.disabled = false;
+            analyzeTechnicalBtn.innerHTML = '<i data-lucide="search"></i>';
+        }
+    });
+    observer.observe(techQuestionsInput, { attributes: true, childList: true, subtree: true, characterData: true });
+}
+if (analyzeTechnicalBtn) {
+    analyzeTechnicalBtn.addEventListener('click', function(e) {
+        if (!validateTechnicalForm()) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    });
+}
 </script>
 
 <style>
