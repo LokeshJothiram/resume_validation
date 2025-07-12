@@ -59,6 +59,16 @@
     </div>
     <!-- Right: Resume Match Analysis Result and Technical Proficiency Analysis -->
     <div class="flex-1 flex flex-col gap-6 h-full w-full">
+        <!-- Unified Save and Shortlist buttons -->
+        <div id="unified-action-btns" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
+            <button id="unified-save-btn" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm" title="Save all available analyses">
+                <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+            </button>
+            <button id="unified-shortlist-btn" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm" title="Shortlist the resume">
+                <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+            </button>
+        </div>
+
         <!-- Resume Match Analysis Results -->
         <div class="w-full pl-0 mt-0 flex flex-col">
             <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800 header-gradient">Analysis Results</h2>
@@ -72,15 +82,6 @@
                     <span class="sr-only">Loading...</span>
                 </div>
                 <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
-            </div>
-            <!-- Save and Shortlist buttons -->
-            <div id="action-btns-resume" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
-                <button id="save-analysis-btn-resume" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm">
-                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                </button>
-                <button id="shortlist-btn-resume" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm">
-                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                </button>
             </div>
             <!-- Compact Technical Proficiency Actions (hidden by default) -->
             <div id="compact-tech-actions" class="flex flex-wrap gap-2 mb-4 hidden">
@@ -140,15 +141,6 @@
                 </div>
                 <p class="mt-4 text-blue-600 font-semibold animate-pulse">Analyzing... Please wait.</p>
             </div>
-            <!-- Save and Shortlist buttons -->
-            <div id="action-btns-audio" class="flex flex-col sm:flex-row gap-4 mb-4 hidden">
-                <button id="save-analysis-btn-audio" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm">
-                    <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
-                </button>
-                <button id="shortlist-btn-audio" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm">
-                    <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
-                </button>
-            </div>
             <div id="results-audio" class="flex flex-col min-h-0 overflow-x-auto">
                 <div id="meta_info_audio" class="mb-4 text-gray-700"></div>
                 <div class="flex flex-col">
@@ -169,6 +161,110 @@
 </div>
 
 <script>
+// Global state management for unified save/shortlist
+window.analysisState = {
+    resumeSaved: false,
+    technicalSaved: false,
+    resumeShortlisted: false,
+    technicalShortlisted: false,
+    resumeResult: null,
+    technicalResult: null
+};
+
+function updateUnifiedButtons() {
+    const saveBtn = document.getElementById('unified-save-btn');
+    const shortlistBtn = document.getElementById('unified-shortlist-btn');
+    
+    if (!saveBtn || !shortlistBtn) return;
+    
+    // Check if we have any results
+    const hasResumeResult = window.analysisState.resumeResult !== null;
+    const hasTechnicalResult = window.analysisState.technicalResult !== null;
+    
+    // Also check if there are visible results in the DOM
+    const resumeResultDiv = document.getElementById('resume_result_resume');
+    const audioResultDiv = document.getElementById('audio_result_audio');
+    const hasVisibleResumeResults = resumeResultDiv && resumeResultDiv.innerHTML.trim() && 
+                                   !resumeResultDiv.innerHTML.includes('No analysis yet');
+    const hasVisibleAudioResults = audioResultDiv && audioResultDiv.innerHTML.trim() && 
+                                  !audioResultDiv.innerHTML.includes('No analysis yet');
+    
+    // Show buttons if we have either state results or visible DOM results
+    if (!hasResumeResult && !hasTechnicalResult && !hasVisibleResumeResults && !hasVisibleAudioResults) {
+        // No results yet, hide buttons
+        document.getElementById('unified-action-btns').classList.add('hidden');
+        return;
+    }
+    
+    // Show buttons
+    document.getElementById('unified-action-btns').classList.remove('hidden');
+    
+    // Update save button
+    if (window.analysisState.resumeSaved && window.analysisState.technicalSaved) {
+        saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
+        saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+        saveBtn.classList.add('bg-green-700', 'cursor-default');
+        saveBtn.disabled = true;
+    } else if (hasResumeResult || hasTechnicalResult) {
+        saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+        saveBtn.classList.remove('bg-green-700', 'cursor-default');
+        saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        saveBtn.disabled = false;
+    }
+    
+    // Update shortlist button
+    if (window.analysisState.resumeShortlisted && window.analysisState.technicalShortlisted) {
+        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
+        shortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+        shortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+        shortlistBtn.disabled = true;
+    } else if (hasResumeResult && hasTechnicalResult) {
+        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
+        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
+        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+        shortlistBtn.disabled = false;
+    } else if (hasResumeResult) {
+        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
+        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
+        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+        shortlistBtn.disabled = false;
+    } else if (hasTechnicalResult) {
+        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
+        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
+        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+        shortlistBtn.disabled = false;
+    }
+    
+    // Re-render icons
+    if (window.lucide && window.lucide.createIcons) {
+        lucide.createIcons();
+    }
+}
+
+function resetAnalysisState() {
+    window.analysisState = {
+        resumeSaved: false,
+        technicalSaved: false,
+        resumeShortlisted: false,
+        technicalShortlisted: false,
+        resumeResult: null,
+        technicalResult: null
+    };
+    updateUnifiedButtons();
+}
+
+function clearAnalysisState() {
+    window.analysisState = {
+        resumeSaved: false,
+        technicalSaved: false,
+        resumeShortlisted: false,
+        technicalShortlisted: false,
+        resumeResult: null,
+        technicalResult: null
+    };
+    updateUnifiedButtons();
+}
+
 function updateFileNameDisplay(input) {
     const fileNameId = input.getAttribute('data-file-name-id');
     if (fileNameId) {
@@ -261,6 +357,38 @@ function validateResumeForm() {
 document.addEventListener('DOMContentLoaded', function() {
     populateJobRequirementDropdown();
     
+    // Check if there are existing results and restore state
+    function restoreAnalysisState() {
+        const resumeResultDiv = document.getElementById('resume_result_resume');
+        const audioResultDiv = document.getElementById('audio_result_audio');
+        
+        // Check if we have resume results
+        if (resumeResultDiv && resumeResultDiv.innerHTML.trim() && 
+            !resumeResultDiv.innerHTML.includes('No analysis yet')) {
+            // We have resume results, restore state
+            if (!window.analysisState.resumeResult) {
+                window.analysisState.resumeResult = latestResumeResult || {};
+            }
+        }
+        
+        // Check if we have technical results
+        if (audioResultDiv && audioResultDiv.innerHTML.trim() && 
+            !audioResultDiv.innerHTML.includes('No analysis yet')) {
+            // We have technical results, restore state
+            if (!window.analysisState.technicalResult) {
+                window.analysisState.technicalResult = latestTechnicalResult || {};
+            }
+        }
+        
+        // Update buttons if we have any results
+        if (window.analysisState.resumeResult || window.analysisState.technicalResult) {
+            updateUnifiedButtons();
+        }
+    }
+    
+    // Restore state on page load
+    restoreAnalysisState();
+    
     // Add validation on dropdown change
     document.getElementById('job-requirement-dropdown').addEventListener('change', function() {
         validateResumeForm();
@@ -347,6 +475,180 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       });
     }
+
+    // Unified Save Button Event Listener
+    // This button always saves ALL available analyses (resume + technical) when clicked
+    const unifiedSaveBtn = document.getElementById('unified-save-btn');
+    if (unifiedSaveBtn) {
+        unifiedSaveBtn.addEventListener('click', async function() {
+            const hasResumeResult = window.analysisState.resumeResult !== null;
+            const hasTechnicalResult = window.analysisState.technicalResult !== null;
+            
+            if (!hasResumeResult && !hasTechnicalResult) return;
+            
+            try {
+                unifiedSaveBtn.disabled = true;
+                unifiedSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
+                
+                // Always prepare data for both analyses if available
+                let resumeHTML = '';
+                let audioHTML = '';
+                let metaInfo = '';
+                let technology = '';
+                let audioFileName = '';
+                
+                // Always include resume data if available
+                if (hasResumeResult) {
+                    const resumeResultDiv = document.getElementById('resume_result_resume');
+                    const blocks = resumeResultDiv.querySelectorAll('div.mb-4');
+                    if (blocks.length > 0) {
+                        resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
+                    } else {
+                        resumeHTML = resumeResultDiv.innerHTML;
+                    }
+                }
+                
+                // Always include technical data if available
+                if (hasTechnicalResult) {
+                    const audioResultDiv = document.getElementById('audio_result_audio');
+                    audioHTML = audioResultDiv.innerHTML;
+                    
+                    const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
+                    if (techInput) technology = techInput.value;
+                    
+                    const audioInput = document.getElementById('audio');
+                    if (audioInput && audioInput.files && audioInput.files.length > 0) {
+                        audioFileName = audioInput.files[0].name;
+                    }
+                }
+                
+                const timestamp = new Date().toLocaleString();
+                const data = {
+                    resumeHTML,
+                    audioHTML,
+                    metaInfo,
+                    timestamp,
+                    technology,
+                    audioFileName,
+                    rawData: {
+                        resume: window.analysisState.resumeResult,
+                        technical: window.analysisState.technicalResult
+                    }
+                };
+                
+                // Check if we have a saved analysis ID
+                let savedId = window.analysisState.savedAnalysisId;
+                let response, result;
+                if (savedId) {
+                    // Update existing analysis
+                    response = await fetch(`/update_analysis/${savedId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    result = await response.json();
+                } else {
+                    // Create new analysis
+                    response = await fetch('/save_analysis', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    result = await response.json();
+                }
+                if (result.status === 'success') {
+                    // Mark both as saved (even if only one was available)
+                    window.analysisState.resumeSaved = true;
+                    window.analysisState.technicalSaved = true;
+                    window.analysisState.savedAnalysisId = result.id;
+                    updateUnifiedButtons();
+                    
+                    // Show appropriate success message
+                    if (hasResumeResult && hasTechnicalResult) {
+                        showToast('Both analyses saved successfully!', 'success');
+                    } else if (hasResumeResult) {
+                        showToast('Resume analysis saved successfully!', 'success');
+                    } else if (hasTechnicalResult) {
+                        showToast('Technical analysis saved successfully!', 'success');
+                    }
+                    
+                    if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
+                } else {
+                    unifiedSaveBtn.disabled = false;
+                    unifiedSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                    showToast('Failed to save analysis.', 'error');
+                }
+            } catch (err) {
+                unifiedSaveBtn.disabled = false;
+                unifiedSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
+                showToast('Error saving analysis.', 'error');
+            }
+        });
+    }
+
+    // Unified Shortlist Button Event Listener
+    const unifiedShortlistBtn = document.getElementById('unified-shortlist-btn');
+    if (unifiedShortlistBtn) {
+        unifiedShortlistBtn.addEventListener('click', async function() {
+            const hasResumeResult = window.analysisState.resumeResult !== null;
+            const hasTechnicalResult = window.analysisState.technicalResult !== null;
+            
+            if (!hasResumeResult && !hasTechnicalResult) return;
+            
+            try {
+                unifiedShortlistBtn.disabled = true;
+                unifiedShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
+                
+                let formData = new FormData();
+                let timestamp = new Date().toLocaleString();
+                let found = false;
+                let matchPercent = 0;
+                
+                // Get resume file for shortlisting
+                const resumeInputs = document.querySelectorAll('.resume-file');
+                resumeInputs.forEach(input => {
+                    if (input.files && input.files.length > 0 && !found) {
+                        formData.append('shortlist_resume', input.files[0]);
+                        found = true;
+                    }
+                });
+                
+                // Calculate match percentage
+                if (hasResumeResult && window.analysisState.resumeResult && Array.isArray(window.analysisState.resumeResult.resumes) && window.analysisState.resumeResult.resumes.length > 0) {
+                    matchPercent = window.analysisState.resumeResult.resumes[0].match_percentage || 0;
+                } else if (hasTechnicalResult && window.analysisState.technicalResult && window.analysisState.technicalResult.technical_score !== undefined) {
+                    matchPercent = window.analysisState.technicalResult.technical_score * 10;
+                }
+                
+                formData.append('timestamp', timestamp);
+                formData.append('match_percentage', matchPercent);
+                
+                const response = await fetch('/shortlist_resume', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    // Mark both as shortlisted
+                    window.analysisState.resumeShortlisted = true;
+                    window.analysisState.technicalShortlisted = true;
+                    updateUnifiedButtons();
+                    showToast('Resume shortlisted!', 'shortlist');
+                    if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
+                    if (typeof refreshUserDashboardStats === 'function') refreshUserDashboardStats();
+                    if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
+                    if (typeof renderShortlistedResumes === 'function') renderShortlistedResumes();
+                } else {
+                    unifiedShortlistBtn.disabled = false;
+                    unifiedShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+                }
+            } catch (err) {
+                unifiedShortlistBtn.disabled = false;
+                unifiedShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
+            }
+        });
+    }
 });
 
 function handleTechQuestionsUpload(input) {
@@ -391,12 +693,7 @@ function toggleCompactTechActions(show) {
         else compact.classList.add('hidden');
     }
 }
-// Patch Save/Shortlist show logic to also show compact tech actions
-const actionBtnsResume = document.getElementById('action-btns-resume');
-const observer = new MutationObserver(() => {
-    toggleCompactTechActions(!actionBtnsResume.classList.contains('hidden'));
-});
-observer.observe(actionBtnsResume, { attributes: true, attributeFilter: ['class'] });
+
 // Compact button handlers
 function triggerInput(id) {
     const input = document.getElementById(id);
@@ -411,7 +708,6 @@ document.getElementById('compact-technology').onchange = function() {
         techInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
 };
-// Remove the JS indirection for compact-analyze-btn
 
 function validateTechnicalForm() {
     let isValid = true;
@@ -449,8 +745,8 @@ function validateTechnicalForm() {
     }
     return isValid;
 }
-// --- Fix for Analyze Button Icon and Error Handling ---
 
+// --- Fix for Analyze Button Icon and Error Handling ---
 const techQuestionsDropdown = document.getElementById('techQuestionsDropdown');
 const analyzeTechnicalBtn = document.getElementById('analyze-technical-btn');
 const techQuestionsInput = document.getElementById('tech_questions');
@@ -510,6 +806,11 @@ if (analyzeTechnicalBtn) {
         }
     });
 }
+
+// Export functions for use in main index.html
+window.resetAnalysisState = resetAnalysisState;
+window.clearAnalysisState = clearAnalysisState;
+window.updateUnifiedButtons = updateUnifiedButtons;
 </script>
 
 <style>

@@ -380,6 +380,29 @@
                     const analyzeBtn = document.getElementById('analyze-btn-container');
                     if (analyzeBtn) analyzeBtn.classList.remove('hidden');
                     if (techResumeInput) techResumeInput.required = false;
+                    
+                    // Preserve analysis state when switching to resume tab
+                    // Check for visible results and restore state if needed
+                    const resumeResultDiv = document.getElementById('resume_result_resume');
+                    const audioResultDiv = document.getElementById('audio_result_audio');
+                    
+                    // If we have visible results but no state, restore the state
+                    if (resumeResultDiv && resumeResultDiv.innerHTML.trim() && 
+                        !resumeResultDiv.innerHTML.includes('No analysis yet') && 
+                        !window.analysisState.resumeResult) {
+                        window.analysisState.resumeResult = latestResumeResult || {};
+                    }
+                    
+                    if (audioResultDiv && audioResultDiv.innerHTML.trim() && 
+                        !audioResultDiv.innerHTML.includes('No analysis yet') && 
+                        !window.analysisState.technicalResult) {
+                        window.analysisState.technicalResult = latestTechnicalResult || {};
+                    }
+                    
+                    // Update buttons to show current state
+                    if (typeof updateUnifiedButtons === 'function') {
+                        updateUnifiedButtons();
+                    }
                 });
             }
             if (tabAudio) {
@@ -683,23 +706,17 @@
                 }
 
                 // Use unique IDs for each tab or mode
-                let loaderId, resultsId, actionBtnsId, saveBtnId, shortlistBtnId, metaInfoId, resultCardId, resultDivId;
+                let loaderId, resultsId, metaInfoId, resultCardId, resultDivId;
                 // FIX: Use which button was clicked, not just field values
                 if (isTechnicalBtn || activeTab === 'audio') {
                     loaderId = 'loader-audio';
                     resultsId = 'results-audio';
-                    actionBtnsId = 'action-btns-audio';
-                    saveBtnId = 'save-analysis-btn-audio';
-                    shortlistBtnId = 'shortlist-btn-audio';
                     metaInfoId = 'meta_info_audio';
                     resultCardId = 'audio_result_card_audio';
                     resultDivId = 'audio_result_audio';
                 } else if (isResumeBtn && activeTab === 'resume') {
                     loaderId = 'loader-resume';
                     resultsId = 'results-resume';
-                    actionBtnsId = 'action-btns-resume';
-                    saveBtnId = 'save-analysis-btn-resume';
-                    shortlistBtnId = 'shortlist-btn-resume';
                     metaInfoId = 'meta_info_resume';
                     resultCardId = 'resume_result_card_resume';
                     resultDivId = 'resume_result_resume';
@@ -711,14 +728,12 @@
                     if (btn && id !== `tab-${activeTab}`) btn.disabled = true;
                 });
 
-                // Show loader, hide results and buttons in right column
-                if (loaderId && resultsId && actionBtnsId) {
+                // Show loader, hide results and reset analysis state
+                if (loaderId && resultsId) {
                     let loaderElem = document.getElementById(loaderId);
                     if (loaderElem) loaderElem.classList.remove('hidden');
                     const resultsElem = document.getElementById(resultsId);
                     if (resultsElem) resultsElem.classList.add('hidden');
-                    const actionBtnsElem = document.getElementById(actionBtnsId);
-                    if (actionBtnsElem) actionBtnsElem.classList.add('hidden');
                     // Hide placeholder when analyzing
                     if (resultCardId === 'resume_result_card_resume') {
                         const ph = document.getElementById('placeholder-resume');
@@ -729,21 +744,9 @@
                     }
                 }
 
-                // Reset Save/Shortlist button state
-                if (saveBtnId && shortlistBtnId) {
-                    const saveBtn = document.getElementById(saveBtnId);
-                    const shortlistBtn = document.getElementById(shortlistBtnId);
-                    if (saveBtn && shortlistBtn) {
-                        saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                        saveBtn.classList.remove('bg-green-700', 'cursor-default');
-                        saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-                        saveBtn.disabled = false;
-                        shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-                        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
-                        shortlistBtn.disabled = false;
-                        lucide.createIcons();
-                    }
+                // Clear analysis state when starting new analysis (only when actually submitting)
+                if (typeof clearAnalysisState === 'function') {
+                    clearAnalysisState();
                 }
 
                 // FIXED: Use button detection instead of field detection for endpoint selection
@@ -764,22 +767,35 @@
                 });
                 
                 const result = await response.json();
-                // Store results separately
+                // Store results separately and update unified state
                 if (isTechnicalBtn || activeTab === 'audio') {
                     latestTechnicalResult = result;
+                    window.analysisState.technicalResult = result;
                 } else if (isResumeBtn && activeTab === 'resume') {
                     latestResumeResult = result;
+                    window.analysisState.resumeResult = result;
                 }
                 latestAnalysisResult = result; // (optional: keep for backward compatibility)
 
-                // Hide loader, show results and buttons in right column
-                if (loaderId && resultsId && actionBtnsId) {
+                // Hide loader, show results and update unified buttons
+                if (loaderId && resultsId) {
                     loaderElem = document.getElementById(loaderId);
                     if (loaderElem) loaderElem.classList.add('hidden');
                     const resultsElem = document.getElementById(resultsId);
                     if (resultsElem) resultsElem.classList.remove('hidden');
-                    const actionBtnsElem = document.getElementById(actionBtnsId);
-                    if (actionBtnsElem) actionBtnsElem.classList.remove('hidden');
+                }
+                
+                // Update unified buttons
+                if (typeof updateUnifiedButtons === 'function') {
+                    updateUnifiedButtons();
+                }
+                
+                // Show compact tech actions when we have resume results
+                if (isResumeBtn && activeTab === 'resume' && result && (Array.isArray(result.resumes) && result.resumes.length > 0 || result.job_requirement_analysis)) {
+                    const compactTechActions = document.getElementById('compact-tech-actions');
+                    if (compactTechActions) {
+                        compactTechActions.classList.remove('hidden');
+                    }
                 }
 
                 // Render results in the correct tab's containers
@@ -1059,163 +1075,16 @@
             }
             }
 
-            // Save button event listener (remove previous, add new)
-            if (saveBtnId) {
-                const saveBtn = document.getElementById(saveBtnId);
-                if (saveBtn) {
-                    saveBtn.replaceWith(saveBtn.cloneNode(true));
-                    const newSaveBtn = document.getElementById(saveBtnId);
-                    newSaveBtn.addEventListener('click', async function() {
-                        // Gather the latest analysis result from the correct resultDiv
-                        let resumeHTML = '';
-                        if (activeTab === 'resume') {
-                            const blocks = resultDiv.querySelectorAll('div.mb-4');
-                            if (blocks.length > 0) {
-                                resumeHTML = Array.from(blocks).map(b => b.outerHTML).join('');
-                            } else {
-                                resumeHTML = resultDiv.innerHTML;
-                            }
-                        }
-                        let audioHTML = '';
-                        if (activeTab === 'audio') {
-                            audioHTML = resultDiv.innerHTML;
-                        }
-                        const metaInfo = metaInfoDiv.innerHTML;
-                        const timestamp = new Date().toLocaleString();
-                        let technology = '';
-                        let audioFileName = '';
-                        if (activeTab === 'audio') {
-                            const techInput = document.getElementById('technology') || document.getElementById('compact-technology');
-                            if (techInput) technology = techInput.value;
-                            const audioInput = document.getElementById('audio');
-                            if (audioInput && audioInput.files && audioInput.files.length > 0) {
-                                audioFileName = audioInput.files[0].name;
-                            }
-                        }
-                        const data = {
-                            resumeHTML,
-                            audioHTML,
-                            metaInfo,
-                            timestamp,
-                            technology,
-                            audioFileName,
-                            rawData: {
-                                resume: latestResumeResult,
-                                technical: latestTechnicalResult
-                            }
-                        };
-                        try {
-                            newSaveBtn.disabled = true;
-                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saving...';
-                            const response = await fetch('/save_analysis', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(data)
-                            });
-                            const result = await response.json();
-                            if (result.status === 'success') {
-                                newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
-                                newSaveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-                                newSaveBtn.classList.add('bg-green-700', 'cursor-default');
-                                newSaveBtn.disabled = true;
-                                lucide.createIcons();
-                                showToast('Analysis saved successfully!', 'success');
-                                if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
-                            } else {
-                                newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                                newSaveBtn.disabled = false;
-                                showToast('Failed to save analysis.', 'error');
-                            }
-                        } catch (err) {
-                            newSaveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-                            newSaveBtn.disabled = false;
-                            showToast('Error saving analysis.', 'error');
-                        }
-                    });
-                }
-            }
+            // Unified save/shortlist buttons are handled in resume_match_tab.html
 
-            // Shortlist button event listener (remove previous, add new)
-            if (shortlistBtnId) {
-                const shortlistBtn = document.getElementById(shortlistBtnId);
-                if (shortlistBtn) {
-                    shortlistBtn.replaceWith(shortlistBtn.cloneNode(true));
-                    const newShortlistBtn = document.getElementById(shortlistBtnId);
-                    newShortlistBtn.addEventListener('click', async function() {
-                        let formData = new FormData();
-                        let timestamp = new Date().toLocaleString();
-                        let found = false;
-                        let matchPercent = 0;
-                        if (activeTab === 'audio') {
-                            const techResumeInput = document.getElementById('tech_resume');
-                            if (!techResumeInput.files || techResumeInput.files.length === 0) {
-                                const el = document.getElementById('tech_resume_error');
-                                if (el) el.classList.remove('hidden');
-                                newShortlistBtn.disabled = false;
-                                return;
-                            }
-                            formData.append('shortlist_resume', techResumeInput.files[0]);
-                            found = true;
-                            // Technical Proficiency: use technical_score * 10
-                            if (latestAnalysisResult && latestAnalysisResult.technical_score !== undefined) {
-                                matchPercent = latestAnalysisResult.technical_score * 10;
-                            }
-                        } else if (activeTab === 'resume') {
-                            const resumeInputs = document.querySelectorAll('.resume-file');
-                            resumeInputs.forEach(input => {
-                                if (input.files && input.files.length > 0 && !found) {
-                                    formData.append('shortlist_resume', input.files[0]);
-                                    found = true;
-                                }
-                            });
-                            // Resume Match: use first resume's match_percentage
-                            if (latestAnalysisResult && Array.isArray(latestAnalysisResult.resumes) && latestAnalysisResult.resumes.length > 0) {
-                                matchPercent = latestAnalysisResult.resumes[0].match_percentage || 0;
-                            }
-                        }
-                        formData.append('timestamp', timestamp);
-                        formData.append('match_percentage', matchPercent);
-                        try {
-                            newShortlistBtn.disabled = true;
-                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisting...';
-                            const response = await fetch('/shortlist_resume', {
-                                method: 'POST',
-                                body: formData
-                            });
-                            const result = await response.json();
-                            if (result.status === 'success') {
-                                newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
-                                newShortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-                                newShortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
-                                newShortlistBtn.disabled = true;
-                                lucide.createIcons();
-                                showToast('Resume shortlisted!', 'shortlist');
-                                if (typeof renderUserRecentActivity === 'function') renderUserRecentActivity();
-                                if (typeof refreshUserDashboardStats === 'function') refreshUserDashboardStats();
-                                if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
-                                if (typeof renderShortlistedResumes === 'function') renderShortlistedResumes();
-                            } else {
-                                newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                                newShortlistBtn.disabled = false;
-                            }
-                        } catch (err) {
-                            newShortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist';
-                            newShortlistBtn.disabled = false;
-                        }
-                    });
+                            // After results are rendered (after fetch and DOM update):
+                // Hide loader, show results
+                if (loaderId && resultsId) {
+                    loaderElem = document.getElementById(loaderId);
+                    if (loaderElem) loaderElem.classList.add('hidden');
+                    const resultsElem = document.getElementById(resultsId);
+                    if (resultsElem) resultsElem.classList.remove('hidden');
                 }
-            }
-
-            // After results are rendered (after fetch and DOM update):
-            // Hide loader, show results and buttons in right column
-            if (loaderId && resultsId && actionBtnsId) {
-                loaderElem = document.getElementById(loaderId);
-                if (loaderElem) loaderElem.classList.add('hidden');
-                const resultsElem = document.getElementById(resultsId);
-                if (resultsElem) resultsElem.classList.remove('hidden');
-                const actionBtnsElem = document.getElementById(actionBtnsId);
-                if (actionBtnsElem) actionBtnsElem.classList.remove('hidden');
-            }
 
             // Re-enable all tab buttons after loading
             tabIds.forEach(id => {
@@ -1722,6 +1591,9 @@
                 toast.style.opacity = '0';
             }, 2000);
         }
+        
+        // Make showToast available globally
+        window.showToast = showToast;
 
         // --- Interview Question Generator Tab Logic ---
         function setTabNavigationEnabled(enabled) {

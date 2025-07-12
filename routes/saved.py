@@ -63,6 +63,30 @@ def get_saved_analysis(analysis_id):
     analysis = SavedAnalysis.query.filter_by(id=analysis_id, user_id=user.id).first_or_404()
     return jsonify(analysis.data)
 
+@saved_bp.route('/update_analysis/<int:analysis_id>', methods=['POST'])
+@login_required
+def update_analysis(analysis_id):
+    user = get_current_user()
+    analysis = SavedAnalysis.query.filter_by(id=analysis_id, user_id=user.id).first_or_404()
+    new_data = request.get_json()
+    # Merge new data with existing data (deep merge for resumeHTML, audioHTML, rawData, etc.)
+    existing_data = analysis.data or {}
+    # Update/overwrite keys with new data
+    for key in ['resumeHTML', 'audioHTML', 'metaInfo', 'technology', 'audioFileName', 'timestamp']:
+        if key in new_data:
+            existing_data[key] = new_data[key]
+    # Merge rawData if present
+    if 'rawData' in new_data:
+        if 'rawData' not in existing_data:
+            existing_data['rawData'] = {}
+        for subkey in ['resume', 'technical']:
+            if subkey in new_data['rawData']:
+                existing_data['rawData'][subkey] = new_data['rawData'][subkey]
+    analysis.data = existing_data
+    db.session.commit()
+    log_activity(user, 'update_analysis', {'analysis_id': analysis.id})
+    return jsonify({'status': 'success', 'id': analysis.id})
+
 @saved_bp.route('/delete_saved_analysis/<int:analysis_id>', methods=['DELETE'])
 @login_required
 def delete_saved_analysis(analysis_id):
