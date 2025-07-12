@@ -64,11 +64,17 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl md:text-2xl font-bold text-gray-800 header-gradient m-0">Analysis Results</h2>
                 <div id="unified-action-btns" class="flex flex-col sm:flex-row gap-4 hidden">
-                    <button id="unified-save-btn" type="button" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center justify-center text-xs md:text-sm" title="Save all available analyses">
-                        <i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save
+                    <button id="unified-save-btn" type="button" class="pill-btn pill-btn-green" title="Save all available analyses">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span class="pill-btn-text">Save</span>
                     </button>
-                    <button id="unified-shortlist-btn" type="button" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 flex items-center justify-center text-xs md:text-sm" title="Shortlist the resume">
-                        <i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist
+                    <button id="unified-shortlist-btn" type="button" class="pill-btn pill-btn-orange" title="Shortlist the resume">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <polygon points="12 17.27 18.18 21 16.54 13.97 22 9.24 14.81 8.63 12 2 9.19 8.63 2 9.24 7.46 13.97 5.82 21 12 17.27"/>
+                        </svg>
+                        <span class="pill-btn-text">Shortlist</span>
                     </button>
                 </div>
             </div>
@@ -198,26 +204,26 @@ function updateUnifiedButtons() {
     // Update save button
     if (window.analysisState.resumeSaved && window.analysisState.technicalSaved) {
         saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Saved';
-        saveBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-        saveBtn.classList.add('bg-green-700', 'cursor-default');
+        saveBtn.classList.remove('pill-btn-green', 'pill-btn-green:hover:not(:disabled)');
+        saveBtn.classList.add('pill-btn-green', 'pill-btn-green:disabled');
         saveBtn.disabled = true;
     } else if (hasTechnicalResult) {
         saveBtn.innerHTML = '<i data-lucide="save" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Save';
-        saveBtn.classList.remove('bg-green-700', 'cursor-default');
-        saveBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+        saveBtn.classList.remove('pill-btn-green:disabled', 'pill-btn-green:disabled');
+        saveBtn.classList.add('pill-btn-green', 'pill-btn-green:hover:not(:disabled)');
         saveBtn.disabled = false;
     }
     
     // Update shortlist button
     if (window.analysisState.resumeShortlisted && window.analysisState.technicalShortlisted) {
         shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlisted';
-        shortlistBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
-        shortlistBtn.classList.add('bg-yellow-600', 'cursor-default');
+        shortlistBtn.classList.remove('pill-btn-orange', 'pill-btn-orange:hover:not(:disabled)');
+        shortlistBtn.classList.add('pill-btn-orange', 'pill-btn-orange:disabled');
         shortlistBtn.disabled = true;
     } else if (hasTechnicalResult) {
         shortlistBtn.innerHTML = '<i data-lucide="star" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Shortlist Resume';
-        shortlistBtn.classList.remove('bg-yellow-600', 'cursor-default');
-        shortlistBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+        shortlistBtn.classList.remove('pill-btn-orange:disabled', 'pill-btn-orange:disabled');
+        shortlistBtn.classList.add('pill-btn-orange', 'pill-btn-orange:hover:not(:disabled)');
         shortlistBtn.disabled = false;
     }
     
@@ -1099,5 +1105,82 @@ button[type="submit"]:active {
 .btn-compact-analyze:hover, .btn-compact-analyze:focus {
     background: #1e40af;
     border-color: #1e40af;
+}
+/* Saved badge */
+#saved-badge {
+  background: #d1fae5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+#saved-badge svg {
+  color: #047857;
+}
+/* Shortlisted badge */
+#shortlisted-badge {
+  background: #ffedd5;
+  color: #b45309;
+  border: 1px solid #fdba74;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+#shortlisted-badge svg {
+  color: #b45309;
+}
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid transparent;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  cursor: pointer;
+  outline: none;
+}
+.pill-btn svg {
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.3em;
+}
+.pill-btn-green {
+  background: #d1fae5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.pill-btn-green:hover:not(:disabled) {
+  background: #bbf7d0;
+  color: #065f46;
+  border-color: #34d399;
+}
+.pill-btn-green:disabled, .pill-btn-green[disabled] {
+  background: #d1fae5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  cursor: default;
+  opacity: 1;
+}
+.pill-btn-orange {
+  background: #ffedd5;
+  color: #b45309;
+  border: 1px solid #fdba74;
+}
+.pill-btn-orange:hover:not(:disabled) {
+  background: #fed7aa;
+  color: #92400e;
+  border-color: #fb923c;
+}
+.pill-btn-orange:disabled, .pill-btn-orange[disabled] {
+  background: #ffedd5;
+  color: #b45309;
+  border: 1px solid #fdba74;
+  cursor: default;
+  opacity: 1;
+}
+.pill-btn-text {
+  vertical-align: middle;
 }
 </style> 
