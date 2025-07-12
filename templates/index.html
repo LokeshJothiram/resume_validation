@@ -819,7 +819,7 @@
                 
                 // Show selected technology and audio file name only for technical proficiency
                 if (resultCardId === 'audio_result_card_audio') {
-                    const selectedTechInput = document.getElementById('technology');
+                    const selectedTechInput = document.getElementById('technology') || document.getElementById('compact-technology');
                     const selectedTech = selectedTechInput ? selectedTechInput.value : '';
                     const audioInput = document.getElementById('audio');
                     let audioFileName = '';
